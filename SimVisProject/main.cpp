@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QtQml>
 #include "mysimulator.h"
+#include <QDebug>
+#include <QVector>
 int main(int argc, char *argv[])
 {
     qmlRegisterType<MySimulator>("MySimulator", 1, 0, "MySimulator");

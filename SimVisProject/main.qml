@@ -42,7 +42,7 @@ Window {
                 diffuseIntensity: 0.5
                 specularIntensity: 0.01
                 shininess: 100.0
-                attenuation: 0.01
+                attenuation: 0.001
                 position: camera.position
             }
 
@@ -54,16 +54,17 @@ Window {
 
             SimplexBump {
                 id: simplexBump
-                enabled: true
-                intensity: 0.1
-                scale: 1.0
+                enabled: false
+                intensity: 0.01
+                scale: 10.0
             }
         }
     }
 
     Camera {
         id: camera
-
+        farPlane: 1000000
+        nearPlane: 0.01
     }
 
 

@@ -5,6 +5,20 @@ MySimulator::MySimulator()
 
 }
 
+int MySimulator::planesPerDimension() const
+{
+    return m_settings.planesPerDimension;
+}
+
+void MySimulator::setPlanesPerDimension(int planesPerDimension)
+{
+    if (m_settings.planesPerDimension == planesPerDimension)
+        return;
+
+    m_settings.planesPerDimension = planesPerDimension;
+    emit planesPerDimensionChanged(planesPerDimension);
+}
+
 SimulatorWorker *MySimulator::createWorker()
 {
     return new MyWorker();
@@ -13,47 +27,39 @@ SimulatorWorker *MySimulator::createWorker()
 MyWorker::MyWorker()
 {
     using namespace SimVis;
-    int numberOfTriangles = 100000;
-    double maxDistanceFromOrigo = 100;
-    // Initialize your worker here
-    for(int triangleId=0; triangleId<numberOfTriangles; triangleId++) {
-        // Each triangle has 3 vertices, randomly placed
-        float x = maxDistanceFromOrigo*(2.0*rand()/double(RAND_MAX) - 1.0);
-        float y = maxDistanceFromOrigo*(2.0*rand()/double(RAND_MAX) - 1.0);
-        float z = maxDistanceFromOrigo*(2.0*rand()/double(RAND_MAX) - 1.0);
-        QVector3D center = QVector3D(x,y,z);
+    reset();
+}
 
-        TriangleCollectionVBOData vertices[3];
-        TriangleCollectionVBOData &p1 = vertices[0];
-        TriangleCollectionVBOData &p2 = vertices[1];
-        TriangleCollectionVBOData &p3 = vertices[2];
-        for(int vertexId=0; vertexId<3; vertexId++) {
-            // Relative displacement of vertices is between 0 and 2
-            float x = 2.0*rand()/double(RAND_MAX);
-            float y = 2.0*rand()/double(RAND_MAX);
-            float z = 2.0*rand()/double(RAND_MAX);
-            vertices[vertexId].vertex = QVector3D(x,y,z) + center;
-            vertices[vertexId].color = QVector3D(0.5*x, 0.5*y, 0.5*z); // Random color based on displacement
-        }
-
-        // Set normal vectors
-        QVector3D normal = QVector3D::crossProduct((p1.vertex-p3.vertex), (p1.vertex-p2.vertex)).normalized();
-        p1.normal = normal;
-        p2.normal = normal;
-        p3.normal = normal;
-        m_vertices.push_back(p1);
-        m_vertices.push_back(p2);
-        m_vertices.push_back(p3);
+void MyWorker::reset() {
+    m_vertices.clear();
+    m_planePositionsX.resize(m_settings.planesPerDimension);
+    m_planePositionsY.resize(m_settings.planesPerDimension);
+    m_planePositionsZ.resize(m_settings.planesPerDimension);
+    for(int planeId=0; planeId<m_settings.planesPerDimension; planeId++) {
+        float x = rand()/double(RAND_MAX);
+        float y = rand()/double(RAND_MAX);
+        float z = rand()/double(RAND_MAX);
+        m_planePositionsX[planeId] = x*m_settings.planeSize;
+        m_planePositionsY[planeId] = y*m_settings.planeSize;
+        m_planePositionsZ[planeId] = z*m_settings.planeSize;
     }
+
+    std::sort(m_planePositionsX.begin(), m_planePositionsX.end(), std::less<double>());
+    std::sort(m_planePositionsY.begin(), m_planePositionsY.end(), std::less<double>());
+    std::sort(m_planePositionsZ.begin(), m_planePositionsZ.end(), std::less<double>());
+
 }
 
 void MyWorker::synchronizeSimulator(Simulator *simulator)
 {
     MySimulator *mySimulator = qobject_cast<MySimulator*>(simulator);
     if(mySimulator) {
-        // Synchronize data between QML thread and computing thread (MySimulator is on QML, MyWorker is computing thread).
-        // This is for instance data from user through GUI (sliders, buttons, text fields etc)
+        m_settings = mySimulator->m_settings;
 
+        if(mySimulator->m_reset) {
+            reset();
+            mySimulator->m_reset = false;
+        }
     }
 }
 
@@ -62,8 +68,65 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
     // Synchronize with renderables.
     TriangleCollection* triangleCollection = qobject_cast<TriangleCollection*>(renderableObject);
     if(triangleCollection) {
+        triangleCollection->data.clear();
         // Update triangle collection renderable. Similarly if you use other renderables.
-        triangleCollection->data = m_vertices;
+        float planeSize = m_settings.planeSize;
+
+        for(int planeId=0; planeId<m_settings.planesPerDimension; planeId++) {
+            SimVis::TriangleCollectionVBOData p1;
+            SimVis::TriangleCollectionVBOData p2;
+            SimVis::TriangleCollectionVBOData p3;
+            SimVis::TriangleCollectionVBOData p4;
+            // First x
+            p1.vertex = QVector3D(m_planePositionsX[planeId], 0, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p2.vertex = QVector3D(m_planePositionsX[planeId], 0, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p3.vertex = QVector3D(m_planePositionsX[planeId], planeSize, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p4.vertex = QVector3D(m_planePositionsX[planeId], planeSize, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            QVector3D normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
+            QVector3D color(1.0, 1.0, 1.0);
+            p1.normal = normal; p2.normal = normal; p3.normal = normal; p4.normal = normal;
+            p1.color = color; p2.color = color; p3.color = color; p4.color = color;
+            triangleCollection->data.push_back(p1);
+            triangleCollection->data.push_back(p2);
+            triangleCollection->data.push_back(p3);
+            triangleCollection->data.push_back(p1);
+            triangleCollection->data.push_back(p3);
+            triangleCollection->data.push_back(p4);
+
+            // Then y
+            p1.vertex = QVector3D(0, m_planePositionsY[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p2.vertex = QVector3D(0, m_planePositionsY[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p3.vertex = QVector3D(planeSize, m_planePositionsY[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p4.vertex = QVector3D(planeSize, m_planePositionsY[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+
+            normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
+            color = QVector3D(1.0, 1.0, 1.0);
+            p1.normal = normal; p2.normal = normal; p3.normal = normal; p4.normal = normal;
+            p1.color = color; p2.color = color; p3.color = color; p4.color = color;
+            triangleCollection->data.push_back(p1);
+            triangleCollection->data.push_back(p2);
+            triangleCollection->data.push_back(p3);
+            triangleCollection->data.push_back(p1);
+            triangleCollection->data.push_back(p3);
+            triangleCollection->data.push_back(p4);
+
+            // And z
+            p1.vertex = QVector3D(0, 0, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p2.vertex = QVector3D(0, planeSize, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+            p3.vertex = QVector3D(planeSize, planeSize, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+            p4.vertex = QVector3D(planeSize, 0, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+
+            normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
+            color = QVector3D(1.0, 1.0, 1.0);
+            p1.normal = normal; p2.normal = normal; p3.normal = normal; p4.normal = normal;
+            p1.color = color; p2.color = color; p3.color = color; p4.color = color;
+            triangleCollection->data.push_back(p1);
+            triangleCollection->data.push_back(p2);
+            triangleCollection->data.push_back(p3);
+            triangleCollection->data.push_back(p1);
+            triangleCollection->data.push_back(p3);
+            triangleCollection->data.push_back(p4);
+        }
         triangleCollection->dirty = true;
         return;
     }
@@ -71,14 +134,7 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
+
     using namespace SimVis;
-    // This is where all the work is being done. Here you can for example run your timesteps in a simulator.
-    for(TriangleCollectionVBOData &vertex : m_vertices) {
-        float dx = 0.05*((2.0*rand()/double(RAND_MAX)) - 1.0);
-        float dy = 0.05*((2.0*rand()/double(RAND_MAX)) - 1.0);
-        float dz = 0.05*((2.0*rand()/double(RAND_MAX)) - 1.0);
-        vertex.vertex[0] += dx;
-        vertex.vertex[1] += dy;
-        vertex.vertex[2] += dz;
-    }
+
 }
