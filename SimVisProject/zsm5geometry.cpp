@@ -6,6 +6,13 @@ Zsm5geometry::Zsm5geometry()
 
 }
 
+Zsm5geometry::~Zsm5geometry()
+{
+    m_planePositionsX.clear();
+    m_planePositionsY.clear();
+    m_planePositionsZ.clear();
+}
+
 double Zsm5geometry::planeSize() const
 {
     return m_planeSize;

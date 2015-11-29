@@ -13,6 +13,7 @@ private:
 
 public:
     Zsm5geometry();
+    ~Zsm5geometry();
     vector<float> &planePositionsX() { return m_planePositionsX; }
     vector<float> &planePositionsY() { return m_planePositionsY; }
     vector<float> &planePositionsZ() { return m_planePositionsZ; }

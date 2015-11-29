@@ -6,6 +6,7 @@
 #include "linegraph.h"
 #include "figure.h"
 #include "mysimulator.h"
+
 int main(int argc, char *argv[])
 {
     qmlRegisterType<Figure>("QMLPlot", 1, 0, "Figure");

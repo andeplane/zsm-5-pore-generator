@@ -80,7 +80,9 @@ void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
     }
 }
 
-double DistributionAnalysis::meanSquareError() {
+double DistributionAnalysis::meanSquareError(Zsm5geometry &geometry) {
+    updateDistribution(geometry);
+
     double error = 0;
     for(int i=0; i<distribution.size(); i++) {
         double delta = distribution[i].y() - wantedDistribution[i].y();
@@ -88,6 +90,49 @@ double DistributionAnalysis::meanSquareError() {
     }
 
     return error;
+}
+
+void DistributionAnalysis::findGradient(Zsm5geometry &geometry, Zsm5geometry &gradient)
+{
+    gradient.planePositionsX().resize(geometry.planesPerDimension());
+    gradient.planePositionsY().resize(geometry.planesPerDimension());
+    gradient.planePositionsZ().resize(geometry.planesPerDimension());
+
+    vector<float> &x = geometry.planePositionsX();
+    vector<float> &y = geometry.planePositionsY();
+    vector<float> &z = geometry.planePositionsZ();
+
+    vector<float> &dEdx = gradient.planePositionsX();
+    vector<float> &dEdy = gradient.planePositionsY();
+    vector<float> &dEdz = gradient.planePositionsZ();
+
+    float eps = 1e-3;
+
+    for(int i=0; i<geometry.planesPerDimension(); i++) {
+        x[i] += eps;
+        double errorPlus = meanSquareError(geometry);
+        x[i] -= 2.0*eps;
+        double errorMinus = meanSquareError(geometry);
+        x[i] += eps; // Restore value
+        double errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        dEdx[i] = errorDerivative;
+
+        y[i] += eps;
+        errorPlus = meanSquareError(geometry);
+        y[i] -= 2.0*eps;
+        errorMinus = meanSquareError(geometry);
+        y[i] += eps; // Restore value
+        errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        dEdy[i] = errorDerivative;
+
+        z[i] += eps;
+        errorPlus = meanSquareError(geometry);
+        z[i] -= 2.0*eps;
+        errorMinus = meanSquareError(geometry);
+        z[i] += eps; // Restore value
+        errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        dEdz[i] = errorDerivative;
+    }
 }
 
 void DistributionAnalysis::updateWantedDistribution(Zsm5geometry &geometry)

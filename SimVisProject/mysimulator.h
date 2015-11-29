@@ -23,6 +23,7 @@ class MyWorker : public SimulatorWorker
     Q_OBJECT
 private:
     Zsm5geometry m_geometry;
+    Zsm5geometry m_geometryGradient;
     DistributionAnalysis m_distributionAnalysis;
     Settings m_settings;
     QVector<SimVis::TriangleCollectionVBOData> m_vertices;

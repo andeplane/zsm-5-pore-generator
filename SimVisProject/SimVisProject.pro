@@ -4,7 +4,12 @@ CONFIG += c++11
 QT += qml quick widgets opengl openglextensions
 
 SOURCES += main.cpp \
-    mysimulator.cpp
+    mysimulator.cpp \
+    graph.cpp \
+    figure.cpp \
+    linegraph.cpp \
+    zsm5geometry.cpp \
+    distributionanalysis.cpp
 
 RESOURCES += qml.qrc
 
@@ -16,4 +21,9 @@ include(deployment.pri)
 include(../SimVis/library_deployment.pri)
 
 HEADERS += \
-    mysimulator.h
+    mysimulator.h \
+    linegraph.h \
+    figure.h \
+    graph.h \
+    zsm5geometry.h \
+    distributionanalysis.h
