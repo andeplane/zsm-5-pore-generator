@@ -51,7 +51,7 @@ void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
     distribution.resize(m_size);
     double avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
     double maxLength = 5.0*avgLengthPerBox;
-    double dx = maxLength / distribution.size();
+    double dx = maxLength / m_size;
     double oneOverDx = 1.0/dx;
     double numberOfVolumes = powf(geometry.planesPerDimension()-1,3);
     for(int i=0; i<distribution.size(); i++) {
@@ -63,10 +63,11 @@ void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
     for(int i=0; i<geometry.planesPerDimension()-1; i++) {
         for(int j=0; j<geometry.planesPerDimension()-1; j++) {
             for(int k=0; k<geometry.planesPerDimension()-1; k++) {
-                double volume = volumes[i][j][k];
+//                double volume = volumes[i][j][k];
+                double volume = volumes.at(i).at(j).at(k);// [i][j][k];
                 double length = powf(volume, 1.0/3.0);
                 int histogramIndex = length * oneOverDx;
-                if(histogramIndex < distribution.size()) {
+                if(histogramIndex < distribution.size() && histogramIndex >= 0) {
                     QPointF &p = distribution[histogramIndex];
                     p.setY(p.y()+1);
                 }
@@ -106,7 +107,7 @@ void DistributionAnalysis::findGradient(Zsm5geometry &geometry, Zsm5geometry &gr
     vector<float> &dEdy = gradient.planePositionsY();
     vector<float> &dEdz = gradient.planePositionsZ();
 
-    float eps = 1e-3;
+    float eps = 1e-5;
 
     for(int i=0; i<geometry.planesPerDimension(); i++) {
         x[i] += eps;
@@ -141,8 +142,8 @@ void DistributionAnalysis::updateWantedDistribution(Zsm5geometry &geometry)
     float avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
     float maxLength = 5.0*avgLengthPerBox;
     float dx = maxLength / m_size;
-    float sigma = 0.1*maxLength;
-    float mu = 0.3*maxLength;
+    float sigma = 0.05*maxLength;
+    float mu = 0.2*maxLength;
     for(int i=0; i<m_size; i++) {
         float x = dx*i;
         float p = 1.0/(sigma*sqrt(2*M_PI))*exp(-(x-mu)*(x-mu)/(2.0*sigma*sigma));

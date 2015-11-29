@@ -188,8 +188,10 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
-    m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
-    qDebug() << "Size: " << m_geometryGradient.planePositionsX().size();
-    using namespace SimVis;
+    //for(int i=0; i<10; i++) {
+        m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
+        m_geometry.followGradient(m_geometryGradient);
+    //}
+    m_distributionAnalysis.updateDistribution(m_geometry);
 
 }

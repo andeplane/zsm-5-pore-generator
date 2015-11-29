@@ -13,7 +13,7 @@
 using std::vector;
 
 struct Settings {
-    int planesPerDimension = 32;
+    int planesPerDimension = 64;
     double planeSize = 10;
     int distributionSize = 100;
 };

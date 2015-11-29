@@ -20,6 +20,7 @@ public:
     int planesPerDimension() const;
     void setPlanesPerDimension(int planesPerDimension);
     void reset();
+    void followGradient(Zsm5geometry &gradient);
     double planeSize() const;
     void setPlaneSize(double planeSize);
 };

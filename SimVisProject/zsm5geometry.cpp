@@ -51,3 +51,25 @@ void Zsm5geometry::reset() {
     std::sort(m_planePositionsY.begin(), m_planePositionsY.end(), std::less<double>());
     std::sort(m_planePositionsZ.begin(), m_planePositionsZ.end(), std::less<double>());
 }
+
+void Zsm5geometry::followGradient(Zsm5geometry &gradient)
+{
+    vector<float> &x = m_planePositionsX;
+    vector<float> &y = m_planePositionsY;
+    vector<float> &z = m_planePositionsZ;
+
+    vector<float> &dEdx = gradient.planePositionsX();
+    vector<float> &dEdy = gradient.planePositionsY();
+    vector<float> &dEdz = gradient.planePositionsZ();
+
+    float eps = 1e-3;
+    for(int i=0; i<m_planesPerDimension; i++) {
+        x[i] -= dEdx[i]*eps;
+        y[i] -= dEdy[i]*eps;
+        z[i] -= dEdz[i]*eps;
+    }
+
+    std::sort(m_planePositionsX.begin(), m_planePositionsX.end(), std::less<double>());
+    std::sort(m_planePositionsY.begin(), m_planePositionsY.end(), std::less<double>());
+    std::sort(m_planePositionsZ.begin(), m_planePositionsZ.end(), std::less<double>());
+}

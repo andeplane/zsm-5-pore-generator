@@ -18,13 +18,13 @@ Window {
         anchors.fill: parent
         simulator: simulator
         camera: camera
-        backgroundColor: "black"
+        backgroundColor: "white"
 
-        SkyBox {
-            id: skybox
-            camera: camera
-            texture: ":/cubemap.jpg"
-        }
+//        SkyBox {
+//            id: skybox
+//            camera: camera
+//            texture: ":/cubemap.jpg"
+//        }
 
         TrackballNavigator {
             id: navigator
@@ -48,11 +48,11 @@ Window {
                 position: camera.position
             }
 
-            SkyBoxReflection {
-                id: reflection
-                skybox: skybox
-                reflectivity: 0.1
-            }
+//            SkyBoxReflection {
+//                id: reflection
+//                skybox: skybox
+//                reflectivity: 0.1
+//            }
         }
 
         Figure {
