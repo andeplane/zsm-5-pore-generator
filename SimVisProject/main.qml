@@ -2,11 +2,13 @@ import QtQuick 2.5
 import QtQuick.Window 2.2
 import SimVis 1.0
 import MySimulator 1.0
+import QMLPlot 1.0
 
 Window {
+    id: rootWindow
     visible: true
-    width: 1024
-    height: 768
+    width: 1650
+    height: 1080
     MySimulator {
         id: simulator
 
@@ -42,21 +44,35 @@ Window {
                 diffuseIntensity: 0.5
                 specularIntensity: 0.01
                 shininess: 100.0
-                attenuation: 0.001
+                attenuation: 0.0
                 position: camera.position
             }
 
             SkyBoxReflection {
                 id: reflection
                 skybox: skybox
-                reflectivity: 0.2
+                reflectivity: 0.1
             }
+        }
 
-            SimplexBump {
-                id: simplexBump
-                enabled: false
-                intensity: 0.01
-                scale: 10.0
+        Figure {
+            id: figure
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: 500
+            height: 500
+            xMin: 0
+            xMax: 5.0*simulator.planeSize/simulator.planesPerDimension
+            yMin: 0
+            yMax: 20
+            LineGraph {
+                id: linegraph
+                dataSource: simulator.distribution
+            }
+            LineGraph {
+                id: linegraph2
+                dataSource: simulator.wantedDistribution
+                color: "red"
             }
         }
     }

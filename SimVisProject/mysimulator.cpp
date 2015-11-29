@@ -1,13 +1,37 @@
 #include "mysimulator.h"
 #include <QDebug>
+#include <cmath>
+#include <iostream>
+using std::cout; using std::endl;
 MySimulator::MySimulator()
 {
-
+    m_distribution = new LineGraphDataSource();
+    m_wantedDistribution = new LineGraphDataSource();
 }
 
 int MySimulator::planesPerDimension() const
 {
     return m_settings.planesPerDimension;
+}
+
+LineGraphDataSource *MySimulator::distribution() const
+{
+    return m_distribution;
+}
+
+double MySimulator::planeSize() const
+{
+    return m_settings.planeSize;
+}
+
+double MySimulator::time() const
+{
+    return m_time;
+}
+
+LineGraphDataSource *MySimulator::wantedDistribution() const
+{
+    return m_wantedDistribution;
 }
 
 void MySimulator::setPlanesPerDimension(int planesPerDimension)
@@ -19,6 +43,42 @@ void MySimulator::setPlanesPerDimension(int planesPerDimension)
     emit planesPerDimensionChanged(planesPerDimension);
 }
 
+void MySimulator::setDistribution(LineGraphDataSource *distribution)
+{
+    if (m_distribution == distribution)
+        return;
+
+    m_distribution = distribution;
+    emit distributionChanged(distribution);
+}
+
+void MySimulator::setPlaneSize(double planeSize)
+{
+    if (m_settings.planeSize == planeSize)
+        return;
+
+    m_settings.planeSize = planeSize;
+    emit planeSizeChanged(planeSize);
+}
+
+void MySimulator::setTime(double time)
+{
+    if (m_time == time)
+        return;
+
+    m_time = time;
+    emit timeChanged(time);
+}
+
+void MySimulator::setWantedDistribution(LineGraphDataSource *wantedDistribution)
+{
+    if (m_wantedDistribution == wantedDistribution)
+        return;
+
+    m_wantedDistribution = wantedDistribution;
+    emit wantedDistributionChanged(wantedDistribution);
+}
+
 SimulatorWorker *MySimulator::createWorker()
 {
     return new MyWorker();
@@ -26,8 +86,29 @@ SimulatorWorker *MySimulator::createWorker()
 
 MyWorker::MyWorker()
 {
-    using namespace SimVis;
     reset();
+    m_wantedDistribution.resize(m_settings.distributionSize);
+    float avgLengthPerBox = m_settings.planeSize / m_settings.planesPerDimension;
+    float maxLength = 5.0*avgLengthPerBox;
+    float dx = maxLength / m_distribution.size();
+    float sigma = 0.1*maxLength;
+    float mu = 0.3*maxLength;
+    for(int i=0; i<m_wantedDistribution.size(); i++) {
+        float x = dx*i;
+        float p = 1.0/(sigma*sqrt(2*M_PI))*exp(-(x-mu)*(x-mu)/(2.0*sigma*sigma));
+        m_wantedDistribution[i].setX(x);
+        m_wantedDistribution[i].setY(p);
+    }
+}
+
+double MyWorker::meanSquareError() {
+    double error = 0;
+    for(int i=0; i<m_distribution.size(); i++) {
+        double delta = m_distribution[i].y() - m_wantedDistribution[i].y();
+        error += delta*delta;
+    }
+
+    return error;
 }
 
 void MyWorker::reset() {
@@ -47,7 +128,7 @@ void MyWorker::reset() {
     std::sort(m_planePositionsX.begin(), m_planePositionsX.end(), std::less<double>());
     std::sort(m_planePositionsY.begin(), m_planePositionsY.end(), std::less<double>());
     std::sort(m_planePositionsZ.begin(), m_planePositionsZ.end(), std::less<double>());
-
+    computeVolume();
 }
 
 void MyWorker::synchronizeSimulator(Simulator *simulator)
@@ -60,6 +141,9 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
             reset();
             mySimulator->m_reset = false;
         }
+        mySimulator->distribution()->setPoints(m_distribution);
+        mySimulator->wantedDistribution()->setPoints(m_wantedDistribution);
+        mySimulator->setTime(mySimulator->time()+1.0);
     }
 }
 
@@ -128,7 +212,6 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
             triangleCollection->data.push_back(p4);
         }
         triangleCollection->dirty = true;
-        return;
     }
 }
 
@@ -137,4 +220,64 @@ void MyWorker::work()
 
     using namespace SimVis;
 
+}
+
+void MyWorker::computeVolume()
+{
+    volume = 0;
+    m_volumes.resize(m_settings.planesPerDimension-1, vector<vector<double> >(m_settings.planesPerDimension-1, vector<double>(m_settings.planesPerDimension-1, 0)));
+    m_distribution.resize(1024);
+    for(int i=0; i<m_settings.planesPerDimension-1; i++) {
+        double x1 = m_planePositionsX[i];
+        double x2 = m_planePositionsX[i+1];
+        double dx = x2-x1;
+        for(int j=0; j<m_settings.planesPerDimension-1; j++) {
+            double y1 = m_planePositionsY[j];
+            double y2 = m_planePositionsY[j+1];
+            double dy = y2-y1;
+            for(int k=0; k<m_settings.planesPerDimension-1; k++) {
+                double z1 = m_planePositionsZ[k];
+                double z2 = m_planePositionsZ[k+1];
+                double dz = z2-z1;
+                double volumeBox = dx*dy*dz;
+                m_volumes[i][j][k] = volumeBox;
+                volume += volumeBox;
+            }
+        }
+    }
+    updateDistribution();
+}
+
+void MyWorker::updateDistribution()
+{
+    m_distribution.resize(m_settings.distributionSize);
+
+    double avgLengthPerBox = m_settings.planeSize / m_settings.planesPerDimension;
+    double maxLength = 5.0*avgLengthPerBox;
+    double dx = maxLength / m_distribution.size();
+    double numberOfVolumes = powf(m_settings.planesPerDimension-1,3);
+
+    for(int i=0; i<m_distribution.size(); i++) {
+        QPointF &p = m_distribution[i];
+        p.setX(i*dx);
+        p.setY(0);
+    }
+
+    for(int i=0; i<m_settings.planesPerDimension-1; i++) {
+        for(int j=0; j<m_settings.planesPerDimension-1; j++) {
+            for(int k=0; k<m_settings.planesPerDimension-1; k++) {
+                double volume = m_volumes[i][j][k];
+                double length = powf(volume, 1.0/3.0);
+                int histogramIndex = length / dx;
+                if(histogramIndex < m_distribution.size()) {
+                    QPointF &p = m_distribution[histogramIndex];
+                    p.setY(p.y()+1);
+                }
+            }
+        }
+    }
+
+    for(QPointF &p : m_distribution) {
+        p.setY(p.y()/(numberOfVolumes*dx));
+    }
 }
