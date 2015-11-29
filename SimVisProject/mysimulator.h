@@ -1,14 +1,16 @@
 #ifndef MYSIMULATOR_H
 #define MYSIMULATOR_H
+#include "linegraph.h"
+#include "zsm5geometry.h"
+#include "distributionanalysis.h"
+
 #include <SimVis/Simulator>
 #include <SimVis/TriangleCollection>
 #include <vector>
-#include "linegraph.h"
-
-using std::vector;
 #include <QPointF>
 #include <QVector>
 #include <QVector3D>
+using std::vector;
 
 struct Settings {
     int planesPerDimension = 32;
@@ -20,24 +22,16 @@ class MyWorker : public SimulatorWorker
 {
     Q_OBJECT
 private:
+    Zsm5geometry m_geometry;
+    DistributionAnalysis m_distributionAnalysis;
     Settings m_settings;
-    QVector<double> m_planePositionsX;
-    QVector<double> m_planePositionsY;
-    QVector<double> m_planePositionsZ;
-    vector<vector<vector<double> > > m_volumes;
-    QVector<QPointF> m_distribution;
-    QVector<QPointF> m_wantedDistribution;
     QVector<SimVis::TriangleCollectionVBOData> m_vertices;
-    double volume = 0;
-    bool dirty = true;
 
     // SimulatorWorker interface
     virtual void synchronizeSimulator(Simulator *simulator);
     virtual void synchronizeRenderer(Renderable *renderableObject);
     virtual void work();
-    void computeVolume();
     void reset();
-    void updateDistribution();
 public:
     MyWorker();
 };
@@ -68,16 +62,16 @@ public:
 public slots:
     void setPlanesPerDimension(int planesPerDimension);
     void setDistribution(LineGraphDataSource* distribution);
+    void setWantedDistribution(LineGraphDataSource* wantedDistribution);
     void setPlaneSize(double planeSize);
     void setTime(double time);
-    void setWantedDistribution(LineGraphDataSource* wantedDistribution);
 
 signals:
     void planesPerDimensionChanged(int planesPerDimension);
+    void wantedDistributionChanged(LineGraphDataSource* wantedDistribution);
     void distributionChanged(LineGraphDataSource* distribution);
     void planeSizeChanged(double planeSize);
     void timeChanged(double time);
-    void wantedDistributionChanged(LineGraphDataSource* wantedDistribution);
 
 protected:
     virtual SimulatorWorker *createWorker();

@@ -87,48 +87,17 @@ SimulatorWorker *MySimulator::createWorker()
 MyWorker::MyWorker()
 {
     reset();
-    m_wantedDistribution.resize(m_settings.distributionSize);
-    float avgLengthPerBox = m_settings.planeSize / m_settings.planesPerDimension;
-    float maxLength = 5.0*avgLengthPerBox;
-    float dx = maxLength / m_distribution.size();
-    float sigma = 0.1*maxLength;
-    float mu = 0.3*maxLength;
-    for(int i=0; i<m_wantedDistribution.size(); i++) {
-        float x = dx*i;
-        float p = 1.0/(sigma*sqrt(2*M_PI))*exp(-(x-mu)*(x-mu)/(2.0*sigma*sigma));
-        m_wantedDistribution[i].setX(x);
-        m_wantedDistribution[i].setY(p);
-    }
-}
-
-double MyWorker::meanSquareError() {
-    double error = 0;
-    for(int i=0; i<m_distribution.size(); i++) {
-        double delta = m_distribution[i].y() - m_wantedDistribution[i].y();
-        error += delta*delta;
-    }
-
-    return error;
 }
 
 void MyWorker::reset() {
     m_vertices.clear();
-    m_planePositionsX.resize(m_settings.planesPerDimension);
-    m_planePositionsY.resize(m_settings.planesPerDimension);
-    m_planePositionsZ.resize(m_settings.planesPerDimension);
-    for(int planeId=0; planeId<m_settings.planesPerDimension; planeId++) {
-        float x = rand()/double(RAND_MAX);
-        float y = rand()/double(RAND_MAX);
-        float z = rand()/double(RAND_MAX);
-        m_planePositionsX[planeId] = x*m_settings.planeSize;
-        m_planePositionsY[planeId] = y*m_settings.planeSize;
-        m_planePositionsZ[planeId] = z*m_settings.planeSize;
-    }
 
-    std::sort(m_planePositionsX.begin(), m_planePositionsX.end(), std::less<double>());
-    std::sort(m_planePositionsY.begin(), m_planePositionsY.end(), std::less<double>());
-    std::sort(m_planePositionsZ.begin(), m_planePositionsZ.end(), std::less<double>());
-    computeVolume();
+    m_geometry.setPlaneSize(m_settings.planeSize);
+    m_geometry.setPlanesPerDimension(m_settings.planesPerDimension);
+    m_geometry.reset();
+
+    m_distributionAnalysis.updateDistribution(m_geometry);
+    m_distributionAnalysis.updateWantedDistribution(m_geometry);
 }
 
 void MyWorker::synchronizeSimulator(Simulator *simulator)
@@ -141,8 +110,8 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
             reset();
             mySimulator->m_reset = false;
         }
-        mySimulator->distribution()->setPoints(m_distribution);
-        mySimulator->wantedDistribution()->setPoints(m_wantedDistribution);
+        mySimulator->distribution()->setPoints(m_distributionAnalysis.distribution);
+        mySimulator->wantedDistribution()->setPoints(m_distributionAnalysis.wantedDistribution);
         mySimulator->setTime(mySimulator->time()+1.0);
     }
 }
@@ -155,17 +124,19 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
         triangleCollection->data.clear();
         // Update triangle collection renderable. Similarly if you use other renderables.
         float planeSize = m_settings.planeSize;
-
+        vector<float> &x = m_geometry.planePositionsX();
+        vector<float> &y = m_geometry.planePositionsY();
+        vector<float> &z = m_geometry.planePositionsZ();
         for(int planeId=0; planeId<m_settings.planesPerDimension; planeId++) {
             SimVis::TriangleCollectionVBOData p1;
             SimVis::TriangleCollectionVBOData p2;
             SimVis::TriangleCollectionVBOData p3;
             SimVis::TriangleCollectionVBOData p4;
             // First x
-            p1.vertex = QVector3D(m_planePositionsX[planeId], 0, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p2.vertex = QVector3D(m_planePositionsX[planeId], 0, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p3.vertex = QVector3D(m_planePositionsX[planeId], planeSize, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p4.vertex = QVector3D(m_planePositionsX[planeId], planeSize, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p1.vertex = QVector3D(x[planeId], 0, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p2.vertex = QVector3D(x[planeId], 0, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p3.vertex = QVector3D(x[planeId], planeSize, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p4.vertex = QVector3D(x[planeId], planeSize, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
             QVector3D normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
             QVector3D color(1.0, 1.0, 1.0);
             p1.normal = normal; p2.normal = normal; p3.normal = normal; p4.normal = normal;
@@ -178,10 +149,10 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
             triangleCollection->data.push_back(p4);
 
             // Then y
-            p1.vertex = QVector3D(0, m_planePositionsY[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p2.vertex = QVector3D(0, m_planePositionsY[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p3.vertex = QVector3D(planeSize, m_planePositionsY[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p4.vertex = QVector3D(planeSize, m_planePositionsY[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p1.vertex = QVector3D(0, y[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p2.vertex = QVector3D(0, y[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p3.vertex = QVector3D(planeSize, y[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p4.vertex = QVector3D(planeSize, y[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
 
             normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
             color = QVector3D(1.0, 1.0, 1.0);
@@ -195,10 +166,10 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
             triangleCollection->data.push_back(p4);
 
             // And z
-            p1.vertex = QVector3D(0, 0, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p2.vertex = QVector3D(0, planeSize, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
-            p3.vertex = QVector3D(planeSize, planeSize, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
-            p4.vertex = QVector3D(planeSize, 0, m_planePositionsY[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+            p1.vertex = QVector3D(0, 0, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p2.vertex = QVector3D(0, planeSize, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+            p3.vertex = QVector3D(planeSize, planeSize, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+            p4.vertex = QVector3D(planeSize, 0, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
 
             normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
             color = QVector3D(1.0, 1.0, 1.0);
@@ -220,64 +191,4 @@ void MyWorker::work()
 
     using namespace SimVis;
 
-}
-
-void MyWorker::computeVolume()
-{
-    volume = 0;
-    m_volumes.resize(m_settings.planesPerDimension-1, vector<vector<double> >(m_settings.planesPerDimension-1, vector<double>(m_settings.planesPerDimension-1, 0)));
-    m_distribution.resize(1024);
-    for(int i=0; i<m_settings.planesPerDimension-1; i++) {
-        double x1 = m_planePositionsX[i];
-        double x2 = m_planePositionsX[i+1];
-        double dx = x2-x1;
-        for(int j=0; j<m_settings.planesPerDimension-1; j++) {
-            double y1 = m_planePositionsY[j];
-            double y2 = m_planePositionsY[j+1];
-            double dy = y2-y1;
-            for(int k=0; k<m_settings.planesPerDimension-1; k++) {
-                double z1 = m_planePositionsZ[k];
-                double z2 = m_planePositionsZ[k+1];
-                double dz = z2-z1;
-                double volumeBox = dx*dy*dz;
-                m_volumes[i][j][k] = volumeBox;
-                volume += volumeBox;
-            }
-        }
-    }
-    updateDistribution();
-}
-
-void MyWorker::updateDistribution()
-{
-    m_distribution.resize(m_settings.distributionSize);
-
-    double avgLengthPerBox = m_settings.planeSize / m_settings.planesPerDimension;
-    double maxLength = 5.0*avgLengthPerBox;
-    double dx = maxLength / m_distribution.size();
-    double numberOfVolumes = powf(m_settings.planesPerDimension-1,3);
-
-    for(int i=0; i<m_distribution.size(); i++) {
-        QPointF &p = m_distribution[i];
-        p.setX(i*dx);
-        p.setY(0);
-    }
-
-    for(int i=0; i<m_settings.planesPerDimension-1; i++) {
-        for(int j=0; j<m_settings.planesPerDimension-1; j++) {
-            for(int k=0; k<m_settings.planesPerDimension-1; k++) {
-                double volume = m_volumes[i][j][k];
-                double length = powf(volume, 1.0/3.0);
-                int histogramIndex = length / dx;
-                if(histogramIndex < m_distribution.size()) {
-                    QPointF &p = m_distribution[histogramIndex];
-                    p.setY(p.y()+1);
-                }
-            }
-        }
-    }
-
-    for(QPointF &p : m_distribution) {
-        p.setY(p.y()/(numberOfVolumes*dx));
-    }
 }
