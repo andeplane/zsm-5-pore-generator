@@ -9,6 +9,11 @@ MySimulator::MySimulator()
     m_wantedDistribution = new LineGraphDataSource();
 }
 
+MySimulator::~MySimulator()
+{
+
+}
+
 int MySimulator::planesPerDimension() const
 {
     return m_settings.planesPerDimension;
@@ -89,6 +94,16 @@ MyWorker::MyWorker()
     reset();
 }
 
+MyWorker::~MyWorker()
+{
+
+}
+
+void MyWorker::doWork()
+{
+    work();
+}
+
 void MyWorker::reset() {
     m_vertices.clear();
 
@@ -110,8 +125,8 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
             reset();
             mySimulator->m_reset = false;
         }
-        mySimulator->distribution()->setPoints(m_distributionAnalysis.distribution);
-        mySimulator->wantedDistribution()->setPoints(m_distributionAnalysis.wantedDistribution);
+        if(mySimulator->distribution()) mySimulator->distribution()->setPoints(m_distributionAnalysis.distribution);
+        if(mySimulator->wantedDistribution()) mySimulator->wantedDistribution()->setPoints(m_distributionAnalysis.wantedDistribution);
         mySimulator->setTime(mySimulator->time()+1.0);
     }
 }
@@ -188,10 +203,15 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
-    //for(int i=0; i<10; i++) {
-        m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
-        m_geometry.followGradient(m_geometryGradient);
-    //}
+    QElapsedTimer t;
+    t.start();
+    m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
+    m_geometry.followGradient(m_geometryGradient, m_eps);
     m_distributionAnalysis.updateDistribution(m_geometry);
-
+    double mse = m_distributionAnalysis.meanSquareError(m_geometry);
+    if(mse < m_minMse) {
+        m_minMse = mse;
+        // m_eps *= 0.95;
+    }
+    qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << m_eps << "   mse: " << mse << "   (min mse: " << m_minMse << ")";
 }

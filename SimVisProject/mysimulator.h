@@ -13,7 +13,7 @@
 using std::vector;
 
 struct Settings {
-    int planesPerDimension = 64;
+    int planesPerDimension = 32;
     double planeSize = 10;
     int distributionSize = 100;
 };
@@ -26,6 +26,8 @@ private:
     Zsm5geometry m_geometryGradient;
     DistributionAnalysis m_distributionAnalysis;
     Settings m_settings;
+    float m_minMse = 1e9;
+    float m_eps = 1e-3;
     QVector<SimVis::TriangleCollectionVBOData> m_vertices;
 
     // SimulatorWorker interface
@@ -35,8 +37,10 @@ private:
     void reset();
 public:
     MyWorker();
+    ~MyWorker();
+    void doWork();
 };
-
+class LineGraphDataSource;
 class MySimulator : public Simulator
 {
     Q_OBJECT
@@ -54,6 +58,7 @@ private:
 
 public:
     MySimulator();
+    ~MySimulator();
     int planesPerDimension() const;
     LineGraphDataSource* distribution() const;
     double planeSize() const;

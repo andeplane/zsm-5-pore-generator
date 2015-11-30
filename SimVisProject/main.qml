@@ -62,7 +62,7 @@ Window {
             width: 500
             height: 500
             xMin: 0
-            xMax: 5.0*simulator.planeSize/simulator.planesPerDimension
+            xMax: 10.0*simulator.planeSize/simulator.planesPerDimension
             yMin: 0
             yMax: 20
             LineGraph {

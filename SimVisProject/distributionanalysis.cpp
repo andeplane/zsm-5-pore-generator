@@ -16,9 +16,26 @@ DistributionAnalysis::DistributionAnalysis()
 
 }
 
-double DistributionAnalysis::computeVolume(Zsm5geometry &geometry) {
-    double volume = 0;
-    volumes.resize(geometry.planesPerDimension()-1, vector<vector<float> >(geometry.planesPerDimension()-1, vector<float>(geometry.planesPerDimension()-1, 0)));
+
+#include <iostream>
+using namespace std;
+void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
+{
+    histogram.resize(m_size);
+    memset(&histogram.front(), 0, histogram.size()*sizeof(int));
+    const double avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
+    const double maxLength = 5.0*avgLengthPerBox;
+    const double dx = maxLength / m_size;
+    const double oneOverDx = 1.0/dx;
+    const double numberOfVolumes = powf(geometry.planesPerDimension()-1,3);
+    if(distribution.size() != m_size) {
+        distribution.resize(m_size);
+        for(int i=0; i<distribution.size(); i++) {
+            QPointF &p = distribution[i];
+            p.setX(i*dx);
+        }
+    }
+
     vector<float> &x = geometry.planePositionsX();
     vector<float> &y = geometry.planePositionsY();
     vector<float> &z = geometry.planePositionsZ();
@@ -34,50 +51,21 @@ double DistributionAnalysis::computeVolume(Zsm5geometry &geometry) {
                 double z1 = z[k];
                 double z2 = z[k+1];
                 double dz = z2-z1;
-                double volumeBox = dx*dy*dz;
-                volumes[i][j][k] = volumeBox;
-                volume += volumeBox;
-            }
-        }
-    }
-
-    return volume;
-}
-#include <iostream>
-using namespace std;
-void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
-{
-    computeVolume(geometry);
-    distribution.resize(m_size);
-    double avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
-    double maxLength = 5.0*avgLengthPerBox;
-    double dx = maxLength / m_size;
-    double oneOverDx = 1.0/dx;
-    double numberOfVolumes = powf(geometry.planesPerDimension()-1,3);
-    for(int i=0; i<distribution.size(); i++) {
-        QPointF &p = distribution[i];
-        p.setX(i*dx);
-        p.setY(0);
-    }
-    // Create histogram by counting
-    for(int i=0; i<geometry.planesPerDimension()-1; i++) {
-        for(int j=0; j<geometry.planesPerDimension()-1; j++) {
-            for(int k=0; k<geometry.planesPerDimension()-1; k++) {
-//                double volume = volumes[i][j][k];
-                double volume = volumes.at(i).at(j).at(k);// [i][j][k];
-                double length = powf(volume, 1.0/3.0);
-                int histogramIndex = length * oneOverDx;
-                if(histogramIndex < distribution.size() && histogramIndex >= 0) {
-                    QPointF &p = distribution[histogramIndex];
-                    p.setY(p.y()+1);
+                double volume = dx*dy*dz;
+                double length = cbrt(volume);
+                int histogramIndex = int(length * oneOverDx);
+                if(histogramIndex < m_size && histogramIndex >= 0) {
+                    histogram[histogramIndex]++;
                 }
             }
         }
     }
 
     // Normalize
-    for(QPointF &p : distribution) {
-        p.setY(p.y()/(numberOfVolumes*dx));
+    double normalizationConstant = 1.0/(numberOfVolumes*dx);
+    for(int i=0; i<distribution.size(); i++) {
+        QPointF &p = distribution[i];
+        p.setY(histogram[i]*normalizationConstant);
     }
 }
 
@@ -85,6 +73,7 @@ double DistributionAnalysis::meanSquareError(Zsm5geometry &geometry) {
     updateDistribution(geometry);
 
     double error = 0;
+#pragma simd
     for(int i=0; i<distribution.size(); i++) {
         double delta = distribution[i].y() - wantedDistribution[i].y();
         error += delta*delta;
@@ -142,8 +131,8 @@ void DistributionAnalysis::updateWantedDistribution(Zsm5geometry &geometry)
     float avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
     float maxLength = 5.0*avgLengthPerBox;
     float dx = maxLength / m_size;
-    float sigma = 0.05*maxLength;
-    float mu = 0.2*maxLength;
+    float sigma = 0.1*maxLength;
+    float mu = 0.3*maxLength;
     for(int i=0; i<m_size; i++) {
         float x = dx*i;
         float p = 1.0/(sigma*sqrt(2*M_PI))*exp(-(x-mu)*(x-mu)/(2.0*sigma*sigma));

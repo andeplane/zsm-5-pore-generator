@@ -14,11 +14,9 @@ private:
 public:
     QVector<QPointF> distribution;
     QVector<QPointF> wantedDistribution;
-    vector<vector<vector<float> > > volumes;
-
+    vector<int> histogram;
 
     DistributionAnalysis();
-    double computeVolume(Zsm5geometry &geometry);
     void updateDistribution(Zsm5geometry &geometry);
     void updateWantedDistribution(Zsm5geometry &geometry);
     int size() const;
