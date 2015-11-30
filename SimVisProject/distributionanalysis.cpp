@@ -73,7 +73,6 @@ double DistributionAnalysis::meanSquareError(Zsm5geometry &geometry) {
     updateDistribution(geometry);
 
     double error = 0;
-#pragma simd
     for(int i=0; i<distribution.size(); i++) {
         double delta = distribution[i].y() - wantedDistribution[i].y();
         error += delta*delta;

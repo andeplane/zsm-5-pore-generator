@@ -211,7 +211,7 @@ void MyWorker::work()
     double mse = m_distributionAnalysis.meanSquareError(m_geometry);
     if(mse < m_minMse) {
         m_minMse = mse;
-        // m_eps *= 0.95;
+        m_eps *= 0.99;
     }
     qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << m_eps << "   mse: " << mse << "   (min mse: " << m_minMse << ")";
 }

@@ -62,7 +62,6 @@ void Zsm5geometry::followGradient(Zsm5geometry &gradient, float eps)
     vector<float> &dEdy = gradient.planePositionsY();
     vector<float> &dEdz = gradient.planePositionsZ();
 
-    eps = 1e-3;
     for(int i=0; i<m_planesPerDimension; i++) {
         x[i] -= dEdx[i]*eps;
         y[i] -= dEdy[i]*eps;
