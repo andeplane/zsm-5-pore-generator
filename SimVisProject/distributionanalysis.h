@@ -14,6 +14,8 @@ private:
 public:
     QVector<QPointF> distribution;
     QVector<QPointF> wantedDistribution;
+    float currentMean = 0.0;
+    float wantedMean = 0.0;
     vector<int> histogram;
 
     DistributionAnalysis();

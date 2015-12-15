@@ -39,6 +39,7 @@ void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
     vector<float> &x = geometry.planePositionsX();
     vector<float> &y = geometry.planePositionsY();
     vector<float> &z = geometry.planePositionsZ();
+    int count = 0;
     for(int i=0; i<geometry.planesPerDimension()-1; i++) {
         double x1 = x[i];
         double x2 = x[i+1];
@@ -56,16 +57,19 @@ void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
                 int histogramIndex = int(length * oneOverDx);
                 if(histogramIndex < m_size && histogramIndex >= 0) {
                     histogram[histogramIndex]++;
+                    count++;
                 }
             }
         }
     }
 
     // Normalize
-    double normalizationConstant = 1.0/(numberOfVolumes*dx);
+    double normalizationConstant = 1.0/(count*dx);
+    currentMean = 0;
     for(int i=0; i<distribution.size(); i++) {
         QPointF &p = distribution[i];
         p.setY(histogram[i]*normalizationConstant);
+        currentMean += p.x()*p.y()*dx;
     }
 }
 
@@ -96,30 +100,35 @@ void DistributionAnalysis::findGradient(Zsm5geometry &geometry, Zsm5geometry &gr
     vector<float> &dEdz = gradient.planePositionsZ();
 
     float eps = 1e-5;
-
+    float error = meanSquareError(geometry);
     for(int i=0; i<geometry.planesPerDimension(); i++) {
         x[i] += eps;
         double errorPlus = meanSquareError(geometry);
-        x[i] -= 2.0*eps;
-        double errorMinus = meanSquareError(geometry);
-        x[i] += eps; // Restore value
-        double errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        x[i] -= eps;
+//        x[i] -= 2.0*eps;
+//        double errorMinus = meanSquareError(geometry);
+//        x[i] += eps; // Restore value
+//        double errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        double errorDerivative = (errorPlus - error)/eps;
         dEdx[i] = errorDerivative;
 
-        y[i] += eps;
+        y[i] -= eps;
         errorPlus = meanSquareError(geometry);
-        y[i] -= 2.0*eps;
-        errorMinus = meanSquareError(geometry);
-        y[i] += eps; // Restore value
-        errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+//        y[i] -= 2.0*eps;
+//        errorMinus = meanSquareError(geometry);
+//        y[i] += eps; // Restore value
+//        errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        errorDerivative = (errorPlus - error)/eps;
         dEdy[i] = errorDerivative;
 
         z[i] += eps;
         errorPlus = meanSquareError(geometry);
-        z[i] -= 2.0*eps;
-        errorMinus = meanSquareError(geometry);
-        z[i] += eps; // Restore value
-        errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        z[i] -= eps;
+//        z[i] -= 2.0*eps;
+//        errorMinus = meanSquareError(geometry);
+//        z[i] += eps; // Restore value
+//        errorDerivative = (errorPlus - errorMinus)/(2.0*eps);
+        errorDerivative = (errorPlus - error)/eps;
         dEdz[i] = errorDerivative;
     }
 }
@@ -130,11 +139,13 @@ void DistributionAnalysis::updateWantedDistribution(Zsm5geometry &geometry)
     float avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
     float maxLength = 5.0*avgLengthPerBox;
     float dx = maxLength / m_size;
-    float sigma = 0.1*maxLength;
-    float mu = 0.3*maxLength;
+    float sigma = 0.05*maxLength;
+    float mu = 0.4*maxLength;
+    wantedMean = 0;
     for(int i=0; i<m_size; i++) {
         float x = dx*i;
         float p = 1.0/(sigma*sqrt(2*M_PI))*exp(-(x-mu)*(x-mu)/(2.0*sigma*sigma));
+        wantedMean += x*p*dx;
         wantedDistribution[i].setX(x);
         wantedDistribution[i].setY(p);
     }

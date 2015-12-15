@@ -42,9 +42,9 @@ void Zsm5geometry::reset() {
         float x = rand()/double(RAND_MAX);
         float y = rand()/double(RAND_MAX);
         float z = rand()/double(RAND_MAX);
-        m_planePositionsX[planeId] = x*m_planeSize;
-        m_planePositionsY[planeId] = y*m_planeSize;
-        m_planePositionsZ[planeId] = z*m_planeSize;
+        m_planePositionsX[planeId] = x*1.5*m_planeSize;
+        m_planePositionsY[planeId] = y*1.5*m_planeSize;
+        m_planePositionsZ[planeId] = z*1.5*m_planeSize;
     }
 
     std::sort(m_planePositionsX.begin(), m_planePositionsX.end(), std::less<double>());

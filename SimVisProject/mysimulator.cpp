@@ -113,6 +113,9 @@ void MyWorker::reset() {
 
     m_distributionAnalysis.updateDistribution(m_geometry);
     m_distributionAnalysis.updateWantedDistribution(m_geometry);
+    m_initialMse = m_distributionAnalysis.meanSquareError(m_geometry);
+    m_minMse = m_initialMse;
+    m_mse = m_initialMse;
 }
 
 void MyWorker::synchronizeSimulator(Simulator *simulator)
@@ -138,7 +141,7 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
     if(triangleCollection) {
         triangleCollection->data.clear();
         // Update triangle collection renderable. Similarly if you use other renderables.
-        float planeSize = m_settings.planeSize;
+        float planeSize = 2.0*m_settings.planeSize;
         vector<float> &x = m_geometry.planePositionsX();
         vector<float> &y = m_geometry.planePositionsY();
         vector<float> &z = m_geometry.planePositionsZ();
@@ -203,15 +206,18 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
-    QElapsedTimer t;
-    t.start();
-    m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
-    m_geometry.followGradient(m_geometryGradient, m_eps);
-    m_distributionAnalysis.updateDistribution(m_geometry);
-    double mse = m_distributionAnalysis.meanSquareError(m_geometry);
-    if(mse < m_minMse) {
-        m_minMse = mse;
-        m_eps *= 0.99;
+    for(int i=0; i<2; i++) {
+        QElapsedTimer t;
+        t.start();
+        float eps = 0.5*m_eps * (m_mse/m_initialMse);
+        eps = 1e-3;
+        m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
+        m_geometry.followGradient(m_geometryGradient, eps);
+        m_distributionAnalysis.updateDistribution(m_geometry);
+        m_mse = m_distributionAnalysis.meanSquareError(m_geometry);
+        if(m_mse < m_minMse) {
+            m_minMse = m_mse;
+        }
+        qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << eps << "   mse: " << m_mse << "   (min mse: " << m_minMse << ")  mean: " << m_distributionAnalysis.currentMean << " (wanted: " << m_distributionAnalysis.wantedMean << ")";
     }
-    qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << m_eps << "   mse: " << mse << "   (min mse: " << m_minMse << ")";
 }

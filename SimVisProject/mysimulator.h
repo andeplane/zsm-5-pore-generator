@@ -27,6 +27,8 @@ private:
     DistributionAnalysis m_distributionAnalysis;
     Settings m_settings;
     float m_minMse = 1e9;
+    float m_initialMse = 1e9;
+    float m_mse = 1e9;
     float m_eps = 1e-3;
     QVector<SimVis::TriangleCollectionVBOData> m_vertices;
 
