@@ -10,6 +10,7 @@ private:
     vector<float> m_planePositionsZ;
     int m_planesPerDimension = 10;
     double m_planeSize = 10;
+    float m_volume = 0;
 
 public:
     Zsm5geometry();
@@ -23,6 +24,7 @@ public:
     void followGradient(Zsm5geometry &gradient, float eps);
     double planeSize() const;
     void setPlaneSize(double planeSize);
+    void computeVolume();
 };
 
 #endif // ZSM5GEOMETRY_H

@@ -1,7 +1,7 @@
 TEMPLATE = app
 CONFIG += c++11
 
-QT += qml quick widgets opengl openglextensions
+QT += qml quick widgets opengl openglextensions charts
 
 SOURCES += main.cpp \
     mysimulator.cpp \

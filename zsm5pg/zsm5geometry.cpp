@@ -23,6 +23,11 @@ void Zsm5geometry::setPlaneSize(double planeSize)
     m_planeSize = planeSize;
 }
 
+void Zsm5geometry::computeVolume()
+{
+
+}
+
 
 int Zsm5geometry::planesPerDimension() const
 {
@@ -35,6 +40,14 @@ void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
 }
 
 void Zsm5geometry::reset() {
+    m_planePositionsX.clear();
+    m_planePositionsY.clear();
+    m_planePositionsZ.clear();
+    m_planePositionsX.resize(1);
+    m_planePositionsY.resize(1);
+    m_planePositionsZ.resize(1);
+    return;
+
     m_planePositionsX.resize(m_planesPerDimension);
     m_planePositionsY.resize(m_planesPerDimension);
     m_planePositionsZ.resize(m_planesPerDimension);

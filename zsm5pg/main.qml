@@ -11,7 +11,8 @@ Window {
     height: 1080
     MySimulator {
         id: simulator
-
+        planeSize: 100
+        planesPerDimension: 100
     }
 
     Visualizer {
@@ -59,12 +60,12 @@ Window {
             id: figure
             anchors.top: parent.top
             anchors.right: parent.right
-            width: 500
-            height: 500
+            width: 300
+            height: 300
             xMin: 0
-            xMax: 10.0*simulator.planeSize/simulator.planesPerDimension
+            xMax: 10
             yMin: 0
-            yMax: 20
+            yMax: 1.0
             LineGraph {
                 id: linegraph
                 dataSource: simulator.distribution

@@ -103,6 +103,10 @@ void MyWorker::doWork()
 {
     work();
 }
+#include <iostream>
+#include <random>
+
+using namespace std;
 
 void MyWorker::reset() {
     m_vertices.clear();
@@ -110,12 +114,42 @@ void MyWorker::reset() {
     m_geometry.setPlaneSize(m_settings.planeSize);
     m_geometry.setPlanesPerDimension(m_settings.planesPerDimension);
     m_geometry.reset();
+    float lastPlanePosition = 0;
+    int seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator (seed);
+    // std::exponential_distribution<double> distribution (0.76048);
+    float lambda = 0.76048;
+    float x0 = 1.5;
+    std::exponential_distribution<double> distribution (lambda);
 
+    for(int i=0; i<m_settings.planesPerDimension; i++) {
+        float rnd = x0 + distribution(generator);
+        m_geometry.planePositionsX().push_back(lastPlanePosition + rnd);
+        lastPlanePosition += rnd;
+        // cout << rnd << " ";
+    }
+
+    lastPlanePosition = 0;
+    for(int i=0; i<m_settings.planesPerDimension; i++) {
+        float rnd = x0 + distribution(generator);
+        m_geometry.planePositionsY().push_back(lastPlanePosition + rnd);
+        lastPlanePosition += rnd;
+        // cout << rnd << " ";
+    }
+
+    lastPlanePosition = 0;
+    for(int i=0; i<m_settings.planesPerDimension; i++) {
+        float rnd = x0 + distribution(generator);
+        m_geometry.planePositionsZ().push_back(lastPlanePosition + rnd);
+        lastPlanePosition += rnd;
+        // cout << rnd << " ";
+    }
+    cout << endl;
     m_distributionAnalysis.updateDistribution(m_geometry);
-    m_distributionAnalysis.updateWantedDistribution(m_geometry);
-    m_initialMse = m_distributionAnalysis.meanSquareError(m_geometry);
-    m_minMse = m_initialMse;
-    m_mse = m_initialMse;
+//    m_distributionAnalysis.updateWantedDistribution(m_geometry);
+//    m_initialMse = m_distributionAnalysis.meanSquareError(m_geometry);
+//    m_minMse = m_initialMse;
+//    m_mse = m_initialMse;
 }
 
 void MyWorker::synchronizeSimulator(Simulator *simulator)
@@ -141,7 +175,8 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
     if(triangleCollection) {
         triangleCollection->data.clear();
         // Update triangle collection renderable. Similarly if you use other renderables.
-        float planeSize = 2.0*m_settings.planeSize;
+        float planeSize = 0.95*std::max(m_geometry.planePositionsX().back(), std::max(m_geometry.planePositionsY().back(), m_geometry.planePositionsZ().back()));
+
         vector<float> &x = m_geometry.planePositionsX();
         vector<float> &y = m_geometry.planePositionsY();
         vector<float> &z = m_geometry.planePositionsZ();
@@ -206,18 +241,19 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
-    for(int i=0; i<2; i++) {
-        QElapsedTimer t;
-        t.start();
-        float eps = 0.5*m_eps * (m_mse/m_initialMse);
-        eps = 1e-3;
-        m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
-        m_geometry.followGradient(m_geometryGradient, eps);
-        m_distributionAnalysis.updateDistribution(m_geometry);
-        m_mse = m_distributionAnalysis.meanSquareError(m_geometry);
-        if(m_mse < m_minMse) {
-            m_minMse = m_mse;
-        }
-        qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << eps << "   mse: " << m_mse << "   (min mse: " << m_minMse << ")  mean: " << m_distributionAnalysis.currentMean << " (wanted: " << m_distributionAnalysis.wantedMean << ")";
-    }
+
+//    for(int i=0; i<2; i++) {
+//        QElapsedTimer t;
+//        t.start();
+//        float eps = 0.5*m_eps * (m_mse/m_initialMse);
+//        eps = 1e-3;
+//        m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
+//        m_geometry.followGradient(m_geometryGradient, eps);
+//        m_distributionAnalysis.updateDistribution(m_geometry);
+//        m_mse = m_distributionAnalysis.meanSquareError(m_geometry);
+//        if(m_mse < m_minMse) {
+//            m_minMse = m_mse;
+//        }
+//        qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << eps << "   mse: " << m_mse << "   (min mse: " << m_minMse << ")  mean: " << m_distributionAnalysis.currentMean << " (wanted: " << m_distributionAnalysis.wantedMean << ")";
+//    }
 }

@@ -23,11 +23,9 @@ void DistributionAnalysis::updateDistribution(Zsm5geometry &geometry)
 {
     histogram.resize(m_size);
     memset(&histogram.front(), 0, histogram.size()*sizeof(int));
-    const double avgLengthPerBox = geometry.planeSize() / geometry.planesPerDimension();
-    const double maxLength = 5.0*avgLengthPerBox;
+    const double maxLength = 10.0;
     const double dx = maxLength / m_size;
     const double oneOverDx = 1.0/dx;
-    const double numberOfVolumes = powf(geometry.planesPerDimension()-1,3);
     if(distribution.size() != m_size) {
         distribution.resize(m_size);
         for(int i=0; i<distribution.size(); i++) {
