@@ -9,7 +9,9 @@ SOURCES += main.cpp \
     figure.cpp \
     linegraph.cpp \
     zsm5geometry.cpp \
-    distributionanalysis.cpp
+    distributionanalysis.cpp \
+    statistics/statistic.cpp \
+    statistics/poresizestatistic.cpp
 
 RESOURCES += qml.qrc
 
@@ -26,4 +28,7 @@ HEADERS += \
     figure.h \
     graph.h \
     zsm5geometry.h \
-    distributionanalysis.h
+    distributionanalysis.h \
+    statistics/statistic.h \
+    statistics/poresizestatistic.h \
+    random.h
