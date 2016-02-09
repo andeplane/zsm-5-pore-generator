@@ -11,7 +11,9 @@ SOURCES += main.cpp \
     zsm5geometry.cpp \
     distributionanalysis.cpp \
     statistics/statistic.cpp \
-    statistics/poresizestatistic.cpp
+    statistics/poresizestatistic.cpp \
+    montecarlo.cpp \
+    statistics/filestatistic.cpp
 
 RESOURCES += qml.qrc
 
@@ -28,4 +30,7 @@ HEADERS += \
     distributionanalysis.h \
     statistics/statistic.h \
     statistics/poresizestatistic.h \
-    random.h
+    random.h \
+    montecarlo.h \
+    statistics/statistics.h \
+    statistics/filestatistic.h

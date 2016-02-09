@@ -47,7 +47,7 @@ public:
         std::normal_distribution<double> distribution(mean, sigma);
         return distribution(generator);
     }
-    static double nextGaussianf(const double & mean, const double & sigma) {
+    static double nextGaussianf(const float & mean, const float & sigma) {
         // Normally distributed random number.
         std::normal_distribution<float> distribution(mean, sigma);
         return distribution(generator);

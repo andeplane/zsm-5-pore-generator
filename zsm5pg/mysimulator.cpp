@@ -81,11 +81,15 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
     if(mySimulator) {
         m_geometry = mySimulator->geometry();
         m_statistic = mySimulator->statistic();
+        m_monteCarlo = mySimulator->monteCarlo();
         if(m_geometry && mySimulator->m_reset) {
             m_geometry->reset();
             mySimulator->m_reset = false;
         }
         mySimulator->setTime(mySimulator->time()+1.0);
+        if(m_statistic) {
+            m_statistic->emitReady();
+        }
     }
 }
 
@@ -96,9 +100,9 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
     if(triangleCollection && m_geometry) {
         triangleCollection->data.clear();
         // Update triangle collection renderable. Similarly if you use other renderables.
-        vector<float> &x = m_geometry->deltaXVector();
-        vector<float> &y = m_geometry->deltaYVector();
-        vector<float> &z = m_geometry->deltaZVector();
+        QVector<float> &x = m_geometry->deltaXVector();
+        QVector<float> &y = m_geometry->deltaYVector();
+        QVector<float> &z = m_geometry->deltaZVector();
         float maxPlaneCoordinateX = 0;
         float maxPlaneCoordinateY = 0;
         float maxPlaneCoordinateZ = 0;
@@ -191,4 +195,9 @@ void MyWorker::work()
 //        }
 //        qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << eps << "   mse: " << m_mse << "   (min mse: " << m_minMse << ")  mean: " << m_distributionAnalysis.currentMean << " (wanted: " << m_distributionAnalysis.wantedMean << ")";
 //    }
+    if(m_statistic && m_geometry) m_statistic->compute(m_geometry);
+    if(m_monteCarlo) {
+        for(int i=0; i<10; i++)
+            m_monteCarlo->tick();
+    }
 }

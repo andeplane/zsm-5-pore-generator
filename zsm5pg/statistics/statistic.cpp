@@ -1,6 +1,8 @@
 #include "statistic.h"
 #include <QVariant>
+#include <QDebug>
 #include <gsl/gsl_histogram.h>
+#include <cmath>
 Statistic::Statistic()
 {
 
@@ -16,6 +18,16 @@ QVariantList Statistic::xValues() const
     return m_xValues;
 }
 
+const QVector<float> &Statistic::xValuesRaw() const
+{
+    return m_xValuesRaw;
+}
+
+const QVector<float> &Statistic::yValuesRaw() const
+{
+    return m_yValuesRaw;
+}
+
 QVariantList Statistic::yValues() const
 {
     return m_yValues;
@@ -26,18 +38,25 @@ int Statistic::bins() const
     return m_bins;
 }
 
+float Statistic::min() const
+{
+    return m_min;
+}
+
+float Statistic::max() const
+{
+    return m_max;
+}
+
+void Statistic::emitReady()
+{
+    emit histogramReady();
+}
+
 void Statistic::computeHistogram()
 {
-    float minValue = 1e10;
-    float maxValue = -1e10;
-
-    for(int i=0; i<m_histogramValues.size(); i++) {
-        minValue = std::min(m_histogramValues[i], minValue);
-        maxValue = std::max(m_histogramValues[i], maxValue);
-    }
-
     gsl_histogram *hist = gsl_histogram_alloc (m_bins);
-    gsl_histogram_set_ranges_uniform (hist, minValue, maxValue);
+    gsl_histogram_set_ranges_uniform (hist, m_min, m_max);
     for(const float &value : m_histogramValues) {
         gsl_histogram_increment (hist, value);
     }
@@ -50,6 +69,9 @@ void Statistic::computeHistogram()
         float middle = 0.5*(upper+lower);
         float x = middle;
         float y = gsl_histogram_get(hist,i);
+        if(isnan(x) || isnan(y)) {
+            qDebug() << "nan: " << x << ", " << y;
+        }
         m_xValuesRaw[i] = x;
         m_yValuesRaw[i] = y;
     }
@@ -66,7 +88,6 @@ void Statistic::computeHistogram()
         m_xValues.push_back(QVariant::fromValue<float>(m_xValuesRaw[i]));
         m_yValues.push_back(QVariant::fromValue<float>(m_yValuesRaw[i]));
     }
-    emit histogramReady();
 }
 
 void Statistic::normalizeHistogram()
@@ -115,4 +136,22 @@ void Statistic::setBins(int bins)
 
     m_bins = bins;
     emit binsChanged(bins);
+}
+
+void Statistic::setMin(float min)
+{
+    if (m_min == min)
+        return;
+
+    m_min = min;
+    emit minChanged(min);
+}
+
+void Statistic::setMax(float max)
+{
+    if (m_max == max)
+        return;
+
+    m_max = max;
+    emit maxChanged(max);
 }
