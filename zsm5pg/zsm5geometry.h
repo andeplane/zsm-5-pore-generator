@@ -21,7 +21,8 @@ public:
     ~Zsm5geometry();
     void reset();
     void randomWalkStep(float standardDeviation);
-
+    Q_INVOKABLE void save(QString filename);
+    Q_INVOKABLE void load(QString filename);
     QVector<float> &deltaXVector() { return m_deltaXVector; }
     QVector<float> &deltaYVector() { return m_deltaYVector; }
     QVector<float> &deltaZVector() { return m_deltaZVector; }

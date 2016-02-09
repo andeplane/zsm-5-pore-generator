@@ -38,10 +38,9 @@ Window {
                 var xMax = 0
                 var yMin = 1e10
                 var yMax = 0
-                var lambda = 0.76067
+                var lambda = 0.76078
                 for(var i in statistic.xValues) {
                     var x = statistic.xValues[i]
-                    // console.log("x: "+x)
                     var y = statistic.yValues[i]
                     var yTarget = lambda*Math.exp(-lambda*(x-2.0))
                     if(x < 2.0) yTarget = 0

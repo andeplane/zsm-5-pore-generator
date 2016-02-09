@@ -2,6 +2,7 @@
 #include "random.h"
 #include <cstdlib>
 #include <QDebug>
+#include <QFile>
 
 Zsm5geometry::Zsm5geometry()
 {
@@ -54,7 +55,62 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         if(m_deltaYVector[i] + dy > 0) m_deltaYVector[i] += dy;
         if(m_deltaZVector[i] + dz > 0) m_deltaZVector[i] += dz;
     }
-     m_dirty = true;
+    m_dirty = true;
+}
+
+void Zsm5geometry::save(QString filename)
+{
+    QFile file(QUrl(filename).toLocalFile());
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Could not open file "+filename;
+        return;
+    }
+
+    QTextStream out(&file);
+    out << "# number of planes per dimension\n" << m_planesPerDimension << "\n";
+    for(int i=0; i<m_planesPerDimension; i++) {
+        out << m_deltaXVector[i] << " " << m_deltaYVector[i] << " " << m_deltaZVector[i] << "\n";
+    }
+    file.close();
+}
+
+void Zsm5geometry::load(QString filename)
+{
+        QFile file(QUrl(filename).toLocalFile());
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qWarning() << "Could not open file "+filename;
+            return;
+        }
+        QTextStream in(&file);
+        int numberOfXYZValuesRead = 0;
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            if(line.trimmed().startsWith("#")) continue;
+
+            QStringList words = line.split(" ");
+            if(words.count() ==1) {
+                bool castOk;
+                m_planesPerDimension = QString(words[0]).toFloat(&castOk);
+                m_deltaXVector.resize(m_planesPerDimension);
+                m_deltaYVector.resize(m_planesPerDimension);
+                m_deltaZVector.resize(m_planesPerDimension);
+            }
+
+            if(words.length() != 3) continue;
+
+            bool castOk;
+            float dx = QString(words[0]).toFloat(&castOk);
+            if(!castOk) continue;
+            float dy = QString(words[1]).toFloat(&castOk);
+            if(!castOk) continue;
+            float dz = QString(words[2]).toFloat(&castOk);
+            if(!castOk) continue;
+            m_deltaXVector[numberOfXYZValuesRead] = dx;
+            m_deltaYVector[numberOfXYZValuesRead] = dx;
+            m_deltaZVector[numberOfXYZValuesRead] = dx;
+            numberOfXYZValuesRead++;
+        }
+        m_dirty = true;
 }
 
 float Zsm5geometry::lengthScale() const
