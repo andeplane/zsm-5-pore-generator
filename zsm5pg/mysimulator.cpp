@@ -5,8 +5,7 @@
 using std::cout; using std::endl;
 MySimulator::MySimulator()
 {
-    m_distribution = new LineGraphDataSource();
-    m_wantedDistribution = new LineGraphDataSource();
+
 }
 
 MySimulator::~MySimulator()
@@ -19,11 +18,6 @@ int MySimulator::planesPerDimension() const
     return m_settings.planesPerDimension;
 }
 
-LineGraphDataSource *MySimulator::distribution() const
-{
-    return m_distribution;
-}
-
 double MySimulator::planeSize() const
 {
     return m_settings.planeSize;
@@ -34,11 +28,6 @@ double MySimulator::time() const
     return m_time;
 }
 
-LineGraphDataSource *MySimulator::wantedDistribution() const
-{
-    return m_wantedDistribution;
-}
-
 void MySimulator::setPlanesPerDimension(int planesPerDimension)
 {
     if (m_settings.planesPerDimension == planesPerDimension)
@@ -46,15 +35,6 @@ void MySimulator::setPlanesPerDimension(int planesPerDimension)
 
     m_settings.planesPerDimension = planesPerDimension;
     emit planesPerDimensionChanged(planesPerDimension);
-}
-
-void MySimulator::setDistribution(LineGraphDataSource *distribution)
-{
-    if (m_distribution == distribution)
-        return;
-
-    m_distribution = distribution;
-    emit distributionChanged(distribution);
 }
 
 void MySimulator::setPlaneSize(double planeSize)
@@ -73,15 +53,6 @@ void MySimulator::setTime(double time)
 
     m_time = time;
     emit timeChanged(time);
-}
-
-void MySimulator::setWantedDistribution(LineGraphDataSource *wantedDistribution)
-{
-    if (m_wantedDistribution == wantedDistribution)
-        return;
-
-    m_wantedDistribution = wantedDistribution;
-    emit wantedDistributionChanged(wantedDistribution);
 }
 
 SimulatorWorker *MySimulator::createWorker()
@@ -103,53 +74,9 @@ void MyWorker::doWork()
 {
     work();
 }
-#include <iostream>
-#include <random>
-
-using namespace std;
 
 void MyWorker::reset() {
-    m_vertices.clear();
-
-    m_geometry.setPlaneSize(m_settings.planeSize);
-    m_geometry.setPlanesPerDimension(m_settings.planesPerDimension);
     m_geometry.reset();
-    float lastPlanePosition = 0;
-    int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator (seed);
-    // std::exponential_distribution<double> distribution (0.76048);
-    float lambda = 0.76048;
-    float x0 = 1.5;
-    std::exponential_distribution<double> distribution (lambda);
-
-    for(int i=0; i<m_settings.planesPerDimension; i++) {
-        float rnd = x0 + distribution(generator);
-        m_geometry.planePositionsX().push_back(lastPlanePosition + rnd);
-        lastPlanePosition += rnd;
-        // cout << rnd << " ";
-    }
-
-    lastPlanePosition = 0;
-    for(int i=0; i<m_settings.planesPerDimension; i++) {
-        float rnd = x0 + distribution(generator);
-        m_geometry.planePositionsY().push_back(lastPlanePosition + rnd);
-        lastPlanePosition += rnd;
-        // cout << rnd << " ";
-    }
-
-    lastPlanePosition = 0;
-    for(int i=0; i<m_settings.planesPerDimension; i++) {
-        float rnd = x0 + distribution(generator);
-        m_geometry.planePositionsZ().push_back(lastPlanePosition + rnd);
-        lastPlanePosition += rnd;
-        // cout << rnd << " ";
-    }
-    cout << endl;
-    m_distributionAnalysis.updateDistribution(m_geometry);
-//    m_distributionAnalysis.updateWantedDistribution(m_geometry);
-//    m_initialMse = m_distributionAnalysis.meanSquareError(m_geometry);
-//    m_minMse = m_initialMse;
-//    m_mse = m_initialMse;
 }
 
 void MyWorker::synchronizeSimulator(Simulator *simulator)
@@ -162,8 +89,6 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
             reset();
             mySimulator->m_reset = false;
         }
-        if(mySimulator->distribution()) mySimulator->distribution()->setPoints(m_distributionAnalysis.distribution);
-        if(mySimulator->wantedDistribution()) mySimulator->wantedDistribution()->setPoints(m_distributionAnalysis.wantedDistribution);
         mySimulator->setTime(mySimulator->time()+1.0);
     }
 }
@@ -241,7 +166,6 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
-
 //    for(int i=0; i<2; i++) {
 //        QElapsedTimer t;
 //        t.start();

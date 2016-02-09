@@ -5,15 +5,19 @@
 #include "zsm5geometry.h"
 class PoreSizeStatistic : public Statistic
 {
+    Q_OBJECT
+private:
+    Zsm5geometry *geometry = nullptr;
+    vector<float> m_poreVolumes;
 public:
     PoreSizeStatistic();
-    Zsm5geometry *geometry = nullptr;
-    vector<float> poreVolumes;
-    vector<float> poreSizes;
 public:
-    virtual void compute();
     Zsm5geometry *getGeometry() const;
     void setGeometry(Zsm5geometry *value);
+
+    // Statistic interface
+public:
+    virtual void compute() override;
 };
 
 #endif // PORESIZESTATISTIC_H

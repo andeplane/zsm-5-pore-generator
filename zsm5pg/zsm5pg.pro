@@ -3,11 +3,11 @@ CONFIG += c++11
 
 QT += qml quick widgets opengl openglextensions charts
 
+INCLUDEPATH += /usr/local/include
+LIBS += -L/usr/local/lib -lgsl
+
 SOURCES += main.cpp \
     mysimulator.cpp \
-    graph.cpp \
-    figure.cpp \
-    linegraph.cpp \
     zsm5geometry.cpp \
     distributionanalysis.cpp \
     statistics/statistic.cpp \
@@ -24,9 +24,6 @@ include(../SimVis/library_deployment.pri)
 
 HEADERS += \
     mysimulator.h \
-    linegraph.h \
-    figure.h \
-    graph.h \
     zsm5geometry.h \
     distributionanalysis.h \
     statistics/statistic.h \

@@ -1,6 +1,5 @@
 #ifndef MYSIMULATOR_H
 #define MYSIMULATOR_H
-#include "linegraph.h"
 #include "zsm5geometry.h"
 #include "distributionanalysis.h"
 
@@ -42,42 +41,32 @@ public:
     ~MyWorker();
     void doWork();
 };
-class LineGraphDataSource;
+
 class MySimulator : public Simulator
 {
     Q_OBJECT
     Q_PROPERTY(int planesPerDimension READ planesPerDimension WRITE setPlanesPerDimension NOTIFY planesPerDimensionChanged)
     Q_PROPERTY(double planeSize READ planeSize WRITE setPlaneSize NOTIFY planeSizeChanged)
-    Q_PROPERTY(LineGraphDataSource* distribution READ distribution WRITE setDistribution NOTIFY distributionChanged)
-    Q_PROPERTY(LineGraphDataSource* wantedDistribution READ wantedDistribution WRITE setWantedDistribution NOTIFY wantedDistributionChanged)
     Q_PROPERTY(double time READ time WRITE setTime NOTIFY timeChanged)
 private:
     Settings m_settings;
     bool m_reset = true;
-    LineGraphDataSource* m_distribution = nullptr;
-    LineGraphDataSource* m_wantedDistribution = nullptr;
     double m_time = 0;
 
 public:
     MySimulator();
     ~MySimulator();
     int planesPerDimension() const;
-    LineGraphDataSource* distribution() const;
     double planeSize() const;
     double time() const;
-    LineGraphDataSource* wantedDistribution() const;
 
 public slots:
     void setPlanesPerDimension(int planesPerDimension);
-    void setDistribution(LineGraphDataSource* distribution);
-    void setWantedDistribution(LineGraphDataSource* wantedDistribution);
     void setPlaneSize(double planeSize);
     void setTime(double time);
 
 signals:
     void planesPerDimensionChanged(int planesPerDimension);
-    void wantedDistributionChanged(LineGraphDataSource* wantedDistribution);
-    void distributionChanged(LineGraphDataSource* distribution);
     void planeSizeChanged(double planeSize);
     void timeChanged(double time);
 

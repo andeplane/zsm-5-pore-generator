@@ -2,7 +2,7 @@ import QtQuick 2.5
 import QtQuick.Window 2.2
 import SimVis 1.0
 import MySimulator 1.0
-import QMLPlot 1.0
+import QtCharts 2.0
 
 Window {
     id: rootWindow
@@ -20,12 +20,6 @@ Window {
         simulator: simulator
         camera: camera
         backgroundColor: "white"
-
-//        SkyBox {
-//            id: skybox
-//            camera: camera
-//            texture: ":/cubemap.jpg"
-//        }
 
         TrackballNavigator {
             id: navigator
@@ -47,33 +41,6 @@ Window {
                 shininess: 100.0
                 attenuation: 0.0
                 position: camera.position
-            }
-
-//            SkyBoxReflection {
-//                id: reflection
-//                skybox: skybox
-//                reflectivity: 0.1
-//            }
-        }
-
-        Figure {
-            id: figure
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: 300
-            height: 300
-            xMin: 0
-            xMax: 10
-            yMin: 0
-            yMax: 1.0
-            LineGraph {
-                id: linegraph
-                dataSource: simulator.distribution
-            }
-            LineGraph {
-                id: linegraph2
-                dataSource: simulator.wantedDistribution
-                color: "red"
             }
         }
     }
