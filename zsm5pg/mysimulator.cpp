@@ -13,37 +13,19 @@ MySimulator::~MySimulator()
 
 }
 
-int MySimulator::planesPerDimension() const
-{
-    return m_settings.planesPerDimension;
-}
-
-double MySimulator::planeSize() const
-{
-    return m_settings.planeSize;
-}
-
 double MySimulator::time() const
 {
     return m_time;
 }
 
-void MySimulator::setPlanesPerDimension(int planesPerDimension)
+Zsm5geometry *MySimulator::geometry() const
 {
-    if (m_settings.planesPerDimension == planesPerDimension)
-        return;
-
-    m_settings.planesPerDimension = planesPerDimension;
-    emit planesPerDimensionChanged(planesPerDimension);
+    return m_geometry;
 }
 
-void MySimulator::setPlaneSize(double planeSize)
+Statistic *MySimulator::statistic() const
 {
-    if (m_settings.planeSize == planeSize)
-        return;
-
-    m_settings.planeSize = planeSize;
-    emit planeSizeChanged(planeSize);
+    return m_statistic;
 }
 
 void MySimulator::setTime(double time)
@@ -55,6 +37,24 @@ void MySimulator::setTime(double time)
     emit timeChanged(time);
 }
 
+void MySimulator::setGeometry(Zsm5geometry *geometry)
+{
+    if (m_geometry == geometry)
+        return;
+
+    m_geometry = geometry;
+    emit geometryChanged(geometry);
+}
+
+void MySimulator::setStatistic(Statistic *statistic)
+{
+    if (m_statistic == statistic)
+        return;
+
+    m_statistic = statistic;
+    emit statisticChanged(statistic);
+}
+
 SimulatorWorker *MySimulator::createWorker()
 {
     return new MyWorker();
@@ -62,7 +62,7 @@ SimulatorWorker *MySimulator::createWorker()
 
 MyWorker::MyWorker()
 {
-    reset();
+
 }
 
 MyWorker::~MyWorker()
@@ -75,18 +75,14 @@ void MyWorker::doWork()
     work();
 }
 
-void MyWorker::reset() {
-    m_geometry.reset();
-}
-
 void MyWorker::synchronizeSimulator(Simulator *simulator)
 {
     MySimulator *mySimulator = qobject_cast<MySimulator*>(simulator);
     if(mySimulator) {
-        m_settings = mySimulator->m_settings;
-
-        if(mySimulator->m_reset) {
-            reset();
+        m_geometry = mySimulator->geometry();
+        m_statistic = mySimulator->statistic();
+        if(m_geometry && mySimulator->m_reset) {
+            m_geometry->reset();
             mySimulator->m_reset = false;
         }
         mySimulator->setTime(mySimulator->time()+1.0);
@@ -97,24 +93,39 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 {
     // Synchronize with renderables.
     TriangleCollection* triangleCollection = qobject_cast<TriangleCollection*>(renderableObject);
-    if(triangleCollection) {
+    if(triangleCollection && m_geometry) {
         triangleCollection->data.clear();
         // Update triangle collection renderable. Similarly if you use other renderables.
-        float planeSize = 0.95*std::max(m_geometry.planePositionsX().back(), std::max(m_geometry.planePositionsY().back(), m_geometry.planePositionsZ().back()));
+        vector<float> &x = m_geometry->deltaXVector();
+        vector<float> &y = m_geometry->deltaYVector();
+        vector<float> &z = m_geometry->deltaZVector();
+        float maxPlaneCoordinateX = 0;
+        float maxPlaneCoordinateY = 0;
+        float maxPlaneCoordinateZ = 0;
+        for(int planeId=0; planeId<m_geometry->planesPerDimension(); planeId++) {
+            maxPlaneCoordinateX += x[planeId];
+            maxPlaneCoordinateY += y[planeId];
+            maxPlaneCoordinateZ += z[planeId];
+        }
 
-        vector<float> &x = m_geometry.planePositionsX();
-        vector<float> &y = m_geometry.planePositionsY();
-        vector<float> &z = m_geometry.planePositionsZ();
-        for(int planeId=0; planeId<m_settings.planesPerDimension; planeId++) {
+        float x0 = 0;
+        float y0 = 0;
+        float z0 = 0;
+
+        for(int planeId=0; planeId<m_geometry->planesPerDimension(); planeId++) {
             SimVis::TriangleCollectionVBOData p1;
             SimVis::TriangleCollectionVBOData p2;
             SimVis::TriangleCollectionVBOData p3;
             SimVis::TriangleCollectionVBOData p4;
+            x0 += x[planeId];
+            y0 += y[planeId];
+            z0 += z[planeId];
+
             // First x
-            p1.vertex = QVector3D(x[planeId], 0, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p2.vertex = QVector3D(x[planeId], 0, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p3.vertex = QVector3D(x[planeId], planeSize, planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p4.vertex = QVector3D(x[planeId], planeSize, 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p1.vertex = QVector3D(x0, 0, 0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p2.vertex = QVector3D(x0, 0, maxPlaneCoordinateZ) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p3.vertex = QVector3D(x0, maxPlaneCoordinateY, maxPlaneCoordinateZ) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p4.vertex = QVector3D(x0, maxPlaneCoordinateY, 0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
             QVector3D normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
             QVector3D color(1.0, 1.0, 1.0);
             p1.normal = normal; p2.normal = normal; p3.normal = normal; p4.normal = normal;
@@ -127,10 +138,10 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
             triangleCollection->data.push_back(p4);
 
             // Then y
-            p1.vertex = QVector3D(0, y[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p2.vertex = QVector3D(0, y[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p3.vertex = QVector3D(planeSize, y[planeId], planeSize) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p4.vertex = QVector3D(planeSize, y[planeId], 0) - 0.5*QVector3D(planeSize, planeSize, planeSize);
+            p1.vertex = QVector3D(0, y0, 0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p2.vertex = QVector3D(0, y0, maxPlaneCoordinateZ) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p3.vertex = QVector3D(maxPlaneCoordinateX, y0, maxPlaneCoordinateZ) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p4.vertex = QVector3D(maxPlaneCoordinateX, y0, 0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
 
             normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
             color = QVector3D(1.0, 1.0, 1.0);
@@ -144,10 +155,10 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
             triangleCollection->data.push_back(p4);
 
             // And z
-            p1.vertex = QVector3D(0, 0, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);
-            p2.vertex = QVector3D(0, planeSize, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
-            p3.vertex = QVector3D(planeSize, planeSize, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
-            p4.vertex = QVector3D(planeSize, 0, z[planeId]) - 0.5*QVector3D(planeSize, planeSize, planeSize);;
+            p1.vertex = QVector3D(0, 0, z0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p2.vertex = QVector3D(0, maxPlaneCoordinateY, z0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p3.vertex = QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, z0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
+            p4.vertex = QVector3D(maxPlaneCoordinateX, 0, z0) - 0.5*QVector3D(maxPlaneCoordinateX, maxPlaneCoordinateY, maxPlaneCoordinateZ);
 
             normal = QVector3D::crossProduct(p1.vertex-p2.vertex, p1.vertex-p3.vertex).normalized();
             color = QVector3D(1.0, 1.0, 1.0);

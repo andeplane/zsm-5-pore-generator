@@ -4,11 +4,18 @@
 #include <QDebug>
 #include <QVector>
 #include "mysimulator.h"
+#include "statistics/poresizestatistic.h"
+#include "zsm5geometry.h"
 #define GUI
 int main(int argc, char *argv[])
 {
 #ifdef GUI
     qmlRegisterType<MySimulator>("MySimulator", 1, 0, "MySimulator");
+    qmlRegisterType<PoreSizeStatistic>("Zeolite", 1, 0, "PoreSizeStatistic");
+    qmlRegisterType<Zsm5geometry>("Zeolite", 1, 0, "Zsm5geometry");
+    qmlRegisterUncreatableType<Statistic>("Zeolite", 1, 0, "Statistic",
+                                          "Cannot create abstract type Statistic. This must be subclassed.");
+
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;

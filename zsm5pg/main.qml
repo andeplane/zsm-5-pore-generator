@@ -3,16 +3,24 @@ import QtQuick.Window 2.2
 import SimVis 1.0
 import MySimulator 1.0
 import QtCharts 2.0
+import Zeolite 1.0
 
 Window {
     id: rootWindow
     visible: true
-    width: 1650
-    height: 1080
+    width: 1500
+    height: 900
     MySimulator {
         id: simulator
-        planeSize: 100
-        planesPerDimension: 100
+        geometry: Zsm5geometry {
+            planesPerDimension: 10
+            lengthScale: 5
+        }
+
+        statistic: PoreSizeStatistic {
+            id: statistic
+            bins: 100
+        }
     }
 
     Visualizer {
@@ -50,7 +58,4 @@ Window {
         farPlane: 1000000
         nearPlane: 0.01
     }
-
-
 }
-

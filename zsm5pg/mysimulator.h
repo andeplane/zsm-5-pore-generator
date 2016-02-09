@@ -2,6 +2,7 @@
 #define MYSIMULATOR_H
 #include "zsm5geometry.h"
 #include "distributionanalysis.h"
+#include "statistics/statistic.h"
 
 #include <SimVis/Simulator>
 #include <SimVis/TriangleCollection>
@@ -11,31 +12,18 @@
 #include <QVector3D>
 using std::vector;
 
-struct Settings {
-    int planesPerDimension = 100;
-    double planeSize = 20;
-    int distributionSize = 100;
-};
-
 class MyWorker : public SimulatorWorker
 {
     Q_OBJECT
 private:
-    Zsm5geometry m_geometry;
-    Zsm5geometry m_geometryGradient;
-    DistributionAnalysis m_distributionAnalysis;
-    Settings m_settings;
-    float m_minMse = 1e9;
-    float m_initialMse = 1e9;
-    float m_mse = 1e9;
-    float m_eps = 1e-3;
     QVector<SimVis::TriangleCollectionVBOData> m_vertices;
+    Zsm5geometry *m_geometry = nullptr;
+    Statistic *m_statistic = nullptr;
 
     // SimulatorWorker interface
     virtual void synchronizeSimulator(Simulator *simulator);
     virtual void synchronizeRenderer(Renderable *renderableObject);
     virtual void work();
-    void reset();
 public:
     MyWorker();
     ~MyWorker();
@@ -45,30 +33,33 @@ public:
 class MySimulator : public Simulator
 {
     Q_OBJECT
-    Q_PROPERTY(int planesPerDimension READ planesPerDimension WRITE setPlanesPerDimension NOTIFY planesPerDimensionChanged)
-    Q_PROPERTY(double planeSize READ planeSize WRITE setPlaneSize NOTIFY planeSizeChanged)
     Q_PROPERTY(double time READ time WRITE setTime NOTIFY timeChanged)
+    Q_PROPERTY(Zsm5geometry* geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+    Q_PROPERTY(Statistic* statistic READ statistic WRITE setStatistic NOTIFY statisticChanged)
+
+
 private:
-    Settings m_settings;
     bool m_reset = true;
     double m_time = 0;
+    Zsm5geometry* m_geometry = nullptr;
+    Statistic* m_statistic = nullptr;
 
 public:
     MySimulator();
     ~MySimulator();
-    int planesPerDimension() const;
-    double planeSize() const;
     double time() const;
+    Zsm5geometry* geometry() const;
+    Statistic* statistic() const;
 
 public slots:
-    void setPlanesPerDimension(int planesPerDimension);
-    void setPlaneSize(double planeSize);
     void setTime(double time);
+    void setGeometry(Zsm5geometry* geometry);
+    void setStatistic(Statistic* statistic);
 
 signals:
-    void planesPerDimensionChanged(int planesPerDimension);
-    void planeSizeChanged(double planeSize);
     void timeChanged(double time);
+    void geometryChanged(Zsm5geometry* geometry);
+    void statisticChanged(Statistic* statistic);
 
 protected:
     virtual SimulatorWorker *createWorker();
