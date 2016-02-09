@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     statistics/statistic.cpp \
     statistics/poresizestatistic.cpp \
     montecarlo.cpp \
-    statistics/filestatistic.cpp
+    statistics/filestatistic.cpp \
+    statistics/porevolumestatistic.cpp
 
 RESOURCES += qml.qrc
 
@@ -33,4 +34,5 @@ HEADERS += \
     random.h \
     montecarlo.h \
     statistics/statistics.h \
-    statistics/filestatistic.h
+    statistics/filestatistic.h \
+    statistics/porevolumestatistic.h

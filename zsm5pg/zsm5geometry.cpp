@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <QDebug>
 #include <QFile>
-
+#include <QUrl>
 Zsm5geometry::Zsm5geometry()
 {
 
@@ -36,12 +36,6 @@ void Zsm5geometry::reset() {
         m_deltaXVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
         m_deltaYVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
         m_deltaZVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
-//        m_deltaXVector[planeId] = std::max(2.0,Random::nextGaussianf(mean, m_lengthScale));
-//        m_deltaYVector[planeId] = std::max(2.0,Random::nextGaussianf(mean, m_lengthScale));
-//        m_deltaZVector[planeId] = std::max(2.0,Random::nextGaussianf(mean, m_lengthScale));
-//        m_deltaXVector[planeId] = Random::nextFloat(0.1, m_lengthScale);
-//        m_deltaYVector[planeId] = Random::nextFloat(0.1, m_lengthScale);
-//        m_deltaZVector[planeId] = Random::nextFloat(0.1, m_lengthScale);
     }
 }
 
@@ -51,9 +45,9 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         float dx = Random::nextGaussianf(0, standardDeviation);
         float dy = Random::nextGaussianf(0, standardDeviation);
         float dz = Random::nextGaussianf(0, standardDeviation);
-        if(m_deltaXVector[i] + dx > 0) m_deltaXVector[i] += dx;
-        if(m_deltaYVector[i] + dy > 0) m_deltaYVector[i] += dy;
-        if(m_deltaZVector[i] + dz > 0) m_deltaZVector[i] += dz;
+        if(m_deltaXVector[i] + dx > 1) m_deltaXVector[i] += dx;
+        if(m_deltaYVector[i] + dy > 1) m_deltaYVector[i] += dy;
+        if(m_deltaZVector[i] + dz > 1) m_deltaZVector[i] += dz;
     }
     m_dirty = true;
 }
@@ -106,8 +100,8 @@ void Zsm5geometry::load(QString filename)
             float dz = QString(words[2]).toFloat(&castOk);
             if(!castOk) continue;
             m_deltaXVector[numberOfXYZValuesRead] = dx;
-            m_deltaYVector[numberOfXYZValuesRead] = dx;
-            m_deltaZVector[numberOfXYZValuesRead] = dx;
+            m_deltaYVector[numberOfXYZValuesRead] = dy;
+            m_deltaZVector[numberOfXYZValuesRead] = dz;
             numberOfXYZValuesRead++;
         }
         m_dirty = true;

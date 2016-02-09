@@ -37,7 +37,7 @@ double MonteCarlo::computeChiSquared()
 
 void MonteCarlo::tick()
 {
-    if(!m_statistic || !m_geometry) return;
+    if(!m_statistic || !m_geometry || !m_running) return;
     QVector<float> x = m_geometry->deltaXVector();
     QVector<float> y = m_geometry->deltaYVector();
     QVector<float> z = m_geometry->deltaZVector();
@@ -48,11 +48,11 @@ void MonteCarlo::tick()
     // qDebug() << "csq1: " << chiSquared1 << " and csq2: " << chiSquared2;
     float deltaChiSquared = chiSquared2 - chiSquared1;
     qDebug() << deltaChiSquared;
-    float w = exp(-deltaChiSquared / m_temperature);
+    float w = exp(-deltaChiSquared / (m_temperature+1e-6));
     // qDebug() << "Delta chi squared: " << deltaChiSquared;
-    // bool accepted = deltaChiSquared < 0 || Random::nextFloat() < w;
+    bool accepted = deltaChiSquared < 0 || Random::nextFloat() < w;
     // bool accepted = Random::nextFloat() < w;
-    bool accepted = deltaChiSquared < 0;
+    // bool accepted = deltaChiSquared < 0;
     setSteps(m_steps+1);
 
     if(accepted) {

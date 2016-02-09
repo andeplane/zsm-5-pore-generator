@@ -28,6 +28,16 @@ Statistic *MySimulator::statistic() const
     return m_statistic;
 }
 
+MonteCarlo *MySimulator::monteCarlo() const
+{
+    return m_monteCarlo;
+}
+
+float MySimulator::tickTime() const
+{
+    return m_tickTime;
+}
+
 void MySimulator::setTime(double time)
 {
     if (m_time == time)
@@ -53,6 +63,24 @@ void MySimulator::setStatistic(Statistic *statistic)
 
     m_statistic = statistic;
     emit statisticChanged(statistic);
+}
+
+void MySimulator::setMonteCarlo(MonteCarlo *monteCarlo)
+{
+    if (m_monteCarlo == monteCarlo)
+        return;
+
+    m_monteCarlo = monteCarlo;
+    emit monteCarloChanged(monteCarlo);
+}
+
+void MySimulator::setTickTime(float tickTime)
+{
+    if (m_tickTime == tickTime)
+        return;
+
+    m_tickTime = tickTime;
+    emit tickTimeChanged(tickTime);
 }
 
 SimulatorWorker *MySimulator::createWorker()
@@ -82,6 +110,7 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
         m_geometry = mySimulator->geometry();
         m_statistic = mySimulator->statistic();
         m_monteCarlo = mySimulator->monteCarlo();
+        mySimulator->setTickTime(double(m_timeElapsed)/(m_numberOfTicks+1)/1000.0);
         if(m_geometry && mySimulator->m_reset) {
             m_geometry->reset();
             mySimulator->m_reset = false;
@@ -183,7 +212,15 @@ void MyWorker::work()
 {
     if(m_statistic && m_geometry) m_statistic->compute(m_geometry);
     if(m_monteCarlo) {
-        for(int i=0; i<10; i++)
+        if(!m_monteCarlo->running()) return;
+        QElapsedTimer timer;
+        timer.start();
+
+        for(int i=0; i<10; i++) {
             m_monteCarlo->tick();
+        }
+
+        m_timeElapsed += timer.elapsed();
+        m_numberOfTicks++;
     }
 }
