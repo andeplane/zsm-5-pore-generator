@@ -181,20 +181,6 @@ void MyWorker::synchronizeRenderer(Renderable *renderableObject)
 
 void MyWorker::work()
 {
-//    for(int i=0; i<2; i++) {
-//        QElapsedTimer t;
-//        t.start();
-//        float eps = 0.5*m_eps * (m_mse/m_initialMse);
-//        eps = 1e-3;
-//        m_distributionAnalysis.findGradient(m_geometry, m_geometryGradient);
-//        m_geometry.followGradient(m_geometryGradient, eps);
-//        m_distributionAnalysis.updateDistribution(m_geometry);
-//        m_mse = m_distributionAnalysis.meanSquareError(m_geometry);
-//        if(m_mse < m_minMse) {
-//            m_minMse = m_mse;
-//        }
-//        qDebug() << "Elapsed time: " << t.elapsed() << "  eps: " << eps << "   mse: " << m_mse << "   (min mse: " << m_minMse << ")  mean: " << m_distributionAnalysis.currentMean << " (wanted: " << m_distributionAnalysis.wantedMean << ")";
-//    }
     if(m_statistic && m_geometry) m_statistic->compute(m_geometry);
     if(m_monteCarlo) {
         for(int i=0; i<10; i++)

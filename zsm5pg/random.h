@@ -47,11 +47,22 @@ public:
         std::normal_distribution<double> distribution(mean, sigma);
         return distribution(generator);
     }
-    static double nextGaussianf(const float & mean, const float & sigma) {
+    static float nextGaussianf(const float & mean, const float & sigma) {
         // Normally distributed random number.
         std::normal_distribution<float> distribution(mean, sigma);
         return distribution(generator);
     }
+
+    static double nextExponential(const double &lambda) {
+        std::exponential_distribution<double> distribution(lambda);
+        return distribution(generator);
+    }
+
+    static float nextExponentialf(const float &lambda) {
+        std::exponential_distribution<float> distribution(lambda);
+        return distribution(generator);
+    }
+
     static int nextInt(const int & min, const int & max) {
         // Random int between min and max
         std::uniform_int_distribution<int> distribution(min,max);

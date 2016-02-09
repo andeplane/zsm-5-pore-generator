@@ -26,14 +26,18 @@ void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
 }
 
 void Zsm5geometry::reset() {
-    float mean = 2.5;
+    float mean = 3.0;
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
+
     for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-        m_deltaXVector[planeId] = Random::nextGaussianf(mean, m_lengthScale);
-        m_deltaYVector[planeId] = Random::nextGaussianf(mean, m_lengthScale);
-        m_deltaZVector[planeId] = Random::nextGaussianf(mean, m_lengthScale);
+        m_deltaXVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
+        m_deltaYVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
+        m_deltaZVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
+//        m_deltaXVector[planeId] = std::max(2.0,Random::nextGaussianf(mean, m_lengthScale));
+//        m_deltaYVector[planeId] = std::max(2.0,Random::nextGaussianf(mean, m_lengthScale));
+//        m_deltaZVector[planeId] = std::max(2.0,Random::nextGaussianf(mean, m_lengthScale));
 //        m_deltaXVector[planeId] = Random::nextFloat(0.1, m_lengthScale);
 //        m_deltaYVector[planeId] = Random::nextFloat(0.1, m_lengthScale);
 //        m_deltaZVector[planeId] = Random::nextFloat(0.1, m_lengthScale);
