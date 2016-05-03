@@ -47,7 +47,7 @@ void MonteCarlo::tick()
     float chiSquared2 = computeChiSquared();
     // qDebug() << "csq1: " << chiSquared1 << " and csq2: " << chiSquared2;
     float deltaChiSquared = chiSquared2 - chiSquared1;
-    qDebug() << deltaChiSquared;
+    // qDebug() << deltaChiSquared;
     float w = exp(-deltaChiSquared / (m_temperature+1e-6));
     // qDebug() << "Delta chi squared: " << deltaChiSquared;
     bool accepted = deltaChiSquared < 0 || Random::nextFloat() < w;
@@ -63,7 +63,7 @@ void MonteCarlo::tick()
         m_geometry->setDeltaZVector(z);
     }
 
-    qDebug() << "Acceptance ratio: " << m_accepted / double(m_steps) << " (w: " << w << ")";
+    // qDebug() << "Acceptance ratio: " << m_accepted / double(m_steps) << " (w: " << w << ")";
 }
 
 float MonteCarlo::standardDeviation() const

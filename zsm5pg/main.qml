@@ -156,7 +156,7 @@ Window {
         }
         LineSeries {
             id: lineSeries
-            name: "Data"
+            name: "3d model"
             axisX: xAxis
             axisY: yAxis
             style: Qt.DotLine
@@ -240,9 +240,15 @@ Window {
             Row {
                 Button {
                     text: "Load"
+                    onClicked: {
+                        myGeometry.load("/projects/geometry.txt")
+                    }
                 }
                 Button {
                     text: "Save"
+                    onClicked: {
+                        myGeometry.save("/projects/geometry.txt")
+                    }
                 }
             }
         }

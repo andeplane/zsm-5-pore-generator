@@ -54,7 +54,8 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
 
 void Zsm5geometry::save(QString filename)
 {
-    QFile file(QUrl(filename).toLocalFile());
+    //QFile file(QUrl(filename).toLocalFile());
+    QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qWarning() << "Could not open file "+filename;
         return;
@@ -66,11 +67,13 @@ void Zsm5geometry::save(QString filename)
         out << m_deltaXVector[i] << " " << m_deltaYVector[i] << " " << m_deltaZVector[i] << "\n";
     }
     file.close();
+    qDebug() << "Saved geometry to file: " << filename;
 }
 
 void Zsm5geometry::load(QString filename)
 {
-        QFile file(QUrl(filename).toLocalFile());
+        //QFile file(QUrl(filename).toLocalFile());
+        QFile file(filename);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qWarning() << "Could not open file "+filename;
             return;
