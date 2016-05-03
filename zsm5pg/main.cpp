@@ -7,7 +7,8 @@
 #include "statistics/statistics.h"
 #include "zsm5geometry.h"
 #include "montecarlo.h"
-#define GUI
+#include "inifile.h"
+// #define GUI
 int main(int argc, char *argv[])
 {
 #ifdef GUI
@@ -26,10 +27,13 @@ int main(int argc, char *argv[])
 
     return app.exec();
 #else
-    MyWorker worker;
-    worker.doWork();
-    worker.doWork();
-    worker.doWork();
+    IniFile file("file:///projects/test.txt");
+    qDebug() << "dustefyr: " << file.getDouble("dustefyr");
+    qDebug() << "array: " << file.getDoubleArray("myarray");
+//    MyWorker worker;
+//    worker.doWork();
+//    worker.doWork();
+//    worker.doWork();
 #endif
 }
 

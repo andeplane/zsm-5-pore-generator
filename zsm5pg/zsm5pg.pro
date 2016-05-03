@@ -14,7 +14,9 @@ SOURCES += main.cpp \
     statistics/poresizestatistic.cpp \
     montecarlo.cpp \
     statistics/filestatistic.cpp \
-    statistics/porevolumestatistic.cpp
+    statistics/porevolumestatistic.cpp \
+    nogui.cpp \
+    inifile.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,4 +37,6 @@ HEADERS += \
     montecarlo.h \
     statistics/statistics.h \
     statistics/filestatistic.h \
-    statistics/porevolumestatistic.h
+    statistics/porevolumestatistic.h \
+    nogui.h \
+    inifile.h
