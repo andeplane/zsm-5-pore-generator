@@ -6,11 +6,10 @@
 IniFile::IniFile(QString filename) :
     m_filename(filename)
 {
-    QUrl url = filename;
-    QFile file(url.toLocalFile());
+    QFile file(filename);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Could not open " << filename;
-        return;
+        exit(1);
     }
 
     QString content(file.readAll());
@@ -71,6 +70,17 @@ int IniFile::getInt(QString key)
     exit(1);
 }
 
+bool IniFile::getBool(QString key)
+{
+    if(m_keyValuePairs.contains(key)) {
+        QString value = m_keyValuePairs[key];
+        return (value.toLower().compare("true") == 0);
+    }
+
+    qDebug() << "Error, could not find key " << key;
+    exit(1);
+}
+
 QVector<double> IniFile::getDoubleArray(QString key)
 {
     if(m_keyValuePairs.contains(key)) {
@@ -103,5 +113,14 @@ QVector<int> IniFile::getIntArray(QString key)
     }
     qDebug() << "Error, could not find key " << key;
     exit(1);
+}
+
+bool IniFile::contains(QString key) {
+    return m_keyValuePairs.contains(key);
+}
+
+bool IniFile::hasKey(QString key)
+{
+    return contains(key);
 }
 

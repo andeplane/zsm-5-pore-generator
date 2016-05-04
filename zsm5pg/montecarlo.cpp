@@ -1,6 +1,11 @@
 #include "montecarlo.h"
 #include "random.h"
 #include <QDebug>
+void MonteCarlo::setDebug(bool debug)
+{
+    m_debug = debug;
+}
+
 MonteCarlo::MonteCarlo()
 {
 
@@ -11,45 +16,24 @@ Zsm5geometry *MonteCarlo::geometry() const
     return m_geometry;
 }
 
-Statistic *MonteCarlo::statistic() const
-{
-    return m_statistic;
-}
-
-double MonteCarlo::computeChiSquared()
-{
-    double lambda = 0.76078;
-    const QVector<float> &xValues = m_statistic->xValuesRaw();
-    const QVector<float> &yValues = m_statistic->yValuesRaw();
-    double chiSquared = 0;
-    int N = xValues.size();
-    for(int i=0; i<N; i++) {
-        const float &x = xValues[i];
-        const float &y = yValues[i];
-        double targetY = lambda*exp(-lambda*(x-2.0));
-        if(x<2.0) targetY = 0.0;
-        double deltaYSquared = (y - targetY)*(y - targetY);
-        chiSquared += deltaYSquared;
-    }
-    chiSquared /= N;
-    return chiSquared;
-}
-
 void MonteCarlo::tick()
 {
-    if(!m_statistic || !m_geometry || !m_running) return;
+    if(!m_model || !m_data || !m_geometry || !m_running) return;
     QVector<float> x = m_geometry->deltaXVector();
     QVector<float> y = m_geometry->deltaYVector();
     QVector<float> z = m_geometry->deltaZVector();
-    float chiSquared1 = computeChiSquared();
+
+    QVector<float> xValues = m_model->xValuesRaw();
+    QVector<float> yValues = m_model->yValuesRaw();
+
+    float chiSquared1 = m_model->chiSquared(m_data);
     m_geometry->randomWalkStep(m_standardDeviation);
-    m_statistic->compute(m_geometry);
-    float chiSquared2 = computeChiSquared();
-    // qDebug() << "csq1: " << chiSquared1 << " and csq2: " << chiSquared2;
+    m_model->compute(m_geometry);
+    float chiSquared2 = m_model->chiSquared(m_data);
     float deltaChiSquared = chiSquared2 - chiSquared1;
-    // qDebug() << deltaChiSquared;
+
     float w = exp(-deltaChiSquared / (m_temperature+1e-6));
-    // qDebug() << "Delta chi squared: " << deltaChiSquared;
+
     bool accepted = deltaChiSquared < 0 || Random::nextFloat() < w;
     // bool accepted = Random::nextFloat() < w;
     // bool accepted = deltaChiSquared < 0;
@@ -57,10 +41,23 @@ void MonteCarlo::tick()
 
     if(accepted) {
         setAccepted(m_accepted+1);
+        setChiSquared(chiSquared2);
+
+        if(m_debug) qDebug() << "csq1: " << chiSquared1 << " and csq2: " << chiSquared2;
+        if(m_debug) qDebug() << "Delta chi squared: " << deltaChiSquared;
+        if(m_debug) qDebug() << "Accepted: " << accepted  << " (w = " << w << ")";
     } else {
         m_geometry->setDeltaXVector(x);
         m_geometry->setDeltaYVector(y);
         m_geometry->setDeltaZVector(z);
+        m_model->setXValuesRaw(xValues);
+        m_model->setYValuesRaw(yValues);
+//        qDebug() << "Chi squared before: " << chiSquared1;
+//        chiSquared2 = m_model->chiSquared(m_data);
+//        qDebug() << "Chi squared now: " << chiSquared2;
+//        chiSquared2 = m_model->chiSquared(m_data);
+//        qDebug() << "Chi squared again: " << chiSquared2;
+        setChiSquared(chiSquared1);
     }
 
     // qDebug() << "Acceptance ratio: " << m_accepted / double(m_steps) << " (w: " << w << ")";
@@ -91,6 +88,26 @@ bool MonteCarlo::running() const
     return m_running;
 }
 
+float MonteCarlo::acceptanceRatio()
+{
+    return m_accepted / float(m_steps);
+}
+
+float MonteCarlo::chiSquared() const
+{
+    return m_chiSquared;
+}
+
+Statistic *MonteCarlo::model() const
+{
+    return m_model;
+}
+
+Statistic *MonteCarlo::data() const
+{
+    return m_data;
+}
+
 void MonteCarlo::setGeometry(Zsm5geometry *geometry)
 {
     if (m_geometry == geometry)
@@ -98,15 +115,6 @@ void MonteCarlo::setGeometry(Zsm5geometry *geometry)
 
     m_geometry = geometry;
     emit geometryChanged(geometry);
-}
-
-void MonteCarlo::setStatistic(Statistic *statistic)
-{
-    if (m_statistic == statistic)
-        return;
-
-    m_statistic = statistic;
-    emit statisticChanged(statistic);
 }
 
 void MonteCarlo::setStandardDeviation(float standardDeviation)
@@ -152,4 +160,31 @@ void MonteCarlo::setRunning(bool running)
 
     m_running = running;
     emit runningChanged(running);
+}
+
+void MonteCarlo::setModel(Statistic *model)
+{
+    if (m_model == model)
+        return;
+
+    m_model = model;
+    emit modelChanged(model);
+}
+
+void MonteCarlo::setData(Statistic *data)
+{
+    if (m_data == data)
+        return;
+
+    m_data = data;
+    emit dataChanged(data);
+}
+
+void MonteCarlo::setChiSquared(float chiSquared)
+{
+    if (m_chiSquared == chiSquared)
+        return;
+
+    m_chiSquared = chiSquared;
+    emit chiSquaredChanged(chiSquared);
 }

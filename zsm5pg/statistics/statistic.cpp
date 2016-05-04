@@ -2,8 +2,14 @@
 #include <QVariant>
 #include <QDebug>
 #include <gsl/gsl_histogram.h>
+#include <QFile>
 #include <cmath>
 Statistic::Statistic()
+{
+
+}
+
+void Statistic::compute(Zsm5geometry *geometry)
 {
 
 }
@@ -48,9 +54,87 @@ float Statistic::max() const
     return m_max;
 }
 
+void Statistic::save(QString filename)
+{
+    QFile file(filename);
+    if(!file.open(QFileDevice::WriteOnly | QFileDevice::Text)) {
+        qDebug() << "Error, could not not save file " << filename;
+        return;
+    }
+
+    QTextStream stream(&file);
+    for(int i=0; i<m_xValuesRaw.count(); i++) {
+        float x = m_xValuesRaw[i];
+        float y = m_yValuesRaw[i];
+        stream << x << " " << y << "\n";
+    }
+    file.close();
+}
+
+void Statistic::load(QString filename)
+{
+    QFile file(filename);
+    if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
+        qDebug() << "Could not open file " << filename;
+        exit(1);
+    }
+
+    m_xValuesRaw.clear();
+    m_yValuesRaw.clear();
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        line = line.trimmed();
+        QStringList splitted = line.split(" ");
+        if(splitted.count()==2) {
+            bool ok;
+            float x = splitted[0].toFloat(&ok);
+            if(ok) {
+                float y = splitted[1].toFloat(&ok);
+                if(ok) {
+                    m_xValuesRaw.push_back(x);
+                    m_yValuesRaw.push_back(y);
+                }
+            }
+        }
+    }
+}
+
 void Statistic::emitReady()
 {
     emit histogramReady();
+}
+
+double Statistic::eval(double x)
+{
+    for(int i=0; i<m_xValuesRaw.size()-1; i++) {
+        double x0 = m_xValuesRaw[i];
+        double x1 = m_xValuesRaw[i+1];
+        if(x0 <= x && x <= x1) {
+            double y0 = m_yValuesRaw[i];
+            double y1 = m_yValuesRaw[i+1];
+            double delta = x1 - x0;
+            double f = (x1 - x) / delta;
+            double value = y0*f + (1.0 - f)*y1;
+            return value;
+        }
+    }
+    qDebug() << "Could not interpolate x=" << x;
+    exit(1);
+}
+
+double Statistic::chiSquared(Statistic *statistic)
+{
+    double chiSquared = 0;
+    for(int bin = 0; bin<m_bins; bin++) {
+        double x = m_xValuesRaw[bin];
+        double y_this = m_yValuesRaw[bin];
+        double y_other = statistic->eval(x);
+        double delta = y_this - y_other;
+        chiSquared += delta*delta;
+    }
+    return chiSquared;
 }
 
 void Statistic::computeHistogram()
@@ -109,6 +193,16 @@ void Statistic::normalizeHistogram()
     for(int i=0; i<m_xValuesRaw.size(); i++) {
         m_yValuesRaw[i] *= oneOverIntegralSum;
     }
+}
+
+void Statistic::setYValuesRaw(const QVector<float> &yValuesRaw)
+{
+    m_yValuesRaw = yValuesRaw;
+}
+
+void Statistic::setXValuesRaw(const QVector<float> &xValuesRaw)
+{
+    m_xValuesRaw = xValuesRaw;
 }
 
 void Statistic::setXValues(QVariantList xValues)

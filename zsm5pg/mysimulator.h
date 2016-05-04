@@ -1,7 +1,6 @@
 #ifndef MYSIMULATOR_H
 #define MYSIMULATOR_H
 #include "zsm5geometry.h"
-#include "distributionanalysis.h"
 #include "statistics/statistic.h"
 #include "montecarlo.h"
 

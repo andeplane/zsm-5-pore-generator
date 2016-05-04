@@ -7,7 +7,7 @@ PoreVolumeStatistic::PoreVolumeStatistic()
 
 void PoreVolumeStatistic::compute(Zsm5geometry *geometry)
 {
-    if(!geometry || !geometry->dirty()) return;
+    if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -28,6 +28,5 @@ void PoreVolumeStatistic::compute(Zsm5geometry *geometry)
     }
 
     computeHistogram();
-    geometry->setDirty(false);
 }
 

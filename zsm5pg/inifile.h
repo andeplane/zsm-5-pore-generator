@@ -11,9 +11,11 @@ public:
     QString getString(QString key);
     double getDouble(QString key);
     int getInt(QString key);
+    bool getBool(QString key);
     QVector<double> getDoubleArray(QString key);
     QVector<int> getIntArray(QString key);
-
+    bool hasKey(QString key);
+    bool contains(QString key);
 private:
     QString m_filename;
 };

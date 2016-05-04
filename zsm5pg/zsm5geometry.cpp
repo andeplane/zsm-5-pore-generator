@@ -26,16 +26,16 @@ void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
     m_planesPerDimension = planesPerDimension;
 }
 
-void Zsm5geometry::reset() {
-    float mean = 3.0;
+void Zsm5geometry::reset(float min, float max) {
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
 
+    float delta = max - min;
     for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-        m_deltaXVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
-        m_deltaYVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
-        m_deltaZVector[planeId] = 2.0 + Random::nextExponentialf(0.76078);
+        m_deltaXVector[planeId] = min + Random::nextFloat()*delta;
+        m_deltaYVector[planeId] = min + Random::nextFloat()*delta;
+        m_deltaZVector[planeId] = min + Random::nextFloat()*delta;
     }
 }
 
@@ -49,7 +49,6 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         if(m_deltaYVector[i] + dy > 1) m_deltaYVector[i] += dy;
         if(m_deltaZVector[i] + dz > 1) m_deltaZVector[i] += dz;
     }
-    m_dirty = true;
 }
 
 void Zsm5geometry::save(QString filename)
@@ -72,52 +71,46 @@ void Zsm5geometry::save(QString filename)
 
 void Zsm5geometry::load(QString filename)
 {
-        //QFile file(QUrl(filename).toLocalFile());
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning() << "Could not open file "+filename;
-            return;
-        }
-        QTextStream in(&file);
-        int numberOfXYZValuesRead = 0;
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            if(line.trimmed().startsWith("#")) continue;
+    //QFile file(QUrl(filename).toLocalFile());
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Could not open file "+filename;
+        return;
+    }
+    QTextStream in(&file);
+    int numberOfXYZValuesRead = 0;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if(line.trimmed().startsWith("#")) continue;
 
-            QStringList words = line.split(" ");
-            if(words.count() ==1) {
-                bool castOk;
-                m_planesPerDimension = QString(words[0]).toFloat(&castOk);
-                m_deltaXVector.resize(m_planesPerDimension);
-                m_deltaYVector.resize(m_planesPerDimension);
-                m_deltaZVector.resize(m_planesPerDimension);
-            }
-
-            if(words.length() != 3) continue;
-
+        QStringList words = line.split(" ");
+        if(words.count() ==1) {
             bool castOk;
-            float dx = QString(words[0]).toFloat(&castOk);
-            if(!castOk) continue;
-            float dy = QString(words[1]).toFloat(&castOk);
-            if(!castOk) continue;
-            float dz = QString(words[2]).toFloat(&castOk);
-            if(!castOk) continue;
-            m_deltaXVector[numberOfXYZValuesRead] = dx;
-            m_deltaYVector[numberOfXYZValuesRead] = dy;
-            m_deltaZVector[numberOfXYZValuesRead] = dz;
-            numberOfXYZValuesRead++;
+            m_planesPerDimension = QString(words[0]).toFloat(&castOk);
+            m_deltaXVector.resize(m_planesPerDimension);
+            m_deltaYVector.resize(m_planesPerDimension);
+            m_deltaZVector.resize(m_planesPerDimension);
         }
-        m_dirty = true;
+
+        if(words.length() != 3) continue;
+
+        bool castOk;
+        float dx = QString(words[0]).toFloat(&castOk);
+        if(!castOk) continue;
+        float dy = QString(words[1]).toFloat(&castOk);
+        if(!castOk) continue;
+        float dz = QString(words[2]).toFloat(&castOk);
+        if(!castOk) continue;
+        m_deltaXVector[numberOfXYZValuesRead] = dx;
+        m_deltaYVector[numberOfXYZValuesRead] = dy;
+        m_deltaZVector[numberOfXYZValuesRead] = dz;
+        numberOfXYZValuesRead++;
+    }
 }
 
 float Zsm5geometry::lengthScale() const
 {
     return m_lengthScale;
-}
-
-bool Zsm5geometry::dirty() const
-{
-    return m_dirty;
 }
 
 void Zsm5geometry::setLengthScale(float lengthScale)
@@ -127,13 +120,4 @@ void Zsm5geometry::setLengthScale(float lengthScale)
 
     m_lengthScale = lengthScale;
     emit lengthScaleChanged(lengthScale);
-}
-
-void Zsm5geometry::setDirty(bool dirty)
-{
-    if (m_dirty == dirty)
-        return;
-
-    m_dirty = dirty;
-    emit dirtyChanged(dirty);
 }

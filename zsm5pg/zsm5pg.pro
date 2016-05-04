@@ -9,14 +9,13 @@ LIBS += -L/usr/local/lib -lgsl
 SOURCES += main.cpp \
     mysimulator.cpp \
     zsm5geometry.cpp \
-    distributionanalysis.cpp \
     statistics/statistic.cpp \
     statistics/poresizestatistic.cpp \
     montecarlo.cpp \
-    statistics/filestatistic.cpp \
     statistics/porevolumestatistic.cpp \
     nogui.cpp \
-    inifile.cpp
+    inifile.cpp \
+    statistics/distributionstatistic.cpp
 
 RESOURCES += qml.qrc
 
@@ -30,13 +29,12 @@ include(../SimVis/library_deployment.pri)
 HEADERS += \
     mysimulator.h \
     zsm5geometry.h \
-    distributionanalysis.h \
     statistics/statistic.h \
     statistics/poresizestatistic.h \
     random.h \
     montecarlo.h \
     statistics/statistics.h \
-    statistics/filestatistic.h \
     statistics/porevolumestatistic.h \
     nogui.h \
-    inifile.h
+    inifile.h \
+    statistics/distributionstatistic.h

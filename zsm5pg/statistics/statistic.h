@@ -27,7 +27,7 @@ protected:
 
 public:
     Statistic();
-    virtual void compute(class Zsm5geometry *geometry) = 0;
+    virtual void compute(class Zsm5geometry *geometry);
     void prepareHistogram();
     void computeHistogram();
     QVariantList xValues() const;
@@ -37,7 +37,13 @@ public:
     int bins() const;
     float min() const;
     float max() const;
+    void save(QString filename);
+    void load(QString filename);
+    virtual double eval(double x);
+    double chiSquared(Statistic *statistic);
     void emitReady();
+    void setXValuesRaw(const QVector<float> &xValuesRaw);
+    void setYValuesRaw(const QVector<float> &yValuesRaw);
 
 public slots:
     void setXValues(QVariantList xValues);

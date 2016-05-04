@@ -112,7 +112,7 @@ void MyWorker::synchronizeSimulator(Simulator *simulator)
         m_monteCarlo = mySimulator->monteCarlo();
         mySimulator->setTickTime(double(m_timeElapsed)/(m_numberOfTicks+1)/1000.0);
         if(m_geometry && mySimulator->m_reset) {
-            m_geometry->reset();
+            m_geometry->reset(1, 5);
             mySimulator->m_reset = false;
         }
         mySimulator->setTime(mySimulator->time()+1.0);
