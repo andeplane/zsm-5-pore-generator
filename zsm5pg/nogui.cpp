@@ -11,6 +11,11 @@ NoGUI::NoGUI()
     geometry = new Zsm5geometry();
     monteCarlo = new MonteCarlo();
     statistic = new PoreSizeStatistic();
+    m_poreSizeDistribution = new PoreSizeStatistic();
+    m_poreSizeDistribution->setMin(0);
+    m_poreSizeDistribution->setMax(20);
+    QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
+    m_concentration = new Concentration(f);
 }
 
 void NoGUI::loadIniFile(IniFile &iniFile)
@@ -20,6 +25,11 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         statistic = new PoreVolumeStatistic();
     } else if(statisticType.compare("poreSize") == 0) {
         statistic = new PoreSizeStatistic();
+    } else if(statisticType.compare("concentration") == 0) {
+        statistic = new Concentration("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
+    } else {
+        qDebug() << "Error, could not find statistic type " << statisticType;
+        exit(1);
     }
 
     printEvery = iniFile.getInt("printEvery");
@@ -35,17 +45,18 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     int bins = iniFile.getInt("bins");
     float xMin = iniFile.getDouble("xMin");
     float xMax = iniFile.getDouble("xMax");
+    float delta = xMax - xMin;
 
     if(iniFile.getString("dataType").compare("normalDistribution") == 0) {
         DistributionStatistic *data = new DistributionStatistic();
         data->setNormalDistributionMean(iniFile.getDouble("normalDistributionMean"));
         data->setNormalDistributionStandardDeviation(iniFile.getDouble("normalDistributionStandardDeviation"));
-        data->setType(DistributionStatistic::Type::Normal, xMin, xMax, bins);
+        data->setType(DistributionStatistic::Type::Normal, xMin, xMin+3*delta, bins);
         monteCarlo->setData(data);
     } else if(iniFile.getString("dataType").compare("exponentialDistribution") == 0) {
         DistributionStatistic *data = new DistributionStatistic();
         data->setExponentialDistributionMean(iniFile.getDouble("exponentialDistributionMean"));
-        data->setType(DistributionStatistic::Type::Exponential, xMin, xMax, bins);
+        data->setType(DistributionStatistic::Type::Exponential, xMin, xMin+3*delta, bins);
         monteCarlo->setData(data);
     } else {
         Statistic *data = new Statistic();
@@ -64,44 +75,22 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     }
 
     statistic->setMin(xMin);
-    statistic->setMax(xMax);
+    statistic->setMax(xMin + 3*delta);
     statistic->setBins(bins);
     monteCarlo->setDebug(iniFile.getBool("verbose"));
     monteCarlo->setModel(statistic);
     monteCarlo->setRunning(true);
     statistic->compute(geometry);
 
-//    QVector<float> x = geometry->deltaXVector();
-//    QVector<float> y = geometry->deltaYVector();
-//    QVector<float> z = geometry->deltaZVector();
-
-//    Statistic *model = monteCarlo->model();
-//    Statistic *data = monteCarlo->data();
-
-//    model->compute(geometry);
-//    qDebug() << "Chi squared 0: " << model->chiSquared(data);
-//    qDebug() << "Chi squared 1: " << model->chiSquared(data);
-//    geometry->randomWalkStep(1.0);
-//    model->compute(geometry);
-//    qDebug() << "Chi squared 2: " << model->chiSquared(data);
-
-//    exit(0);
-
-//    Statistic *model = monteCarlo->model();
-//    Statistic *data = monteCarlo->data();
-//    qDebug() << "Model: " << model->yValuesRaw();
-//    qDebug() << "Data: " << data->yValuesRaw();
-//    model->compute(geometry);
-//    data->compute(geometry);
-//    qDebug() << "Model: " << model->yValuesRaw();
-//    qDebug() << "Data: " << data->yValuesRaw();
-//    qDebug() << "Chi squared: " << model->chiSquared(data);
-
-//    exit(0);
+    monteCarlo->model()->updateQML();
+    monteCarlo->data()->updateQML();
+    qDebug() << "I'm done with this.";
 }
 
 void NoGUI::run() {
-    for(int step=0; step<steps; step++) {
+    monteCarlo->data()->createLineSeries();
+    for(step=0; step<steps; step++) {
+        qDebug() << "yeah?";
         monteCarlo->tick();
         if( (step % printEvery) == 0) {
             qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio();
@@ -110,5 +99,82 @@ void NoGUI::run() {
 
     geometry->save("/projects/poregenerator/currentgeometry.txt");
     statistic->save("/projects/poregenerator/currenthistogram.txt");
+}
 
+bool NoGUI::tick()
+{
+    if(step >= steps) {
+        geometry->save("/projects/poregenerator/currentgeometry.txt");
+        statistic->save("/projects/poregenerator/currenthistogram.txt");
+
+        return true;
+    }
+
+    monteCarlo->tick();
+    step++;
+    if( (step % printEvery) == 0) {
+        qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio();
+        m_poreSizeDistribution->compute(geometry);
+        m_poreSizeDistribution->updateQML();
+        monteCarlo->model()->updateQML();
+        m_concentration->compute(geometry);
+    }
+
+    return false;
+}
+
+Statistic *NoGUI::model() const
+{
+    return m_model;
+}
+
+Statistic *NoGUI::data() const
+{
+    return m_data;
+}
+
+Concentration *NoGUI::concentration() const
+{
+    return m_concentration;
+}
+
+Statistic *NoGUI::poreSizeDistribution() const
+{
+    return m_poreSizeDistribution;
+}
+
+void NoGUI::setModel(Statistic *model)
+{
+    if (m_model == model)
+        return;
+
+    m_model = model;
+    emit modelChanged(model);
+}
+
+void NoGUI::setData(Statistic *data)
+{
+    if (m_data == data)
+        return;
+
+    m_data = data;
+    emit dataChanged(data);
+}
+
+void NoGUI::setConcentration(Concentration *concentration)
+{
+    if (m_concentration == concentration)
+        return;
+
+    m_concentration = concentration;
+    emit concentrationChanged(concentration);
+}
+
+void NoGUI::setPoreSizeDistribution(Statistic *poreSizeDistribution)
+{
+    if (m_poreSizeDistribution == poreSizeDistribution)
+        return;
+
+    m_poreSizeDistribution = poreSizeDistribution;
+    emit poreSizeDistributionChanged(poreSizeDistribution);
 }

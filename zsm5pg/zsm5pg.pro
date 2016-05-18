@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     statistics/porevolumestatistic.cpp \
     nogui.cpp \
     inifile.cpp \
-    statistics/distributionstatistic.cpp
+    statistics/distributionstatistic.cpp \
+    statistics/concentration.cpp
 
 RESOURCES += qml.qrc
 
@@ -37,4 +38,5 @@ HEADERS += \
     statistics/porevolumestatistic.h \
     nogui.h \
     inifile.h \
-    statistics/distributionstatistic.h
+    statistics/distributionstatistic.h \
+    statistics/concentration.h

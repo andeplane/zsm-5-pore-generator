@@ -6,7 +6,8 @@
 #include <cmath>
 Statistic::Statistic()
 {
-
+    m_lineSeries = new QLineSeries();
+    m_name = "Statistic";
 }
 
 void Statistic::compute(Zsm5geometry *geometry)
@@ -106,6 +107,15 @@ void Statistic::emitReady()
     emit histogramReady();
 }
 
+void Statistic::createLineSeries() {
+    m_lineSeries->clear();
+    for(int bin=0; bin<m_bins; bin++) {
+        float x = m_xValuesRaw[bin];
+        float y = m_yValuesRaw[bin];
+        m_lineSeries->append(x,y);
+    }
+}
+
 double Statistic::eval(double x)
 {
     for(int i=0; i<m_xValuesRaw.size()-1; i++) {
@@ -120,14 +130,15 @@ double Statistic::eval(double x)
             return value;
         }
     }
-    qDebug() << "Could not interpolate x=" << x;
+    qDebug() << m_name << " could not interpolate x=" << x;
+    qDebug() << "xMin: " << m_xValuesRaw.front() << " and xMax: " << m_xValuesRaw.back();
     exit(1);
 }
 
 double Statistic::chiSquared(Statistic *statistic)
 {
     double chiSquared = 0;
-    for(int bin = 0; bin<m_bins; bin++) {
+    for(int bin = 0; bin<m_xValuesRaw.size(); bin++) {
         double x = m_xValuesRaw[bin];
         double y_this = m_yValuesRaw[bin];
         double y_other = statistic->eval(x);
@@ -162,7 +173,9 @@ void Statistic::computeHistogram()
     gsl_histogram_free(hist);
 
     normalizeHistogram();
+}
 
+void Statistic::updateQML() {
     m_xValues.clear();
     m_yValues.clear();
     m_xValues.reserve(m_xValuesRaw.size());
@@ -171,7 +184,9 @@ void Statistic::computeHistogram()
     for(int i=0; i<m_xValuesRaw.size(); i++) {
         m_xValues.push_back(QVariant::fromValue<float>(m_xValuesRaw[i]));
         m_yValues.push_back(QVariant::fromValue<float>(m_yValuesRaw[i]));
+        // qDebug() << "Updating QML with " << m_xValuesRaw[i] << ", " << m_yValuesRaw[i];
     }
+    emit histogramReady();
 }
 
 void Statistic::normalizeHistogram()
@@ -198,6 +213,11 @@ void Statistic::normalizeHistogram()
 void Statistic::setYValuesRaw(const QVector<float> &yValuesRaw)
 {
     m_yValuesRaw = yValuesRaw;
+}
+
+QLineSeries *Statistic::lineSeries() const
+{
+    return m_lineSeries;
 }
 
 void Statistic::setXValuesRaw(const QVector<float> &xValuesRaw)
@@ -248,4 +268,13 @@ void Statistic::setMax(float max)
 
     m_max = max;
     emit maxChanged(max);
+}
+
+void Statistic::setLineSeries(QLineSeries *lineSeries)
+{
+    if (m_lineSeries == lineSeries)
+        return;
+
+    m_lineSeries = lineSeries;
+    emit lineSeriesChanged(lineSeries);
 }

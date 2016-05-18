@@ -3,7 +3,7 @@
 #include <QDebug>
 PoreSizeStatistic::PoreSizeStatistic()
 {
-
+    m_name = "PoreSize";
 }
 
 void PoreSizeStatistic::compute(Zsm5geometry *geometry)
@@ -23,13 +23,17 @@ void PoreSizeStatistic::compute(Zsm5geometry *geometry)
             for(int k=0; k<z.size(); k++) {
                 const float dz = z[k];
                 const float volume = dx*dy*dz;
-                m_poreVolumes[poreIndex++] = volume;
+                const float poreSize = std::min(std::min(dx,dy), dz);
+                m_poreVolumes[poreIndex++] = cbrt(volume);
+                //m_poreVolumes[poreIndex++] = poreSize;
             }
         }
     }
 
     for(int i=0; i<numberOfPores; i++) {
-        m_histogramValues[i] = cbrt(m_poreVolumes[i]);
+        // m_histogramValues[i] = cbrt(m_poreVolumes[i]);
+        m_histogramValues[i] = m_poreVolumes[i];
     }
     computeHistogram();
+    updateQML();
 }

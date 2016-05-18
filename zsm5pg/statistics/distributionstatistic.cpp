@@ -8,6 +8,7 @@ void DistributionStatistic::setType(DistributionStatistic::Type type, float xMin
     setMax(xMax);
     setMin(xMin);
     m_type = type;
+    m_name = "Distribution";
 
     emit typeChanged(); // Will trigger update
 }
@@ -82,7 +83,9 @@ void DistributionStatistic::update() {
 
         for(int bin = 0; bin < bins(); bin++) {
             float x = m_xValuesRaw[bin];
-            float y = lambda * exp(-lambda*x);
+            // float y = lambda * exp(-lambda*x);
+            double y = lambda*exp(-lambda*(x-2.0));
+            if(x<2.0) y = 0.0;
 
             m_yValuesRaw[bin] = y;
         }

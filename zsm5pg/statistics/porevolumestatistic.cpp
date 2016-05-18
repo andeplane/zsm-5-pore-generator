@@ -2,7 +2,7 @@
 
 PoreVolumeStatistic::PoreVolumeStatistic()
 {
-
+    m_name = "PoreVolume";
 }
 
 void PoreVolumeStatistic::compute(Zsm5geometry *geometry)

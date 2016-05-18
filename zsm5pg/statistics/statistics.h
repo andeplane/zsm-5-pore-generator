@@ -5,5 +5,5 @@
 #include "poresizestatistic.h"
 #include "porevolumestatistic.h"
 #include "distributionstatistic.h"
-
+#include "concentration.h"
 #endif // STATISTICS_H
