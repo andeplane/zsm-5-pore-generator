@@ -9,6 +9,8 @@ void DistributionStatistic::setType(DistributionStatistic::Type type, float xMin
     setMin(xMin);
     m_type = type;
     m_name = "Distribution";
+    m_xLabel = "x";
+    m_yLabel = "y";
 
     emit typeChanged(); // Will trigger update
 }

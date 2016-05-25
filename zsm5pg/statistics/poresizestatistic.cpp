@@ -4,6 +4,8 @@
 PoreSizeStatistic::PoreSizeStatistic()
 {
     m_name = "PoreSize";
+    m_xLabel = "Pore size [nm]";
+    m_yLabel = "P(d)";
 }
 
 void PoreSizeStatistic::compute(Zsm5geometry *geometry)

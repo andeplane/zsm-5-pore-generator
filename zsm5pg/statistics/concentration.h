@@ -5,6 +5,7 @@
 
 class Concentration : public Statistic
 {
+    Q_OBJECT
 public:
     Concentration(QString adsorptionMatrixFilename);
     virtual void compute(Zsm5geometry *geometry) override;

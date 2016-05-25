@@ -8,4 +8,5 @@
 #include "concentration.h"
 #include "cumulativevolume.h"
 #include "dvdlogd.h"
+#include "lengthratio.h"
 #endif // STATISTICS_H

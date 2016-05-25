@@ -7,6 +7,7 @@
 
 class DVDLogd : public Statistic
 {
+    Q_OBJECT
 public:
     DVDLogd();
 

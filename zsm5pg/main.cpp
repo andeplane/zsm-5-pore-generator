@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
                 root->setProperty("poreSizeDistribution", QVariant::fromValue(nogui.poreSizeDistribution()));
                 root->setProperty("cumulativeVolume", QVariant::fromValue(nogui.cumulativeVolume()));
                 root->setProperty("dvlogd", QVariant::fromValue(nogui.dvlogd()));
+                root->setProperty("lengthRatio", QVariant::fromValue(nogui.lengthRatio()));
                 root->setProperty("noGUI", QVariant::fromValue(&nogui));
             }
 

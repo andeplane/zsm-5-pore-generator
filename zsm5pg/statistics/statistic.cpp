@@ -165,13 +165,12 @@ void Statistic::computeHistogram()
         float x = middle;
         float y = gsl_histogram_get(hist,i);
         if(isnan(x) || isnan(y)) {
-            qDebug() << "nan: " << x << ", " << y;
+            qDebug() << "Statistic::computeHistogram() nan: " << x << ", " << y;
         }
         m_xValuesRaw[i] = x;
         m_yValuesRaw[i] = y;
     }
     gsl_histogram_free(hist);
-
     normalizeHistogram();
 }
 
@@ -187,6 +186,16 @@ void Statistic::updateQML() {
         // qDebug() << "Updating QML with " << m_xValuesRaw[i] << ", " << m_yValuesRaw[i];
     }
     emit histogramReady();
+}
+
+QString Statistic::xLabel() const
+{
+    return m_xLabel;
+}
+
+QString Statistic::yLabel() const
+{
+    return m_yLabel;
 }
 
 void Statistic::normalizeHistogram()
@@ -277,4 +286,22 @@ void Statistic::setLineSeries(QLineSeries *lineSeries)
 
     m_lineSeries = lineSeries;
     emit lineSeriesChanged(lineSeries);
+}
+
+void Statistic::setXLabel(QString xLabel)
+{
+    if (m_xLabel == xLabel)
+        return;
+
+    m_xLabel = xLabel;
+    emit xLabelChanged(xLabel);
+}
+
+void Statistic::setYLabel(QString yLabel)
+{
+    if (m_yLabel == yLabel)
+        return;
+
+    m_yLabel = yLabel;
+    emit yLabelChanged(yLabel);
 }

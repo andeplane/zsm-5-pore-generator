@@ -23,8 +23,14 @@ NoGUI::NoGUI()
 
     m_dvlogd = new DVDLogd();
     m_dvlogd->setMin(0);
-    m_dvlogd->setMax(20);
-    m_dvlogd->setBins(20);
+    m_dvlogd->setMax(12);
+    m_dvlogd->setBins(30);
+
+    m_lengthRatio = new LengthRatio();
+    m_lengthRatio->setMin(0);
+    m_lengthRatio->setMax(1);
+    m_lengthRatio->setBins(20);
+
     QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
     m_concentration = new Concentration(f);
 }
@@ -142,6 +148,9 @@ bool NoGUI::tick()
         m_dvlogd->compute(geometry);
         m_dvlogd->updateQML();
 
+        m_lengthRatio->compute(geometry);
+        m_lengthRatio->updateQML();
+
         monteCarlo->model()->updateQML();
         m_concentration->compute(geometry);
     }
@@ -177,6 +186,11 @@ Statistic *NoGUI::cumulativeVolume() const
 Statistic *NoGUI::dvlogd() const
 {
     return m_dvlogd;
+}
+
+Statistic *NoGUI::lengthRatio() const
+{
+    return m_lengthRatio;
 }
 
 void NoGUI::setModel(Statistic *model)
@@ -232,3 +246,13 @@ void NoGUI::setDvlogd(Statistic *dvlogd)
     m_dvlogd = dvlogd;
     emit dvlogdChanged(dvlogd);
 }
+
+void NoGUI::setLengthRatio(Statistic *lengthRatio)
+{
+    if (m_lengthRatio == lengthRatio)
+        return;
+
+    m_lengthRatio = lengthRatio;
+    emit lengthRatioChanged(lengthRatio);
+}
+

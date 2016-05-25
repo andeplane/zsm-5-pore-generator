@@ -5,6 +5,7 @@
 
 class CumulativeVolume : public Statistic
 {
+    Q_OBJECT
 public:
     CumulativeVolume();
 

@@ -5,6 +5,7 @@
 
 class LengthRatio : public Statistic
 {
+    Q_OBJECT
 public:
     LengthRatio();
 

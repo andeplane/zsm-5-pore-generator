@@ -63,4 +63,7 @@ void CumulativeVolume::compute(Zsm5geometry *geometry)
     for(int i=1; i<bins(); i++) {
         m_yValuesRaw[i] += m_yValuesRaw[i-1];
     }
+
+    m_xLabel = "Pore size [nm]";
+    m_yLabel = "Cumulative volume";
 }

@@ -12,6 +12,8 @@ class Statistic : public QObject
     Q_OBJECT
     Q_PROPERTY(QVariantList xValues READ xValues WRITE setXValues NOTIFY xValuesChanged)
     Q_PROPERTY(QVariantList yValues READ yValues WRITE setYValues NOTIFY yValuesChanged)
+    Q_PROPERTY(QString xLabel READ xLabel WRITE setXLabel NOTIFY xLabelChanged)
+    Q_PROPERTY(QString yLabel READ yLabel WRITE setYLabel NOTIFY yLabelChanged)
     Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
     Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
     Q_PROPERTY(int bins READ bins WRITE setBins NOTIFY binsChanged)
@@ -29,6 +31,9 @@ protected:
     QVector<float> m_xValuesRaw;
     QVector<float> m_yValuesRaw;
     QVector<float> m_histogramValues;
+    QString m_xLabel;
+    QString m_yLabel;
+
 public:
     QString m_name;
     Statistic();
@@ -49,19 +54,21 @@ public:
     void emitReady();
     void setXValuesRaw(const QVector<float> &xValuesRaw);
     void setYValuesRaw(const QVector<float> &yValuesRaw);
-
     QLineSeries* lineSeries() const;
     void createLineSeries();
-
     void updateQML();
+    QString xLabel() const;
+    QString yLabel() const;
+
 public slots:
     void setXValues(QVariantList xValues);
     void setYValues(QVariantList yValues);
     void setBins(int bins);
     void setMin(float min);
     void setMax(float max);
-
     void setLineSeries(QLineSeries* lineSeries);
+    void setXLabel(QString xLabel);
+    void setYLabel(QString yLabel);
 
 signals:
     void xValuesChanged(QVariantList xValues);
@@ -71,6 +78,8 @@ signals:
     void minChanged(float min);
     void maxChanged(float max);
     void lineSeriesChanged(QLineSeries* lineSeries);
+    void xLabelChanged(QString xLabel);
+    void yLabelChanged(QString yLabel);
 };
 
 #endif // STATISTIC_H

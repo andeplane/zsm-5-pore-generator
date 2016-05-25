@@ -3,8 +3,7 @@
 #include "inifile.h"
 #include <QElapsedTimer>
 #include <QObject>
-#include "statistics/statistic.h"
-#include "statistics/concentration.h"
+#include "statistics/statistics.h"
 
 class NoGUI : public QObject
 {
@@ -14,6 +13,7 @@ class NoGUI : public QObject
     Q_PROPERTY(Statistic* poreSizeDistribution READ poreSizeDistribution WRITE setPoreSizeDistribution NOTIFY poreSizeDistributionChanged)
     Q_PROPERTY(Statistic* cumulativeVolume READ cumulativeVolume WRITE setCumulativeVolume NOTIFY cumulativeVolumeChanged)
     Q_PROPERTY(Statistic* dvlogd READ dvlogd WRITE setDvlogd NOTIFY dvlogdChanged)
+    Q_PROPERTY(Statistic* lengthRatio READ lengthRatio WRITE setLengthRatio NOTIFY lengthRatioChanged)
     Q_PROPERTY(Concentration* concentration READ concentration WRITE setConcentration NOTIFY concentrationChanged)
 private:
     Statistic* m_model = nullptr;
@@ -22,7 +22,9 @@ private:
     Statistic* m_poreSizeDistribution = nullptr;
     Statistic* m_cumulativeVolume = nullptr;
     Statistic* m_dvlogd = nullptr;
+    Statistic* m_lengthRatio = nullptr;
     double m_elapsedTime = 0;
+
 
 public:
     NoGUI();
@@ -41,6 +43,7 @@ public:
     Statistic* poreSizeDistribution() const;
     Statistic* cumulativeVolume() const;
     Statistic* dvlogd() const;
+    Statistic* lengthRatio() const;
 
 public slots:
     void setModel(Statistic* model);
@@ -49,6 +52,7 @@ public slots:
     void setPoreSizeDistribution(Statistic* poreSizeDistribution);
     void setCumulativeVolume(Statistic* cumulativeVolume);
     void setDvlogd(Statistic* dvlogd);
+    void setLengthRatio(Statistic* lengthRatio);
 
 signals:
     void modelChanged(Statistic* model);
@@ -57,6 +61,7 @@ signals:
     void poreSizeDistributionChanged(Statistic* poreSizeDistribution);
     void cumulativeVolumeChanged(Statistic* cumulativeVolume);
     void dvlogdChanged(Statistic* dvlogd);
+    void lengthRatioChanged(Statistic* lengthRatio);
 };
 
 #endif // NOGUI_H

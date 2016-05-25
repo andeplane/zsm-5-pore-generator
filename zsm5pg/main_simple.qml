@@ -15,6 +15,7 @@ Window {
     property Statistic cumulativeVolume
     property Statistic currentStatistic
     property Statistic dvlogd
+    property Statistic lengthRatio
 
     property NoGUI noGUI
 
@@ -23,8 +24,9 @@ Window {
         console.log("No GUI: " + noGUI)
         console.log("noGUI.cumulativeVolume: " + noGUI.cumulativeVolume)
         // currentStatistic = noGUI.cumulativeVolume
-        currentStatistic = noGUI.poreSizeDistribution
+        // currentStatistic = noGUI.poreSizeDistribution
         // currentStatistic = noGUI.dvlogd
+        currentStatistic = noGUI.lengthRatio
     }
 
     Timer {
@@ -82,8 +84,20 @@ Window {
         poreSizeDistribution.histogramReady.connect(function() {
             updatePSD()
         })
+    }
+
+    onCumulativeVolumeChanged: {
+        updatePSD()
 
         cumulativeVolume.histogramReady.connect(function() {
+            updatePSD()
+        })
+    }
+
+    onLengthRatioChanged: {
+        updatePSD()
+
+        lengthRatio.histogramReady.connect(function() {
             updatePSD()
         })
     }
@@ -187,14 +201,14 @@ Window {
         ValueAxis {
             id: __axisX
             min: 0
-            max: 20
+            max: currentStatistic.max
             tickCount: 5
             titleText: "d [nm]"
         }
         ValueAxis {
             id: __axisY
             min: 0
-            max: 1.0
+            max: 2.0
             tickCount: 5
             titleText: "P(d)"
         }

@@ -3,9 +3,13 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort_vector.h>
 #include <cmath>
+#include <QDebug>
+
 DVDLogd::DVDLogd()
 {
-
+    m_name = "DVDLogD";
+    m_xLabel = "Pore size [nm]";
+    m_yLabel = "dV/dlogd";
 }
 
 
@@ -53,11 +57,15 @@ void DVDLogd::compute(Zsm5geometry *geometry)
         m_yValuesRaw[i] = 0;
     }
 
+    int skipping = 0;
     for(int i=0; i<numberOfPores; i++) {
         float dVN = gsl_vector_get(poreVolumesNormalized, i); // dVN deltaVolumeNormalized
         float poreSize = gsl_vector_get(poreLengths, i);
         int bin = poreSize / dx;
-        if(bin>=bins()) continue; // Some pore sizes might be larger than largest? Don't seg fault
+        if(bin>=bins()) {
+            skipping++;
+            continue; // Some pore sizes might be larger than largest? Don't seg fault
+        }
         m_yValuesRaw[bin] += dVN;
     }
 
@@ -65,11 +73,12 @@ void DVDLogd::compute(Zsm5geometry *geometry)
         m_yValuesRaw[i] += m_yValuesRaw[i-1];
     }
 
+    QVector<float> oldYValues = m_yValuesRaw;
     for(int i=1; i<bins(); i++) {
         float &x0 = m_xValuesRaw[i-1];
         float &x1 = m_xValuesRaw[i];
-        float &y0 = m_yValuesRaw[i-1];
-        float &y1 = m_yValuesRaw[i];
+        float &y0 = oldYValues[i-1];
+        float &y1 = oldYValues[i];
 
         float dy = y1-y0;
         float dx = x1-x0;

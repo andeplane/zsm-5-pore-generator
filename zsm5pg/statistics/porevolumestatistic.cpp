@@ -3,6 +3,8 @@
 PoreVolumeStatistic::PoreVolumeStatistic()
 {
     m_name = "PoreVolume";
+    m_xLabel = "Pore volume [nm^3]";
+    m_yLabel = "P(V)";
 }
 
 void PoreVolumeStatistic::compute(Zsm5geometry *geometry)
