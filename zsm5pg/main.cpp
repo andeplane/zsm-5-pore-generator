@@ -10,7 +10,6 @@
 #include "inifile.h"
 #include "nogui.h"
 #include <QtCharts>
-#include "statistics/concentration.h"
 
 int main(int argc, char *argv[])
 {
@@ -57,6 +56,8 @@ int main(int argc, char *argv[])
                 root->setProperty("modelStatistic", QVariant::fromValue(nogui.monteCarlo->model()));
                 root->setProperty("dataStatistic", QVariant::fromValue(nogui.monteCarlo->data()));
                 root->setProperty("poreSizeDistribution", QVariant::fromValue(nogui.poreSizeDistribution()));
+                root->setProperty("cumulativeVolume", QVariant::fromValue(nogui.cumulativeVolume()));
+                root->setProperty("dvlogd", QVariant::fromValue(nogui.dvlogd()));
                 root->setProperty("noGUI", QVariant::fromValue(&nogui));
             }
 

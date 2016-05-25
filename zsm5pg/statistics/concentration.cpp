@@ -78,10 +78,23 @@ void Concentration::compute(Zsm5geometry *geometry)
                 const float poreVolume = dx*dy*dz;
                 poreSize = cbrt(poreVolume);
 
-                int H = std::roundf(poreSize);
+                // int H = std::roundf(poreSize);
+
+                float H = poreSize;  // 19.5
+                int H0 = poreSize; // 19
+                int H1 = int(poreSize)+1;  // 20
+                float dH = H1-H0;  // 1
+                float fraction = (H1-H) / dH;  // (20-19.5) / 1 = 0.5
+                if(H1>19) {
+                    fraction = 1.0; // 1.0
+                    H1 = 19; // force this
+                }
+
                 if(H>=2 && H<=19) {
                     for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-                        float N_ads = m_values[H][pIndex]/m_volumes[H]*poreVolume;
+                        float N_ads0 = m_values[H0][pIndex]/m_volumes[H0]*poreVolume;
+                        float N_ads1 = m_values[H1][pIndex]/m_volumes[H1]*poreVolume;
+                        float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
                         // float N_ads = m_values[H][pIndex];
                         numberOfAdsorbedAtoms[pIndex] += N_ads;
                     }
@@ -104,9 +117,9 @@ void Concentration::compute(Zsm5geometry *geometry)
         lz += dz;
     }
 
-    float avogadro = 6.0221409e+23;
     float cubicCentimetersPerLiter = 1000;
     float argonMass = 39.948;
+    float avogadro = 6.0221409e+23;
     float argonDensity = 1.784;
     float argonLiterPerMol = argonMass / argonDensity;
 
@@ -134,7 +147,7 @@ void Concentration::compute(Zsm5geometry *geometry)
     m_yValuesRaw.clear();
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
-        N_adsorbed += 1.4*bulkSystemFactor*m_values[1][i];
+        N_adsorbed += bulkSystemFactor*m_values[1][i];
         float N_molesAdsorbed = N_adsorbed/avogadro;
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
         float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;

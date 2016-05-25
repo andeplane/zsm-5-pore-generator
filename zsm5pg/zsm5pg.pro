@@ -16,7 +16,10 @@ SOURCES += main.cpp \
     nogui.cpp \
     inifile.cpp \
     statistics/distributionstatistic.cpp \
-    statistics/concentration.cpp
+    statistics/concentration.cpp \
+    statistics/cumulativevolume.cpp \
+    statistics/lengthratio.cpp \
+    statistics/dvdlogd.cpp
 
 RESOURCES += qml.qrc
 
@@ -39,4 +42,7 @@ HEADERS += \
     nogui.h \
     inifile.h \
     statistics/distributionstatistic.h \
-    statistics/concentration.h
+    statistics/concentration.h \
+    statistics/cumulativevolume.h \
+    statistics/lengthratio.h \
+    statistics/dvdlogd.h

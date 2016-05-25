@@ -45,9 +45,9 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         float dx = Random::nextGaussianf(0, standardDeviation);
         float dy = Random::nextGaussianf(0, standardDeviation);
         float dz = Random::nextGaussianf(0, standardDeviation);
-        if(m_deltaXVector[i] + dx > 2 && Random::nextFloat() < 0.1) m_deltaXVector[i] += dx;
-        if(m_deltaYVector[i] + dy > 2 && Random::nextFloat() < 0.1) m_deltaYVector[i] += dy;
-        if(m_deltaZVector[i] + dz > 2 && Random::nextFloat() < 0.1) m_deltaZVector[i] += dz;
+        if(m_deltaXVector[i] + dx > 2 && Random::nextFloat() < 1) m_deltaXVector[i] += dx;
+        if(m_deltaYVector[i] + dy > 2 && Random::nextFloat() < 1) m_deltaYVector[i] += dy;
+        if(m_deltaZVector[i] + dz > 2 && Random::nextFloat() < 1) m_deltaZVector[i] += dz;
     }
 }
 
@@ -111,6 +111,19 @@ void Zsm5geometry::load(QString filename)
 float Zsm5geometry::lengthScale() const
 {
     return m_lengthScale;
+}
+
+double Zsm5geometry::totalVolume()
+{
+    double L[3];
+    L[0] = 0; L[1] = 0; L[2] = 0;
+
+    for(int i=0; i<m_deltaXVector.size(); i++) {
+        L[0] += m_deltaXVector[i];
+        L[1] += m_deltaXVector[i];
+        L[2] += m_deltaXVector[i];
+    }
+    return L[0]*L[1]*L[2];
 }
 
 void Zsm5geometry::setLengthScale(float lengthScale)

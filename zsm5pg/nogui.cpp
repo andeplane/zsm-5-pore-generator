@@ -14,6 +14,17 @@ NoGUI::NoGUI()
     m_poreSizeDistribution = new PoreSizeStatistic();
     m_poreSizeDistribution->setMin(0);
     m_poreSizeDistribution->setMax(20);
+    m_poreSizeDistribution->setBins(100);
+
+    m_cumulativeVolume = new CumulativeVolume();
+    m_cumulativeVolume->setMin(0);
+    m_cumulativeVolume->setMax(20);
+    m_cumulativeVolume->setBins(100);
+
+    m_dvlogd = new DVDLogd();
+    m_dvlogd->setMin(0);
+    m_dvlogd->setMax(20);
+    m_dvlogd->setBins(20);
     QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
     m_concentration = new Concentration(f);
 }
@@ -90,10 +101,13 @@ void NoGUI::loadIniFile(IniFile &iniFile)
 void NoGUI::run() {
     monteCarlo->data()->createLineSeries();
     for(step=0; step<steps; step++) {
-        qDebug() << "yeah?";
+        QElapsedTimer timer;
+        timer.start();
         monteCarlo->tick();
+        m_elapsedTime += timer.elapsed();
         if( (step % printEvery) == 0) {
-            qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio();
+            double timeLeft = m_elapsedTime / (step+1) * steps / 1000.; // seconds
+            qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.";
         }
     }
 
@@ -110,12 +124,24 @@ bool NoGUI::tick()
         return true;
     }
 
+    QElapsedTimer timer;
+    timer.start();
     monteCarlo->tick();
+    m_elapsedTime += timer.elapsed();
+
     step++;
     if( (step % printEvery) == 0) {
-        qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio();
+        double timeLeft = m_elapsedTime / (step+1) * (steps-step) / 1000.; // seconds
+        qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.";
         m_poreSizeDistribution->compute(geometry);
         m_poreSizeDistribution->updateQML();
+
+        m_cumulativeVolume->compute(geometry);
+        m_cumulativeVolume->updateQML();
+
+        m_dvlogd->compute(geometry);
+        m_dvlogd->updateQML();
+
         monteCarlo->model()->updateQML();
         m_concentration->compute(geometry);
     }
@@ -141,6 +167,16 @@ Concentration *NoGUI::concentration() const
 Statistic *NoGUI::poreSizeDistribution() const
 {
     return m_poreSizeDistribution;
+}
+
+Statistic *NoGUI::cumulativeVolume() const
+{
+    return m_cumulativeVolume;
+}
+
+Statistic *NoGUI::dvlogd() const
+{
+    return m_dvlogd;
 }
 
 void NoGUI::setModel(Statistic *model)
@@ -177,4 +213,22 @@ void NoGUI::setPoreSizeDistribution(Statistic *poreSizeDistribution)
 
     m_poreSizeDistribution = poreSizeDistribution;
     emit poreSizeDistributionChanged(poreSizeDistribution);
+}
+
+void NoGUI::setCumulativeVolume(Statistic *cumulativeVolume)
+{
+    if (m_cumulativeVolume == cumulativeVolume)
+        return;
+
+    m_cumulativeVolume = cumulativeVolume;
+    emit cumulativeVolumeChanged(cumulativeVolume);
+}
+
+void NoGUI::setDvlogd(Statistic *dvlogd)
+{
+    if (m_dvlogd == dvlogd)
+        return;
+
+    m_dvlogd = dvlogd;
+    emit dvlogdChanged(dvlogd);
 }

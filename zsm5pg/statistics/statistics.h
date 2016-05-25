@@ -6,4 +6,6 @@
 #include "porevolumestatistic.h"
 #include "distributionstatistic.h"
 #include "concentration.h"
+#include "cumulativevolume.h"
+#include "dvdlogd.h"
 #endif // STATISTICS_H

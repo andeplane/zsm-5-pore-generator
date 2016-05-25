@@ -12,10 +12,19 @@ Window {
     property Statistic modelStatistic
     property Statistic dataStatistic
     property Statistic poreSizeDistribution
+    property Statistic cumulativeVolume
+    property Statistic currentStatistic
+    property Statistic dvlogd
+
     property NoGUI noGUI
 
     onNoGUIChanged: {
         timer.start()
+        console.log("No GUI: " + noGUI)
+        console.log("noGUI.cumulativeVolume: " + noGUI.cumulativeVolume)
+        // currentStatistic = noGUI.cumulativeVolume
+        currentStatistic = noGUI.poreSizeDistribution
+        // currentStatistic = noGUI.dvlogd
     }
 
     Timer {
@@ -40,10 +49,12 @@ Window {
     }
 
     function updatePSD() {
+        if(currentStatistic == undefined) return
         psd.clear()
-        for(var i=0; i<poreSizeDistribution.bins; i++) {
-            var x = poreSizeDistribution.xValues[i]
-            var y = poreSizeDistribution.yValues[i]
+
+        for(var i=0; i<currentStatistic.bins; i++) {
+            var x = currentStatistic.xValues[i]
+            var y = currentStatistic.yValues[i]
             psd.append(x,y)
         }
     }
@@ -69,6 +80,10 @@ Window {
         updatePSD()
 
         poreSizeDistribution.histogramReady.connect(function() {
+            updatePSD()
+        })
+
+        cumulativeVolume.histogramReady.connect(function() {
             updatePSD()
         })
     }
@@ -172,7 +187,7 @@ Window {
         ValueAxis {
             id: __axisX
             min: 0
-            max: 15
+            max: 20
             tickCount: 5
             titleText: "d [nm]"
         }
