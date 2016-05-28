@@ -14,6 +14,7 @@ class Statistic : public QObject
     Q_PROPERTY(QVariantList yValues READ yValues WRITE setYValues NOTIFY yValuesChanged)
     Q_PROPERTY(QString xLabel READ xLabel WRITE setXLabel NOTIFY xLabelChanged)
     Q_PROPERTY(QString yLabel READ yLabel WRITE setYLabel NOTIFY yLabelChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
     Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
     Q_PROPERTY(int bins READ bins WRITE setBins NOTIFY binsChanged)
@@ -31,11 +32,11 @@ protected:
     QVector<float> m_xValuesRaw;
     QVector<float> m_yValuesRaw;
     QVector<float> m_histogramValues;
+    QString m_name;
     QString m_xLabel;
     QString m_yLabel;
 
 public:
-    QString m_name;
     Statistic();
     virtual void compute(class Zsm5geometry *geometry);
     void prepareHistogram();
@@ -60,6 +61,11 @@ public:
     QString xLabel() const;
     QString yLabel() const;
 
+    QString name() const
+    {
+        return m_name;
+    }
+
 public slots:
     void setXValues(QVariantList xValues);
     void setYValues(QVariantList yValues);
@@ -69,6 +75,15 @@ public slots:
     void setLineSeries(QLineSeries* lineSeries);
     void setXLabel(QString xLabel);
     void setYLabel(QString yLabel);
+
+    void setName(QString name)
+    {
+        if (m_name == name)
+            return;
+
+        m_name = name;
+        emit nameChanged(name);
+    }
 
 signals:
     void xValuesChanged(QVariantList xValues);
@@ -80,6 +95,7 @@ signals:
     void lineSeriesChanged(QLineSeries* lineSeries);
     void xLabelChanged(QString xLabel);
     void yLabelChanged(QString yLabel);
+    void nameChanged(QString name);
 };
 
 #endif // STATISTIC_H

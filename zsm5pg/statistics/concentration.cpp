@@ -77,7 +77,8 @@ void Concentration::compute(Zsm5geometry *geometry)
 
                 // int H = std::roundf(poreSize);
 
-                float H = poreSize;  // 19.5
+                float H = poreSize;  // 1
+
                 int H0 = poreSize; // 19
                 int H1 = int(poreSize)+1;  // 20
                 float dH = H1-H0;  // 1

@@ -29,7 +29,7 @@ NoGUI::NoGUI()
     m_lengthRatio = new LengthRatio();
     m_lengthRatio->setMin(0);
     m_lengthRatio->setMax(1);
-    m_lengthRatio->setBins(20);
+    m_lengthRatio->setBins(50);
 
     QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
     m_concentration = new Concentration(f);

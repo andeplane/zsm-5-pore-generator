@@ -25,8 +25,8 @@ Window {
         console.log("noGUI.cumulativeVolume: " + noGUI.cumulativeVolume)
         // currentStatistic = noGUI.cumulativeVolume
         // currentStatistic = noGUI.poreSizeDistribution
-        // currentStatistic = noGUI.dvlogd
-        currentStatistic = noGUI.lengthRatio
+        currentStatistic = noGUI.dvlogd
+        // currentStatistic = noGUI.lengthRatio
     }
 
     Timer {
@@ -152,11 +152,15 @@ Window {
         legend.visible: true
         // title: "Pore size distribution"
 
-        LineSeries {
+        ScatterSeries {
             id: model
             name: "Model"
             axisX: _axisX
             axisY: _axisY
+            markerSize: 5
+            color: Qt.rgba(1,1,1,0)
+            borderColor: "black"
+            borderWidth: 1
         }
 
         LineSeries {
@@ -177,7 +181,7 @@ Window {
         ValueAxis {
             id: _axisY
             min: 0
-            max: 1000.0
+            max: 500.0
             tickCount: 5
             titleText: "c"
         }
@@ -189,7 +193,7 @@ Window {
         width: parent.width*0.5
         height: parent.height
         antialiasing: true
-        title: "Pore size distribution"
+        title: currentStatistic.name
 
         LineSeries {
             id: psd
@@ -203,14 +207,14 @@ Window {
             min: 0
             max: currentStatistic.max
             tickCount: 5
-            titleText: "d [nm]"
+            titleText: currentStatistic.xLabel
         }
         ValueAxis {
             id: __axisY
             min: 0
             max: 2.0
             tickCount: 5
-            titleText: "P(d)"
+            titleText: currentStatistic.yLabel
         }
     }
 
