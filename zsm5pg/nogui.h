@@ -2,6 +2,7 @@
 #define NOGUI_H
 #include "inifile.h"
 #include <QElapsedTimer>
+#include <QFile>
 #include <QObject>
 #include "statistics/statistics.h"
 
@@ -24,8 +25,8 @@ private:
     Statistic* m_dvlogd = nullptr;
     Statistic* m_lengthRatio = nullptr;
     double m_elapsedTime = 0;
-    QString m_outputFolder;
-    QString m_inputFile;
+    QString m_filepath;
+    QFile m_log;
 public:
     NoGUI();
     ~NoGUI();

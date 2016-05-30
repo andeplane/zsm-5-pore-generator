@@ -41,8 +41,6 @@ Concentration::Concentration(QString adsorptionMatrixFilename)
         }
     }
 
-    qDebug() << "Pressures: " << m_pressures;
-    qDebug() << "Pressures: " << m_values;
     m_name = "Concentration";
     m_xLabel = "Pressure [p/p0]";
     m_yLabel = "V_ads/cm^3";

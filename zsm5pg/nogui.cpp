@@ -30,21 +30,27 @@ NoGUI::NoGUI()
     m_lengthRatio->setMin(0);
     m_lengthRatio->setMax(1);
     m_lengthRatio->setBins(50);
-
-    QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/new_gcmc_data_may/VadsN.txt");
-    m_concentration = new Concentration(f);
 }
 
 void NoGUI::loadIniFile(IniFile &iniFile)
 {
-    m_inputFile = iniFile.filename();
+    QFileInfo fileInfo(iniFile.filename());
+    m_filepath = fileInfo.filePath();
+
+    m_log.setFileName(QString("%1/log.txt").arg(m_filepath));
+    if (!m_log.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Could not open file " << QString("%1/log.txt").arg(m_filepath);
+        exit(1);
+    }
+
+    QString MDInput = iniFile.getString("MDInput");
     QString statisticType = iniFile.getString("statisticType");
     if(statisticType.compare("poreVolume") == 0) {
         statistic = new PoreVolumeStatistic();
     } else if(statisticType.compare("poreSize") == 0) {
         statistic = new PoreSizeStatistic();
     } else if(statisticType.compare("concentration") == 0) {
-        statistic = new Concentration("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/new_gcmc_data_may/VadsN.txt");
+        statistic = new Concentration(MDInput);
     } else {
         qDebug() << "Error, could not find statistic type " << statisticType;
         exit(1);
@@ -82,11 +88,11 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         monteCarlo->setData(data);
     }
 
-    QFileInfo fileInfo("/projects/poregenerator/currentgeometry.txt");
-    bool loadPrevious = iniFile.getBool("loadPrevious") && fileInfo.exists();
+    QFileInfo fileInfo2(QString("%1/geometry.txt").arg(m_filepath));
+    bool loadPrevious = iniFile.getBool("loadPrevious") && fileInfo2.exists();
 
     if(loadPrevious) {
-        geometry->load(QString("/projects/poregenerator/currentgeometry.txt"));
+        geometry->load(QString("%1/geometry.txt").arg(m_filepath));
     } else {
         geometry->setPlanesPerDimension(iniFile.getInt("planesPerDimension"));
         geometry->reset(xMin, xMax);
@@ -103,7 +109,7 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     monteCarlo->model()->updateQML();
     monteCarlo->data()->updateQML();
 
-    m_outputFolder = iniFile.getString("outputFolder");
+    m_concentration = new Concentration(MDInput);
 }
 
 void NoGUI::run() {
@@ -124,17 +130,14 @@ void NoGUI::run() {
 }
 
 NoGUI::~NoGUI() {
-    if(m_model) m_model->save(QString("%1/model.txt").arg(m_outputFolder));
-    if(m_data) m_data->save(QString("%1/data.txt").arg(m_outputFolder));
-    if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1/poreSizeDistribution.txt").arg(m_outputFolder));
-    if(m_concentration) m_concentration->save(QString("%1/concentration.txt").arg(m_outputFolder).);
-    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1/cumulativeVolume.txt").arg(m_outputFolder));
-    if(m_dvlogd) m_dvlogd->save(QString("%1/dvlogd.txt").arg(m_outputFolder));
-    if(m_lengthRatio) m_lengthRatio->save(QString("%1/lengthRatio.txt").arg(m_outputFolder));
-    if(geometry) geometry->save(QString("%1/geometry.txt").arg(m_outputFolder));
-    QFileInfo fileInfo(m_inputFile);
-    QString filename = fileInfo.fileName();
-    QFile::copy(m_inputFile, QString("%1/input.txt").arg(m_outputFolder).arg(filename));
+    if(m_model) m_model->save(QString("%1/model.txt").arg(m_filepath));
+    if(m_data) m_data->save(QString("%1/data.txt").arg(m_filepath));
+    if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1/poreSizeDistribution.txt").arg(m_filepath));
+    if(m_concentration) m_concentration->save(QString("%1/concentration.txt").arg(m_filepath));
+    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1/cumulativeVolume.txt").arg(m_filepath));
+    if(m_dvlogd) m_dvlogd->save(QString("%1/dvlogd.txt").arg(m_filepath));
+    if(m_lengthRatio) m_lengthRatio->save(QString("%1/lengthRatio.txt").arg(m_filepath));
+    if(geometry) geometry->save(QString("%1/geometry.txt").arg(m_filepath));
 }
 
 bool NoGUI::tick()
