@@ -37,6 +37,7 @@ NoGUI::NoGUI()
 
 void NoGUI::loadIniFile(IniFile &iniFile)
 {
+    m_inputFile = iniFile.filename();
     QString statisticType = iniFile.getString("statisticType");
     if(statisticType.compare("poreVolume") == 0) {
         statistic = new PoreVolumeStatistic();
@@ -102,7 +103,7 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     monteCarlo->model()->updateQML();
     monteCarlo->data()->updateQML();
 
-    m_outputPrefix = iniFile.getString("outputPrefix");
+    m_outputFolder = iniFile.getString("outputFolder");
 }
 
 void NoGUI::run() {
@@ -123,13 +124,17 @@ void NoGUI::run() {
 }
 
 NoGUI::~NoGUI() {
-    if(m_model) m_model->save(QString("%1model.txt").arg(m_outputPrefix));
-    if(m_data) m_data->save(QString("%data.txt").arg(m_outputPrefix));
-    if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1poreSizeDistribution.txt").arg(m_outputPrefix));
-    if(m_concentration) m_concentration->save(QString("%1concentration.txt").arg(m_outputPrefix));
-    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1cumulativeVolume.txt").arg(m_outputPrefix));
-    if(m_dvlogd) m_dvlogd->save(QString("%1dvlogd.txt").arg(m_outputPrefix));
-    if(m_lengthRatio) m_lengthRatio->save(QString("%1lengthRatio.txt").arg(m_outputPrefix));
+    if(m_model) m_model->save(QString("%1/model.txt").arg(m_outputFolder));
+    if(m_data) m_data->save(QString("%1/data.txt").arg(m_outputFolder));
+    if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1/poreSizeDistribution.txt").arg(m_outputFolder));
+    if(m_concentration) m_concentration->save(QString("%1/concentration.txt").arg(m_outputFolder).);
+    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1/cumulativeVolume.txt").arg(m_outputFolder));
+    if(m_dvlogd) m_dvlogd->save(QString("%1/dvlogd.txt").arg(m_outputFolder));
+    if(m_lengthRatio) m_lengthRatio->save(QString("%1/lengthRatio.txt").arg(m_outputFolder));
+    if(geometry) geometry->save(QString("%1/geometry.txt").arg(m_outputFolder));
+    QFileInfo fileInfo(m_inputFile);
+    QString filename = fileInfo.fileName();
+    QFile::copy(m_inputFile, QString("%1/input.txt").arg(m_outputFolder).arg(filename));
 }
 
 bool NoGUI::tick()

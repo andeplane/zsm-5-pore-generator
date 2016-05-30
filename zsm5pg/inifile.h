@@ -16,6 +16,7 @@ public:
     QVector<int> getIntArray(QString key);
     bool hasKey(QString key);
     bool contains(QString key);
+    QString filename() { return m_filename; }
 private:
     QString m_filename;
 };

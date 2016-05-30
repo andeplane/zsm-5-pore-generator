@@ -24,8 +24,8 @@ private:
     Statistic* m_dvlogd = nullptr;
     Statistic* m_lengthRatio = nullptr;
     double m_elapsedTime = 0;
-    QString m_outputPrefix;
-
+    QString m_outputFolder;
+    QString m_inputFile;
 public:
     NoGUI();
     ~NoGUI();
