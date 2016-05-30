@@ -145,7 +145,7 @@ void Concentration::compute(Zsm5geometry *geometry)
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
         N_adsorbed += bulkSystemFactor*m_values[1][i];
-        N_adsorbed *= 1.3;
+        N_adsorbed *= 1.41;
         float N_molesAdsorbed = N_adsorbed/avogadro;
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
         float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;

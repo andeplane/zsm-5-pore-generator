@@ -5,7 +5,7 @@
 #include <QString>
 #include <QDebug>
 #include <QFileInfo>
-
+#include "random.h"
 NoGUI::NoGUI()
 {
     geometry = new Zsm5geometry();
@@ -35,7 +35,8 @@ NoGUI::NoGUI()
 void NoGUI::loadIniFile(IniFile &iniFile)
 {
     QFileInfo fileInfo(iniFile.filename());
-    m_filepath = fileInfo.filePath();
+    m_filepath = fileInfo.absolutePath();
+    Random::seed(iniFile.getInt("seed"));
 
     m_log.setFileName(QString("%1/log.txt").arg(m_filepath));
     if (!m_log.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -106,6 +107,8 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     monteCarlo->setRunning(true);
     statistic->compute(geometry);
 
+    m_data = monteCarlo->data();
+    m_model = monteCarlo->model();
     monteCarlo->model()->updateQML();
     monteCarlo->data()->updateQML();
 
@@ -120,8 +123,10 @@ void NoGUI::run() {
         monteCarlo->tick();
         m_elapsedTime += timer.elapsed();
         if( (step % printEvery) == 0) {
-            double timeLeft = m_elapsedTime / (step+1) * steps / 1000.; // seconds
+            double timeLeft = m_elapsedTime / (step+1) * (steps-step) / 1000.; // seconds
+            QTextStream logStream(&m_log);
             qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.";
+            logStream << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.\n";
         }
     }
 
@@ -130,6 +135,13 @@ void NoGUI::run() {
 }
 
 NoGUI::~NoGUI() {
+    m_poreSizeDistribution->compute(geometry);
+    m_cumulativeVolume->compute(geometry);
+    m_dvlogd->compute(geometry);
+    m_lengthRatio->compute(geometry);
+    m_concentration->compute(geometry);
+    m_model->compute(geometry);
+
     if(m_model) m_model->save(QString("%1/model.txt").arg(m_filepath));
     if(m_data) m_data->save(QString("%1/data.txt").arg(m_filepath));
     if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1/poreSizeDistribution.txt").arg(m_filepath));
@@ -138,6 +150,9 @@ NoGUI::~NoGUI() {
     if(m_dvlogd) m_dvlogd->save(QString("%1/dvlogd.txt").arg(m_filepath));
     if(m_lengthRatio) m_lengthRatio->save(QString("%1/lengthRatio.txt").arg(m_filepath));
     if(geometry) geometry->save(QString("%1/geometry.txt").arg(m_filepath));
+    QFile chiSquareFile(QString("%1/ChiSquare=%2").arg(m_filepath).arg(monteCarlo->chiSquared()));
+    chiSquareFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    chiSquareFile.close();
 }
 
 bool NoGUI::tick()
@@ -157,7 +172,9 @@ bool NoGUI::tick()
     step++;
     if( (step % printEvery) == 0) {
         double timeLeft = m_elapsedTime / (step+1) * (steps-step) / 1000.; // seconds
+        QTextStream logStream(&m_log);
         qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.";
+        logStream << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.\n";
         m_poreSizeDistribution->compute(geometry);
         m_poreSizeDistribution->updateQML();
 

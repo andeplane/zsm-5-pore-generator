@@ -74,7 +74,6 @@ void Statistic::save(QString filename)
 
 void Statistic::load(QString filename)
 {
-    qDebug() << m_name << " will load " << filename;
     QFile file(filename);
     if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
         qDebug() << "Could not open file " << filename;

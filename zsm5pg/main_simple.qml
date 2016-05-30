@@ -181,7 +181,7 @@ Window {
         ValueAxis {
             id: _axisY
             min: 0
-            max: 500.0
+            max: 1000.0
             tickCount: 5
             titleText: "c"
         }

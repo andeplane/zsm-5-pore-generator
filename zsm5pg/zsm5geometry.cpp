@@ -27,11 +27,6 @@ void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
 }
 
 void Zsm5geometry::reset(float min, float max) {
-    double a = 0;
-    for(int i=0; i<100000; i++) {
-        a += Random::nextFloat();
-    }
-
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
@@ -71,7 +66,6 @@ void Zsm5geometry::save(QString filename)
         out << m_deltaXVector[i] << " " << m_deltaYVector[i] << " " << m_deltaZVector[i] << "\n";
     }
     file.close();
-    qDebug() << "Saved geometry to file: " << filename;
 }
 
 void Zsm5geometry::load(QString filename)

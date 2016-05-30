@@ -10,12 +10,10 @@
 #include "inifile.h"
 #include "nogui.h"
 #include <QtCharts>
+#include "random.h"
 
 int main(int argc, char *argv[])
 {
-//    QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
-//    Concentration c(f);
-//    exit(1);
     int GUI = true;
 
     if(argc > 1) {
