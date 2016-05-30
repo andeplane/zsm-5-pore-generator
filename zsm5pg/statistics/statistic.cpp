@@ -74,6 +74,7 @@ void Statistic::save(QString filename)
 
 void Statistic::load(QString filename)
 {
+    qDebug() << m_name << " will load " << filename;
     QFile file(filename);
     if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
         qDebug() << "Could not open file " << filename;
@@ -97,6 +98,8 @@ void Statistic::load(QString filename)
                     m_xValuesRaw.push_back(x);
                     m_yValuesRaw.push_back(y);
                 }
+            } else {
+                qDebug() << "Warning, could not parse line " << line;
             }
         }
     }
@@ -131,7 +134,7 @@ double Statistic::eval(double x)
         }
     }
     qDebug() << m_name << " could not interpolate x=" << x;
-    qDebug() << "xMin: " << m_xValuesRaw.front() << " and xMax: " << m_xValuesRaw.back();
+    qDebug() << "X values: " << m_xValuesRaw;
     exit(1);
 }
 
@@ -274,7 +277,6 @@ void Statistic::setMax(float max)
 {
     if (m_max == max)
         return;
-
     m_max = max;
     emit maxChanged(max);
 }

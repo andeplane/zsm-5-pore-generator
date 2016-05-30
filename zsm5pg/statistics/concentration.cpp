@@ -42,6 +42,7 @@ Concentration::Concentration(QString adsorptionMatrixFilename)
     }
 
     qDebug() << "Pressures: " << m_pressures;
+    qDebug() << "Pressures: " << m_values;
     m_name = "Concentration";
     m_xLabel = "Pressure [p/p0]";
     m_yLabel = "V_ads/cm^3";
@@ -73,7 +74,7 @@ void Concentration::compute(Zsm5geometry *geometry)
                 const float dz = z[k];
                 float poreSize = std::min(std::min(dx, dy), dz);
                 const float poreVolume = dx*dy*dz;
-                poreSize = cbrt(poreVolume);
+                // poreSize = cbrt(poreVolume);
 
                 // int H = std::roundf(poreSize);
 
@@ -145,14 +146,12 @@ void Concentration::compute(Zsm5geometry *geometry)
     m_yValuesRaw.clear();
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
-        N_adsorbed += sqrt(2)*bulkSystemFactor*m_values[1][i];
+        N_adsorbed += bulkSystemFactor*m_values[1][i];
+        N_adsorbed *= 1.3;
         float N_molesAdsorbed = N_adsorbed/avogadro;
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
         float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;
         float volumeAdsorbedCm3PerMassZeolite = volumeAdsorbedCm3 / totalZeoliteMassGrams;
-
-        // qDebug() << m_pressures[i] << " " << volumeAdsorbedCm3PerMassZeolite;
-        // qDebug() << m_pressures[i] << " " << N_adsorbed;
         m_xValuesRaw.push_back(m_pressures[i]);
         m_yValuesRaw.push_back(volumeAdsorbedCm3PerMassZeolite);
     }

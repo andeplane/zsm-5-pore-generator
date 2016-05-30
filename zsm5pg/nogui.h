@@ -24,10 +24,11 @@ private:
     Statistic* m_dvlogd = nullptr;
     Statistic* m_lengthRatio = nullptr;
     double m_elapsedTime = 0;
-
+    QString m_outputPrefix;
 
 public:
     NoGUI();
+    ~NoGUI();
     int steps = 0; // total timesteps
     int step = 0; // current timestep
     int printEvery = 100;

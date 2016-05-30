@@ -25,8 +25,9 @@ void PoreSizeStatistic::compute(Zsm5geometry *geometry)
             for(int k=0; k<z.size(); k++) {
                 const float dz = z[k];
                 const float volume = dx*dy*dz;
-                const float poreSize = std::min(std::min(dx,dy), dz);
-                m_poreVolumes[poreIndex++] = cbrt(volume);
+                float poreSize = std::min(std::min(dx,dy), dz);
+                // poreSize = cbrt(volume);
+                m_poreVolumes[poreIndex++] = poreSize;
                 //m_poreVolumes[poreIndex++] = poreSize;
             }
         }
@@ -38,4 +39,6 @@ void PoreSizeStatistic::compute(Zsm5geometry *geometry)
     }
     computeHistogram();
     updateQML();
+//    qDebug() << m_xValuesRaw;
+//    qDebug() << m_yValuesRaw;
 }

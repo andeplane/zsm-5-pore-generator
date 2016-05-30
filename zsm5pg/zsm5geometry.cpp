@@ -27,6 +27,11 @@ void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
 }
 
 void Zsm5geometry::reset(float min, float max) {
+    double a = 0;
+    for(int i=0; i<100000; i++) {
+        a += Random::nextFloat();
+    }
+
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
@@ -45,9 +50,9 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         float dx = Random::nextGaussianf(0, standardDeviation);
         float dy = Random::nextGaussianf(0, standardDeviation);
         float dz = Random::nextGaussianf(0, standardDeviation);
-        if(m_deltaXVector[i] + dx > 2 && Random::nextFloat() < 1) m_deltaXVector[i] += dx;
-        if(m_deltaYVector[i] + dy > 2 && Random::nextFloat() < 1) m_deltaYVector[i] += dy;
-        if(m_deltaZVector[i] + dz > 2 && Random::nextFloat() < 1) m_deltaZVector[i] += dz;
+        if(m_deltaXVector[i] + dx > 2 && Random::nextFloat() < 1.0) m_deltaXVector[i] += dx;
+        if(m_deltaYVector[i] + dy > 2 && Random::nextFloat() < 1.0) m_deltaYVector[i] += dy;
+        if(m_deltaZVector[i] + dz > 2 && Random::nextFloat() < 1.0) m_deltaZVector[i] += dz;
     }
 }
 

@@ -24,8 +24,8 @@ Window {
         console.log("No GUI: " + noGUI)
         console.log("noGUI.cumulativeVolume: " + noGUI.cumulativeVolume)
         // currentStatistic = noGUI.cumulativeVolume
-        // currentStatistic = noGUI.poreSizeDistribution
-        currentStatistic = noGUI.dvlogd
+        currentStatistic = noGUI.poreSizeDistribution
+        // currentStatistic = noGUI.dvlogd
         // currentStatistic = noGUI.lengthRatio
     }
 

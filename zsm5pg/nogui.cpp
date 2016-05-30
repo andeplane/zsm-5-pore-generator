@@ -14,7 +14,7 @@ NoGUI::NoGUI()
     m_poreSizeDistribution = new PoreSizeStatistic();
     m_poreSizeDistribution->setMin(0);
     m_poreSizeDistribution->setMax(20);
-    m_poreSizeDistribution->setBins(100);
+    m_poreSizeDistribution->setBins(30);
 
     m_cumulativeVolume = new CumulativeVolume();
     m_cumulativeVolume->setMin(0);
@@ -23,7 +23,7 @@ NoGUI::NoGUI()
 
     m_dvlogd = new DVDLogd();
     m_dvlogd->setMin(0);
-    m_dvlogd->setMax(12);
+    m_dvlogd->setMax(20);
     m_dvlogd->setBins(30);
 
     m_lengthRatio = new LengthRatio();
@@ -31,7 +31,7 @@ NoGUI::NoGUI()
     m_lengthRatio->setMax(1);
     m_lengthRatio->setBins(50);
 
-    QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
+    QString f("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/new_gcmc_data_may/VadsN.txt");
     m_concentration = new Concentration(f);
 }
 
@@ -43,12 +43,11 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     } else if(statisticType.compare("poreSize") == 0) {
         statistic = new PoreSizeStatistic();
     } else if(statisticType.compare("concentration") == 0) {
-        statistic = new Concentration("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/adsorption/scripts/Vads.txt");
+        statistic = new Concentration("/Users/anderhaf/Dropbox/uio/phd/2016/zeolite/new_gcmc_data_may/VadsN.txt");
     } else {
         qDebug() << "Error, could not find statistic type " << statisticType;
         exit(1);
     }
-
     printEvery = iniFile.getInt("printEvery");
 
     // Monte carlo properties
@@ -77,6 +76,7 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         monteCarlo->setData(data);
     } else {
         Statistic *data = new Statistic();
+        data->setName("Data statistic");
         data->load(iniFile.getString("dataType"));
         monteCarlo->setData(data);
     }
@@ -101,7 +101,8 @@ void NoGUI::loadIniFile(IniFile &iniFile)
 
     monteCarlo->model()->updateQML();
     monteCarlo->data()->updateQML();
-    qDebug() << "I'm done with this.";
+
+    m_outputPrefix = iniFile.getString("outputPrefix");
 }
 
 void NoGUI::run() {
@@ -119,6 +120,16 @@ void NoGUI::run() {
 
     geometry->save("/projects/poregenerator/currentgeometry.txt");
     statistic->save("/projects/poregenerator/currenthistogram.txt");
+}
+
+NoGUI::~NoGUI() {
+    if(m_model) m_model->save(QString("%1model.txt").arg(m_outputPrefix));
+    if(m_data) m_data->save(QString("%data.txt").arg(m_outputPrefix));
+    if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1poreSizeDistribution.txt").arg(m_outputPrefix));
+    if(m_concentration) m_concentration->save(QString("%1concentration.txt").arg(m_outputPrefix));
+    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1cumulativeVolume.txt").arg(m_outputPrefix));
+    if(m_dvlogd) m_dvlogd->save(QString("%1dvlogd.txt").arg(m_outputPrefix));
+    if(m_lengthRatio) m_lengthRatio->save(QString("%1lengthRatio.txt").arg(m_outputPrefix));
 }
 
 bool NoGUI::tick()
