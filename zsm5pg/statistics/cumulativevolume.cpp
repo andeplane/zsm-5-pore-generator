@@ -30,8 +30,10 @@ void CumulativeVolume::compute(Zsm5geometry *geometry)
             for(int k=0; k<z.size(); k++) {
                 const float dz = z[k];
                 const float dV = dx*dy*dz;
-                // const float poreLength = std::min(std::min(dx, dy), dz);
-                const float poreLength = cbrt(dV);
+                float poreLength = std::min(std::min(dx, dy), dz);
+#ifdef POREISCBRT
+                poreLength = cbrt(dV);
+#endif
                 gsl_vector_set(poreVolumes, poreIndex, dV);
                 gsl_vector_set(poreLengths, poreIndex, poreLength);
                 gsl_vector_set(poreVolumesNormalized, poreIndex, dV * oneOverTotalVolume);

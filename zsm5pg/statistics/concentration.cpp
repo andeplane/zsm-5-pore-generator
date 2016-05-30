@@ -72,8 +72,9 @@ void Concentration::compute(Zsm5geometry *geometry)
                 const float dz = z[k];
                 float poreSize = std::min(std::min(dx, dy), dz);
                 const float poreVolume = dx*dy*dz;
-                // poreSize = cbrt(poreVolume);
-
+#ifdef POREISCBRT
+                poreSize = cbrt(poreVolume);
+#endif
                 // int H = std::roundf(poreSize);
 
                 float H = poreSize;  // 1

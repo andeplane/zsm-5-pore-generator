@@ -51,6 +51,28 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
     }
 }
 
+void Zsm5geometry::resize(int newNumberOfPlanes) {
+    if(newNumberOfPlanes > m_planesPerDimension) {
+        int delta = newNumberOfPlanes - m_planesPerDimension;
+        m_deltaXVector.resize(m_planesPerDimension + delta);
+        m_deltaYVector.resize(m_planesPerDimension + delta);
+        m_deltaZVector.resize(m_planesPerDimension + delta);
+        for(int i=0; i<delta; i++) {
+            int index = m_planesPerDimension+i;
+            int moddedIndex = index % m_planesPerDimension;
+            m_deltaXVector[index] = m_deltaXVector[moddedIndex];
+            m_deltaYVector[index] = m_deltaYVector[moddedIndex];
+            m_deltaZVector[index] = m_deltaZVector[moddedIndex];
+        }
+    } else {
+        m_deltaXVector.resize(newNumberOfPlanes);
+        m_deltaYVector.resize(newNumberOfPlanes);
+        m_deltaZVector.resize(newNumberOfPlanes);
+    }
+
+    setPlanesPerDimension(newNumberOfPlanes);
+}
+
 void Zsm5geometry::save(QString filename)
 {
     //QFile file(QUrl(filename).toLocalFile());

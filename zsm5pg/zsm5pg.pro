@@ -5,7 +5,7 @@ QT += qml quick widgets opengl openglextensions charts
 
 INCLUDEPATH += /usr/local/include
 LIBS += -L/usr/local/lib -lgsl
-
+# DEFINES += POREISCBRT
 SOURCES += main.cpp \
     mysimulator.cpp \
     zsm5geometry.cpp \

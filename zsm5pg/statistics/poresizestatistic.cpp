@@ -26,7 +26,9 @@ void PoreSizeStatistic::compute(Zsm5geometry *geometry)
                 const float dz = z[k];
                 const float volume = dx*dy*dz;
                 float poreSize = std::min(std::min(dx,dy), dz);
-                // poreSize = cbrt(volume);
+#ifdef POREISCBRT
+                poreSize = cbrt(volume);
+#endif
                 m_poreVolumes[poreIndex++] = poreSize;
                 //m_poreVolumes[poreIndex++] = poreSize;
             }

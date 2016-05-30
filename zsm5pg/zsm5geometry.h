@@ -33,6 +33,7 @@ public:
     void setPlanesPerDimension(int planesPerDimension);
     float lengthScale() const;
     double totalVolume();
+    void resize(int newNumberOfPlanes);
 
 public slots:
     void setLengthScale(float lengthScale);

@@ -39,7 +39,7 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     Random::seed(iniFile.getInt("seed"));
 
     m_log.setFileName(QString("%1/log.txt").arg(m_filepath));
-    if (!m_log.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    if (!m_log.open(QIODevice::Append | QIODevice::Text)) {
         qDebug() << "Could not open file " << QString("%1/log.txt").arg(m_filepath);
         exit(1);
     }
@@ -90,13 +90,19 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     }
 
     QFileInfo fileInfo2(QString("%1/geometry.txt").arg(m_filepath));
-    bool loadPrevious = iniFile.getBool("loadPrevious") && fileInfo2.exists();
+    int planesPerDimension = iniFile.getInt("planesPerDimension");
 
+    bool loadPrevious = iniFile.getBool("loadPrevious") && fileInfo2.exists();
     if(loadPrevious) {
         geometry->load(QString("%1/geometry.txt").arg(m_filepath));
     } else {
-        geometry->setPlanesPerDimension(iniFile.getInt("planesPerDimension"));
+        geometry->setPlanesPerDimension(planesPerDimension);
         geometry->reset(xMin, xMax);
+    }
+
+    if(geometry->planesPerDimension() != planesPerDimension) {
+        qDebug() << "Resizing from " << geometry->planesPerDimension() << " planes per dimension to " << planesPerDimension;
+        geometry->resize(planesPerDimension);
     }
 
     statistic->setMin(xMin);
@@ -152,6 +158,15 @@ NoGUI::~NoGUI() {
     if(geometry) geometry->save(QString("%1/geometry.txt").arg(m_filepath));
     QFile chiSquareFile(QString("%1/ChiSquare=%2").arg(m_filepath).arg(monteCarlo->chiSquared()));
     chiSquareFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    chiSquareFile.close();
+
+    chiSquareFile.setFileName(QString("%1/ChiSquare.txt").arg(m_filepath));
+    if(!chiSquareFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Error, could not open chi square file: " << chiSquareFile.fileName();
+        return;
+    }
+    QTextStream in(&chiSquareFile);
+    in << monteCarlo->chiSquared();
     chiSquareFile.close();
 }
 
