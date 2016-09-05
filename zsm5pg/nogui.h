@@ -15,6 +15,7 @@ class NoGUI : public QObject
     Q_PROPERTY(Statistic* cumulativeVolume READ cumulativeVolume WRITE setCumulativeVolume NOTIFY cumulativeVolumeChanged)
     Q_PROPERTY(Statistic* dvlogd READ dvlogd WRITE setDvlogd NOTIFY dvlogdChanged)
     Q_PROPERTY(Statistic* lengthRatio READ lengthRatio WRITE setLengthRatio NOTIFY lengthRatioChanged)
+    Q_PROPERTY(Statistic* currentStatistic READ currentStatistic WRITE setCurrentStatistic NOTIFY currentStatisticChanged)
     Q_PROPERTY(Concentration* concentration READ concentration WRITE setConcentration NOTIFY concentrationChanged)
 private:
     Statistic* m_model = nullptr;
@@ -27,6 +28,7 @@ private:
     double m_elapsedTime = 0;
     QString m_filepath;
     QFile m_log;
+
 public:
     NoGUI();
     ~NoGUI();
@@ -34,7 +36,7 @@ public:
     int step = 0; // current timestep
     int printEvery = 100;
     class Zsm5geometry *geometry = nullptr;
-    class Statistic *statistic = nullptr;
+    class Statistic *m_currentStatistic = nullptr;
     class MonteCarlo* monteCarlo = nullptr;
     void loadIniFile(IniFile &iniFile);
     Q_INVOKABLE void run();
@@ -47,6 +49,11 @@ public:
     Statistic* dvlogd() const;
     Statistic* lengthRatio() const;
 
+    Statistic* currentStatistic() const
+    {
+        return m_currentStatistic;
+    }
+
 public slots:
     void setModel(Statistic* model);
     void setData(Statistic* data);
@@ -56,6 +63,15 @@ public slots:
     void setDvlogd(Statistic* dvlogd);
     void setLengthRatio(Statistic* lengthRatio);
 
+    void setCurrentStatistic(Statistic* currentStatistic)
+    {
+        if (m_currentStatistic == currentStatistic)
+            return;
+
+        m_currentStatistic = currentStatistic;
+        emit currentStatisticChanged(currentStatistic);
+    }
+
 signals:
     void modelChanged(Statistic* model);
     void dataChanged(Statistic* data);
@@ -64,6 +80,7 @@ signals:
     void cumulativeVolumeChanged(Statistic* cumulativeVolume);
     void dvlogdChanged(Statistic* dvlogd);
     void lengthRatioChanged(Statistic* lengthRatio);
+    void currentStatisticChanged(Statistic* m_currentStatistic);
 };
 
 #endif // NOGUI_H

@@ -34,8 +34,7 @@ void MonteCarlo::tick()
     QVector<float> y = m_geometry->deltaYVector();
     QVector<float> z = m_geometry->deltaZVector();
 
-    QVector<float> xValues = m_model->xValuesRaw();
-    QVector<float> yValues = m_model->yValuesRaw();
+    QVector<QPointF> points = m_model->points();
 
     float chiSquared1 = m_model->chiSquared(m_data);
     if(m_debug) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
@@ -57,8 +56,7 @@ void MonteCarlo::tick()
         m_geometry->setDeltaXVector(x);
         m_geometry->setDeltaYVector(y);
         m_geometry->setDeltaZVector(z);
-        m_model->setXValuesRaw(xValues);
-        m_model->setYValuesRaw(yValues);
+        m_model->setPoints(points);
         setChiSquared(chiSquared1);
         if(m_debug) qDebug() << "     STEP REJECTED";
     }

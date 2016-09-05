@@ -16,11 +16,39 @@ Window {
     property Statistic currentStatistic
     property Statistic dvlogd
     property Statistic lengthRatio
-
     property NoGUI noGUI
+
+    onCurrentStatisticChanged: {
+        if(currentStatistic) {
+            currentStatistic.histogramReady.connect(function() {
+                currentStatistic.updateSeries(statisticSeries)
+            })
+            currentStatistic.updateSeries(statisticSeries)
+        }
+    }
+
+    onModelStatisticChanged: {
+        if(modelStatistic) {
+            modelStatistic.histogramReady.connect(function() {
+                modelStatistic.updateSeries(model)
+            })
+            modelStatistic.updateSeries(model)
+        }
+    }
+
+    onDataStatisticChanged: {
+        if(dataStatistic) {
+            dataStatistic.histogramReady.connect(function() {
+                dataStatistic.updateSeries(data)
+            })
+            dataStatistic.updateSeries(data)
+        }
+    }
 
     onNoGUIChanged: {
         timer.start()
+        currentStatistic = noGUI.currentStatistic
+        // console.log("Current statistic thing: ", noGUI.currentStatistic)
         // currentStatistic = noGUI.cumulativeVolume
         currentStatistic = noGUI.poreSizeDistribution
         // currentStatistic = noGUI.dvlogd
@@ -39,109 +67,109 @@ Window {
         }
     }
 
-    function updateModel() {
-        model.clear()
-        for(var i=0; i<modelStatistic.bins; i++) {
-            var x = modelStatistic.xValues[i]
-            var y = modelStatistic.yValues[i]
-            if(!isNaN(x) && !isNaN(x)) model.append(x,y)
-        }
-    }
+//    function updateModel() {
+//        model.clear()
+//        for(var i=0; i<modelStatistic.bins; i++) {
+//            var x = modelStatistic.xValues[i]
+//            var y = modelStatistic.yValues[i]
+//            if(!isNaN(x) && !isNaN(x)) model.append(x,y)
+//        }
+//    }
 
-    function updatePSD() {
-        if(currentStatistic == undefined) return
-        psd.clear()
+//    function updatePSD() {
+//        if(currentStatistic == undefined) return
+//        psd.clear()
 
-        for(var i=0; i<currentStatistic.bins; i++) {
-            var x = currentStatistic.xValues[i]
-            var y = currentStatistic.yValues[i]
-            if(!isNaN(x) && !isNaN(x)) psd.append(x,y)
-        }
-    }
+//        for(var i=0; i<currentStatistic.bins; i++) {
+//            var x = currentStatistic.xValues[i]
+//            var y = currentStatistic.yValues[i]
+//            if(!isNaN(x) && !isNaN(x)) psd.append(x,y)
+//        }
+//    }
 
-    function updateData() {
-        data.clear()
-        for(var i=0; i<dataStatistic.bins; i++) {
-            var x = dataStatistic.xValues[i]
-            var y = dataStatistic.yValues[i]
-            if(!isNaN(x) && !isNaN(x)) data.append(x,y)
-        }
-    }
+//    function updateData() {
+//        data.clear()
+//        for(var i=0; i<dataStatistic.bins; i++) {
+//            var x = dataStatistic.xValues[i]
+//            var y = dataStatistic.yValues[i]
+//            if(!isNaN(x) && !isNaN(x)) data.append(x,y)
+//        }
+//    }
 
-    onModelStatisticChanged: {
-        updateModel()
+//    onModelStatisticChanged: {
+//        updateModel()
 
-        modelStatistic.histogramReady.connect(function() {
-            updateModel()
-        })
-    }
+//        modelStatistic.histogramReady.connect(function() {
+//            updateModel()
+//        })
+//    }
 
-    onPoreSizeDistributionChanged: {
-        updatePSD()
+//    onPoreSizeDistributionChanged: {
+//        updatePSD()
 
-        poreSizeDistribution.histogramReady.connect(function() {
-            updatePSD()
-        })
-    }
+//        poreSizeDistribution.histogramReady.connect(function() {
+//            updatePSD()
+//        })
+//    }
 
-    onCumulativeVolumeChanged: {
-        updatePSD()
+//    onCumulativeVolumeChanged: {
+//        updatePSD()
 
-        cumulativeVolume.histogramReady.connect(function() {
-            updatePSD()
-        })
-    }
+//        cumulativeVolume.histogramReady.connect(function() {
+//            updatePSD()
+//        })
+//    }
 
-    onLengthRatioChanged: {
-        updatePSD()
+//    onLengthRatioChanged: {
+//        updatePSD()
 
-        lengthRatio.histogramReady.connect(function() {
-            updatePSD()
-        })
-    }
+//        lengthRatio.histogramReady.connect(function() {
+//            updatePSD()
+//        })
+//    }
 
-    onDataStatisticChanged: {
-        updateData()
-        dataStatistic.histogramReady.connect(function() {
-            updateData()
-        })
-    }
+//    onDataStatisticChanged: {
+//        updateData()
+//        dataStatistic.histogramReady.connect(function() {
+//            updateData()
+//        })
+//    }
 
     function fitData() {
-        if(dataStatistic==null || modelStatistic==null) return
-        var xMin = 1e10
-        var xMax = -1e10
-        var yMin = 1e10
-        var yMax = -1e10
+//        if(dataStatistic==null || modelStatistic==null) return
+//        var xMin = 1e10
+//        var xMax = -1e10
+//        var yMin = 1e10
+//        var yMax = -1e10
 
-        for(var i=0; i<dataStatistic.bins; i++) {
-            var x = dataStatistic.xValues[i]
-            var y = dataStatistic.yValues[i]
-            if(!isNaN(x) && !isNaN(x)) {
-                xMin = Math.min(xMin, x)
-                xMax = Math.max(xMax, x)
-                yMin = Math.min(yMin, y)
-                yMax = Math.max(yMax, y)
-            }
-        }
+//        for(var i=0; i<dataStatistic.bins; i++) {
+//            var x = dataStatistic.xValues[i]
+//            var y = dataStatistic.yValues[i]
+//            if(!isNaN(x) && !isNaN(x)) {
+//                xMin = Math.min(xMin, x)
+//                xMax = Math.max(xMax, x)
+//                yMin = Math.min(yMin, y)
+//                yMax = Math.max(yMax, y)
+//            }
+//        }
 
-        for(var i=0; i<modelStatistic.bins; i++) {
-            var x = modelStatistic.xValues[i]
-            var y = modelStatistic.yValues[i]
-            if(!isNaN(x) && !isNaN(x))  {
-                xMin = Math.min(xMin, x)
-                xMax = Math.max(xMax, x)
-                yMin = Math.min(yMin, y)
-                yMax = Math.max(yMax, y)
-            }
-        }
+//        for(var i=0; i<modelStatistic.bins; i++) {
+//            var x = modelStatistic.xValues[i]
+//            var y = modelStatistic.yValues[i]
+//            if(!isNaN(x) && !isNaN(x))  {
+//                xMin = Math.min(xMin, x)
+//                xMax = Math.max(xMax, x)
+//                yMin = Math.min(yMin, y)
+//                yMax = Math.max(yMax, y)
+//            }
+//        }
 
-        if(isNaN(xMin) || isNaN(xMax) || isNaN(yMin) || isNaN(yMax)) return;
+//        if(isNaN(xMin) || isNaN(xMax) || isNaN(yMin) || isNaN(yMax)) return;
 
-        _axisX.min = xMin
-        _axisX.max = xMax
-        _axisY.min = yMin
-        _axisY.max = yMax
+//        _axisX.min = xMin
+//        _axisX.max = xMax
+//        _axisY.min = yMin
+//        _axisY.max = yMax
     }
 
     ChartView {
@@ -188,7 +216,7 @@ Window {
     }
 
     ChartView {
-        id: psdChart
+        id: statisticChart
         anchors.left: chart.right
         width: parent.width*0.5
         height: parent.height
@@ -196,7 +224,7 @@ Window {
         title: currentStatistic ? currentStatistic.name : ""
 
         LineSeries {
-            id: psd
+            id: statisticSeries
             name: "Model"
             axisX: __axisX
             axisY: __axisY

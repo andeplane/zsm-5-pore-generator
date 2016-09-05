@@ -16,6 +16,7 @@ DVDLogd::DVDLogd()
 void DVDLogd::compute(Zsm5geometry *geometry)
 {
     if(!geometry) return;
+    return;
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -51,40 +52,43 @@ void DVDLogd::compute(Zsm5geometry *geometry)
     gsl_sort_vector(poreVolumesNormalized);
 
     // Set the x values and be ready to make plot data
-    m_xValuesRaw.resize(bins());
-    m_yValuesRaw.resize(bins());
+    m_points.resize(bins());
     float dx = (max() - min()) / (bins() - 1);
     for(int i=0; i<bins(); i++) {
-        m_xValuesRaw[i] = min() + i*dx;
-        m_yValuesRaw[i] = 0;
+        m_points[i].setX(min() + i*dx);
+        m_points[i].setY(0);
     }
 
     int skipping = 0;
     for(int i=0; i<numberOfPores; i++) {
+        qDebug() << "Getting thing " << i << " (size is " << numberOfPores << ")";
         float dVN = gsl_vector_get(poreVolumesNormalized, i); // dVN deltaVolumeNormalized
+        qDebug() << "Got it, getting next";
         float poreSize = gsl_vector_get(poreLengths, i);
+        qDebug() << "got it";
         int bin = poreSize / dx;
         if(bin>=bins()) {
             skipping++;
             continue; // Some pore sizes might be larger than largest? Don't seg fault
         }
-        m_yValuesRaw[bin] += dVN;
+        m_points[i].setY(m_points[i].y() + dVN);
     }
 
     for(int i=1; i<bins(); i++) {
-        m_yValuesRaw[i] += m_yValuesRaw[i-1];
+        qreal newValue = m_points[i].y() + m_points[i-1].y();
+        m_points[i].setY(newValue);
     }
 
-    QVector<float> oldYValues = m_yValuesRaw;
+    QVector<QPointF> oldValues = m_points;
     for(int i=1; i<bins(); i++) {
-        float &x0 = m_xValuesRaw[i-1];
-        float &x1 = m_xValuesRaw[i];
-        float &y0 = oldYValues[i-1];
-        float &y1 = oldYValues[i];
+        const qreal &x0 = oldValues[i-1].x();
+        const qreal &x1 = oldValues[i].x();
+        const qreal &y0 = oldValues[i-1].y();
+        const qreal &y1 = oldValues[i].y();
 
         float dy = y1-y0;
         float dx = x1-x0;
         float meanX = 0.5*(x0+x1);
-        m_yValuesRaw[i] = meanX*dy/dx;
+        m_points[i].setY(meanX*dy/dx);
     }
 }

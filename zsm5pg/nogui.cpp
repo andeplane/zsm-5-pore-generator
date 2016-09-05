@@ -10,7 +10,7 @@ NoGUI::NoGUI()
 {
     geometry = new Zsm5geometry();
     monteCarlo = new MonteCarlo();
-    statistic = new PoreSizeStatistic();
+    m_currentStatistic = new PoreSizeStatistic();
     m_poreSizeDistribution = new PoreSizeStatistic();
     m_poreSizeDistribution->setMin(0);
     m_poreSizeDistribution->setMax(20);
@@ -47,11 +47,11 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     QString MDInput = iniFile.getString("MDInput");
     QString statisticType = iniFile.getString("statisticType");
     if(statisticType.compare("poreVolume") == 0) {
-        statistic = new PoreVolumeStatistic();
+        setCurrentStatistic(new PoreVolumeStatistic());
     } else if(statisticType.compare("poreSize") == 0) {
-        statistic = new PoreSizeStatistic();
+        setCurrentStatistic(new PoreSizeStatistic());
     } else if(statisticType.compare("concentration") == 0) {
-        statistic = new Concentration(MDInput);
+        setCurrentStatistic(new Concentration(MDInput));
     } else {
         qDebug() << "Error, could not find statistic type " << statisticType;
         exit(1);
@@ -108,18 +108,18 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     float randomWalkFraction = iniFile.getDouble("randomWalkFraction");
     geometry->setRandomWalkFraction(randomWalkFraction);
 
-    statistic->setMin(xMin);
-    statistic->setMax(xMin + 3*delta);
-    statistic->setBins(bins);
+    m_currentStatistic->setMin(xMin);
+    m_currentStatistic->setMax(xMin + 3*delta);
+    m_currentStatistic->setBins(bins);
     m_poreSizeDistribution->setBins(bins);
     m_cumulativeVolume->setBins(bins);
     m_dvlogd->setBins(bins);
     m_lengthRatio->setBins(bins);
     monteCarlo->setFilename(QString("%1/%2").arg(m_filepath).arg(iniFile.getString("mcFilename")));
     monteCarlo->setDebug(iniFile.getBool("verbose"));
-    monteCarlo->setModel(statistic);
+    monteCarlo->setModel(m_currentStatistic);
     monteCarlo->setRunning(true);
-    statistic->compute(geometry);
+    m_currentStatistic->compute(geometry);
 
     m_data = monteCarlo->data();
     m_model = monteCarlo->model();
@@ -130,7 +130,6 @@ void NoGUI::loadIniFile(IniFile &iniFile)
 }
 
 void NoGUI::run() {
-    monteCarlo->data()->createLineSeries();
     for(step=0; step<steps; step++) {
         QElapsedTimer timer;
         timer.start();
@@ -145,7 +144,7 @@ void NoGUI::run() {
     }
 
     geometry->save("/projects/poregenerator/currentgeometry.txt");
-    statistic->save("/projects/poregenerator/currenthistogram.txt");
+    m_currentStatistic->save("/projects/poregenerator/currenthistogram.txt");
 }
 
 NoGUI::~NoGUI() {
@@ -182,7 +181,7 @@ bool NoGUI::tick()
 {
     if(step >= steps) {
         geometry->save("/projects/poregenerator/currentgeometry.txt");
-        statistic->save("/projects/poregenerator/currenthistogram.txt");
+        m_currentStatistic->save("/projects/poregenerator/currenthistogram.txt");
 
         return true;
     }

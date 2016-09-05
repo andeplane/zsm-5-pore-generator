@@ -59,13 +59,12 @@ void DistributionStatistic::setExponentialDistributionMean(float exponentialDist
 
 void DistributionStatistic::update() {
     if(m_type == Type::None) return;
-    m_xValuesRaw.resize(bins());
-    m_yValuesRaw.resize(bins());
+    m_points.resize(bins());
 
     float dx = (max() - min()) / (bins() - 1);
     for(int bin = 0; bin < bins(); bin++) {
         float x = min() + bin*dx;
-        m_xValuesRaw[bin] = x;
+        m_points[bin].setX(x);
     }
 
     if(m_type == Type::Normal) {
@@ -73,10 +72,10 @@ void DistributionStatistic::update() {
         float mu = m_normalDistributionMean;
 
         for(int bin = 0; bin < bins(); bin++) {
-            float x = m_xValuesRaw[bin];
+            float x = m_points[bin].x();
             float y = 1.0 / (sigma*sqrt(2*M_PI)) * exp(-(x-mu)*(x-mu) / (2*sigma*sigma));
 
-            m_yValuesRaw[bin] = y;
+            m_points[bin].setY(y);
         }
     }
 
@@ -84,12 +83,12 @@ void DistributionStatistic::update() {
         float lambda = m_exponentialDistributionMean;
 
         for(int bin = 0; bin < bins(); bin++) {
-            float x = m_xValuesRaw[bin];
+            float x = m_points[bin].x();
             // float y = lambda * exp(-lambda*x);
             double y = lambda*exp(-lambda*(x-2.0));
             if(x<2.0) y = 0.0;
 
-            m_yValuesRaw[bin] = y;
+            m_points[bin].setY(y);
         }
     }
 }

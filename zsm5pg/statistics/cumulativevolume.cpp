@@ -46,12 +46,11 @@ void CumulativeVolume::compute(Zsm5geometry *geometry)
     gsl_sort_vector(poreVolumesNormalized);
 
     // Set the x values and be ready to make plot data
-    m_xValuesRaw.resize(bins());
-    m_yValuesRaw.resize(bins());
+    m_points.resize(bins());
     float dx = (max() - min()) / (bins() - 1);
     for(int i=0; i<bins(); i++) {
-        m_xValuesRaw[i] = min() + i*dx;
-        m_yValuesRaw[i] = 0;
+        m_points[i].setX(min() + i*dx);
+        m_points[i].setY(0);
     }
 
     for(int i=0; i<numberOfPores; i++) {
@@ -59,11 +58,12 @@ void CumulativeVolume::compute(Zsm5geometry *geometry)
         float poreSize = gsl_vector_get(poreLengths, i);
         int bin = poreSize / dx;
         if(bin>=bins()) continue; // Some pore sizes might be larger than largest? Don't seg fault
-        m_yValuesRaw[bin] += dVN;
+        m_points[bin].setY(m_points[bin].y() + dVN);
     }
 
     for(int i=1; i<bins(); i++) {
-        m_yValuesRaw[i] += m_yValuesRaw[i-1];
+        qreal newValue = m_points[i].y() + m_points[i-1].y();
+        m_points[i].setY(newValue);
     }
 
     m_name = "Cumulative volume";

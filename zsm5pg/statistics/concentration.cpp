@@ -141,8 +141,7 @@ void Concentration::compute(Zsm5geometry *geometry)
     float totalZeoliteVolumeBulkSystem = volumeOfZeoliteUnitCell*numberOfUnitCellsBulkSystem;
     float bulkSystemFactor = totalZeoliteVolume / totalZeoliteVolumeBulkSystem;
 
-    m_xValuesRaw.clear();
-    m_yValuesRaw.clear();
+    m_points.clear();
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
         N_adsorbed += bulkSystemFactor*m_values[1][i];
@@ -151,8 +150,7 @@ void Concentration::compute(Zsm5geometry *geometry)
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
         float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;
         float volumeAdsorbedCm3PerMassZeolite = volumeAdsorbedCm3 / totalZeoliteMassGrams;
-        m_xValuesRaw.push_back(m_pressures[i]);
-        m_yValuesRaw.push_back(volumeAdsorbedCm3PerMassZeolite);
+        m_points.push_back(QPointF(m_pressures[i], volumeAdsorbedCm3PerMassZeolite));
     }
-    setBins(m_xValuesRaw.size());
+    setBins(m_points.size());
 }

@@ -6,38 +6,12 @@
 #include <cmath>
 Statistic::Statistic()
 {
-    m_lineSeries = new QLineSeries();
     m_name = "Statistic";
 }
 
 void Statistic::compute(Zsm5geometry *geometry)
 {
 
-}
-
-void Statistic::prepareHistogram()
-{
-    normalizeHistogram();
-}
-
-QVariantList Statistic::xValues() const
-{
-    return m_xValues;
-}
-
-const QVector<float> &Statistic::xValuesRaw() const
-{
-    return m_xValuesRaw;
-}
-
-const QVector<float> &Statistic::yValuesRaw() const
-{
-    return m_yValuesRaw;
-}
-
-QVariantList Statistic::yValues() const
-{
-    return m_yValues;
 }
 
 int Statistic::bins() const
@@ -64,9 +38,9 @@ void Statistic::save(QString filename)
     }
 
     QTextStream stream(&file);
-    for(int i=0; i<m_xValuesRaw.count(); i++) {
-        float x = m_xValuesRaw[i];
-        float y = m_yValuesRaw[i];
+    for(int i=0; i<m_points.count(); i++) {
+        float x = m_points[i].x();
+        float y = m_points[i].y();
         stream << x << " " << y << "\n";
     }
     file.close();
@@ -80,8 +54,7 @@ void Statistic::load(QString filename)
         exit(1);
     }
 
-    m_xValuesRaw.clear();
-    m_yValuesRaw.clear();
+    m_points.clear();
 
     QTextStream in(&file);
     while (!in.atEnd()) {
@@ -94,8 +67,7 @@ void Statistic::load(QString filename)
             if(ok) {
                 float y = splitted[1].toFloat(&ok);
                 if(ok) {
-                    m_xValuesRaw.push_back(x);
-                    m_yValuesRaw.push_back(y);
+                    m_points.push_back(QPointF(x,y));
                 }
             } else {
                 qDebug() << "Warning, could not parse line " << line;
@@ -109,23 +81,14 @@ void Statistic::emitReady()
     emit histogramReady();
 }
 
-void Statistic::createLineSeries() {
-    m_lineSeries->clear();
-    for(int bin=0; bin<m_bins; bin++) {
-        float x = m_xValuesRaw[bin];
-        float y = m_yValuesRaw[bin];
-        m_lineSeries->append(x,y);
-    }
-}
-
 double Statistic::eval(double x)
 {
-    for(int i=0; i<m_xValuesRaw.size()-1; i++) {
-        double x0 = m_xValuesRaw[i];
-        double x1 = m_xValuesRaw[i+1];
+    for(int i=0; i<m_points.size()-1; i++) {
+        double x0 = m_points[i].x();
+        double x1 = m_points[i+1].x();
         if(x0 <= x && x <= x1) {
-            double y0 = m_yValuesRaw[i];
-            double y1 = m_yValuesRaw[i+1];
+            double y0 = m_points[i].y();
+            double y1 = m_points[i+1].y();
             double delta = x1 - x0;
             double f = (x1 - x) / delta;
             double value = y0*f + (1.0 - f)*y1;
@@ -133,7 +96,7 @@ double Statistic::eval(double x)
         }
     }
     qDebug() << m_name << " could not interpolate x=" << x;
-    qDebug() << "X values: " << m_xValuesRaw;
+    qDebug() << "X values: " << m_points;
     exit(1);
 }
 
@@ -141,9 +104,9 @@ double Statistic::chiSquared(Statistic *statistic)
 {
     double chiSquared = 0;
     double sum = 0;
-    for(int bin = 0; bin<m_xValuesRaw.size(); bin++) {
-        double x = m_xValuesRaw[bin];
-        double y_this = m_yValuesRaw[bin];
+    for(int bin = 0; bin<m_points.size(); bin++) {
+        double x = m_points[bin].x();
+        double y_this = m_points[bin].y();
         double y_other = statistic->eval(x);
         double delta = (y_this - y_other) / (y_other + std::numeric_limits<double>::min());
         // double delta = (y_this - y_other);
@@ -156,14 +119,17 @@ double Statistic::chiSquared(Statistic *statistic)
 
 void Statistic::computeHistogram()
 {
+    // Produce histogram
     gsl_histogram *hist = gsl_histogram_alloc (m_bins);
     gsl_histogram_set_ranges_uniform (hist, m_min, m_max);
     for(const float &value : m_histogramValues) {
         gsl_histogram_increment (hist, value);
     }
 
-    m_xValuesRaw.resize(m_bins);
-    m_yValuesRaw.resize(m_bins);
+    // Copy data over to list over points for plotting
+    m_points.clear();
+    m_points.reserve(m_bins);
+
     for(int i=0; i<m_bins; i++) {
         double upper, lower;
         gsl_histogram_get_range(hist, i, &lower, &upper);
@@ -173,24 +139,13 @@ void Statistic::computeHistogram()
         if(isnan(x) || isnan(y)) {
             qDebug() << "Statistic::computeHistogram() nan: " << x << ", " << y;
         }
-        m_xValuesRaw[i] = x;
-        m_yValuesRaw[i] = y;
+        m_points.push_back(QPointF(x,y));
     }
     gsl_histogram_free(hist);
     normalizeHistogram();
 }
 
 void Statistic::updateQML() {
-    m_xValues.clear();
-    m_yValues.clear();
-    m_xValues.reserve(m_xValuesRaw.size());
-    m_yValues.reserve(m_yValuesRaw.size());
-
-    for(int i=0; i<m_xValuesRaw.size(); i++) {
-        m_xValues.push_back(QVariant::fromValue<float>(m_xValuesRaw[i]));
-        m_yValues.push_back(QVariant::fromValue<float>(m_yValuesRaw[i]));
-        // qDebug() << "Updating QML with " << m_xValuesRaw[i] << ", " << m_yValuesRaw[i];
-    }
     emit histogramReady();
 }
 
@@ -204,58 +159,36 @@ QString Statistic::yLabel() const
     return m_yLabel;
 }
 
+QString Statistic::name() const
+{
+    return m_name;
+}
+
+QVector<QPointF> &Statistic::points()
+{
+    return m_points;
+}
+
 void Statistic::normalizeHistogram()
 {
     // Normalize the histogram using the trapezoidal rule
     double integralSum = 0;
 
-    for(int i=0; i<m_xValuesRaw.size()-1; i++) {
-        float &x1 = m_xValuesRaw[i];
-        float &x2 = m_xValuesRaw[i+1];
-        float &y1 = m_yValuesRaw[i];
-        float &y2 = m_yValuesRaw[i+1];
+    for(int i=0; i<m_points.size()-1; i++) {
+        const qreal &x1 = m_points[i].x();
+        const qreal &x2 = m_points[i+1].x();
+        const qreal &y1 = m_points[i].y();
+        const qreal &y2 = m_points[i+1].y();
         double dx = x2-x1;
         double dy = y2+y1;
         integralSum += dx*dy;
     }
     integralSum *= 0.5;
     float oneOverIntegralSum = 1.0 / integralSum;
-    for(int i=0; i<m_xValuesRaw.size(); i++) {
-        m_yValuesRaw[i] *= oneOverIntegralSum;
+    for(int i=0; i<m_points.size(); i++) {
+        float normalizedValue = m_points[i].y() * oneOverIntegralSum;
+        m_points[i].setY(normalizedValue);
     }
-}
-
-void Statistic::setYValuesRaw(const QVector<float> &yValuesRaw)
-{
-    m_yValuesRaw = yValuesRaw;
-}
-
-QLineSeries *Statistic::lineSeries() const
-{
-    return m_lineSeries;
-}
-
-void Statistic::setXValuesRaw(const QVector<float> &xValuesRaw)
-{
-    m_xValuesRaw = xValuesRaw;
-}
-
-void Statistic::setXValues(QVariantList xValues)
-{
-    if (m_xValues == xValues)
-        return;
-
-    m_xValues = xValues;
-    emit xValuesChanged(xValues);
-}
-
-void Statistic::setYValues(QVariantList yValues)
-{
-    if (m_yValues == yValues)
-        return;
-
-    m_yValues = yValues;
-    emit yValuesChanged(yValues);
 }
 
 void Statistic::setBins(int bins)
@@ -284,15 +217,6 @@ void Statistic::setMax(float max)
     emit maxChanged(max);
 }
 
-void Statistic::setLineSeries(QLineSeries *lineSeries)
-{
-    if (m_lineSeries == lineSeries)
-        return;
-
-    m_lineSeries = lineSeries;
-    emit lineSeriesChanged(lineSeries);
-}
-
 void Statistic::setXLabel(QString xLabel)
 {
     if (m_xLabel == xLabel)
@@ -309,4 +233,33 @@ void Statistic::setYLabel(QString yLabel)
 
     m_yLabel = yLabel;
     emit yLabelChanged(yLabel);
+}
+
+void Statistic::updateSeries(QAbstractSeries *series) {
+    if(series) {
+        QXYSeries *xySeries = static_cast<QXYSeries*>(series);
+        if(xySeries) {
+            xySeries->replace(m_points);
+        } else {
+            qDebug() << "Warning, tried to update a non QXYSeries series";
+        }
+    }
+}
+
+void Statistic::setName(QString name)
+{
+    if (m_name == name)
+        return;
+
+    m_name = name;
+    emit nameChanged(name);
+}
+
+void Statistic::setPoints(QVector<QPointF> points)
+{
+    if (m_points == points)
+        return;
+
+    m_points = points;
+    emit pointsChanged(points);
 }
