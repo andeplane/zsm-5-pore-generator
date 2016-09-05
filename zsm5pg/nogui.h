@@ -48,11 +48,7 @@ public:
     Statistic* cumulativeVolume() const;
     Statistic* dvlogd() const;
     Statistic* lengthRatio() const;
-
-    Statistic* currentStatistic() const
-    {
-        return m_currentStatistic;
-    }
+    Statistic* currentStatistic() const;
 
 public slots:
     void setModel(Statistic* model);
@@ -62,15 +58,7 @@ public slots:
     void setCumulativeVolume(Statistic* cumulativeVolume);
     void setDvlogd(Statistic* dvlogd);
     void setLengthRatio(Statistic* lengthRatio);
-
-    void setCurrentStatistic(Statistic* currentStatistic)
-    {
-        if (m_currentStatistic == currentStatistic)
-            return;
-
-        m_currentStatistic = currentStatistic;
-        emit currentStatisticChanged(currentStatistic);
-    }
+    void setCurrentStatistic(Statistic* currentStatistic);
 
 signals:
     void modelChanged(Statistic* model);

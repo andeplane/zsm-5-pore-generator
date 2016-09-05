@@ -16,7 +16,7 @@ DVDLogd::DVDLogd()
 void DVDLogd::compute(Zsm5geometry *geometry)
 {
     if(!geometry) return;
-    return;
+
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -47,31 +47,28 @@ void DVDLogd::compute(Zsm5geometry *geometry)
             }
         }
     }
-
     gsl_sort_vector2(poreVolumes, poreLengths); // Sort both vectors based on the first
     gsl_sort_vector(poreVolumesNormalized);
 
     // Set the x values and be ready to make plot data
-    m_points.resize(bins());
+    m_points.clear();
+    m_points.reserve(bins());
     float dx = (max() - min()) / (bins() - 1);
     for(int i=0; i<bins(); i++) {
-        m_points[i].setX(min() + i*dx);
-        m_points[i].setY(0);
+        float x = min() + i*dx;
+        m_points.push_back(QPointF(x,0));
     }
 
     int skipping = 0;
     for(int i=0; i<numberOfPores; i++) {
-        qDebug() << "Getting thing " << i << " (size is " << numberOfPores << ")";
         float dVN = gsl_vector_get(poreVolumesNormalized, i); // dVN deltaVolumeNormalized
-        qDebug() << "Got it, getting next";
         float poreSize = gsl_vector_get(poreLengths, i);
-        qDebug() << "got it";
         int bin = poreSize / dx;
         if(bin>=bins()) {
             skipping++;
             continue; // Some pore sizes might be larger than largest? Don't seg fault
         }
-        m_points[i].setY(m_points[i].y() + dVN);
+        m_points[bin].setY(m_points[bin].y() + dVN);
     }
 
     for(int i=1; i<bins(); i++) {
@@ -79,7 +76,7 @@ void DVDLogd::compute(Zsm5geometry *geometry)
         m_points[i].setY(newValue);
     }
 
-    QVector<QPointF> oldValues = m_points;
+    QList<QPointF> oldValues = m_points;
     for(int i=1; i<bins(); i++) {
         const qreal &x0 = oldValues[i-1].x();
         const qreal &x1 = oldValues[i].x();

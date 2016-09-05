@@ -10,12 +10,13 @@ PoreVolumeStatistic::PoreVolumeStatistic()
 void PoreVolumeStatistic::compute(Zsm5geometry *geometry)
 {
     if(!geometry) return;
+    Statistic::compute(geometry);
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
     int numberOfPores = x.size()*y.size()*z.size();
     m_poreVolumes.resize(numberOfPores);
-    m_histogramValues.resize(numberOfPores);
+    // m_histogramValues.resize(numberOfPores);
     int poreIndex = 0;
     for(int i=0; i<x.size(); i++) {
         const float dx = x[i];

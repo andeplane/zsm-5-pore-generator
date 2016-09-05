@@ -34,7 +34,7 @@ void MonteCarlo::tick()
     QVector<float> y = m_geometry->deltaYVector();
     QVector<float> z = m_geometry->deltaZVector();
 
-    QVector<QPointF> points = m_model->points();
+    QList<QPointF> points = m_model->points();
 
     float chiSquared1 = m_model->chiSquared(m_data);
     if(m_debug) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
@@ -44,7 +44,7 @@ void MonteCarlo::tick()
     float deltaChiSquared = chiSquared2 - chiSquared1;
     if(m_debug) qDebug() << "New chi squared: " << chiSquared2 << " with deltaChiSquared: " << deltaChiSquared;
 
-    bool accepted = deltaChiSquared < 0 || Random::nextFloat() < exp(-deltaChiSquared*30.);
+    bool accepted = deltaChiSquared < 0 || Random::nextFloat() < exp(-deltaChiSquared / m_temperature);
     setSteps(m_steps+1);
 
     if(accepted) {

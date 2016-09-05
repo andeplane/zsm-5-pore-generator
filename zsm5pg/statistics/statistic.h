@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QVariantList>
 #include <QLineSeries>
+#include <QUrl>
 using namespace QtCharts;
 
 class Statistic : public QObject
@@ -13,7 +14,8 @@ class Statistic : public QObject
     Q_PROPERTY(QString xLabel READ xLabel WRITE setXLabel NOTIFY xLabelChanged)
     Q_PROPERTY(QString yLabel READ yLabel WRITE setYLabel NOTIFY yLabelChanged)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QVector<QPointF> points READ points WRITE setPoints NOTIFY pointsChanged)
+    Q_PROPERTY(QList<QPointF> points READ points WRITE setPoints NOTIFY pointsChanged)
+    Q_PROPERTY(int histogramAverageCount READ histogramAverageCount WRITE setHistogramAverageCount NOTIFY histogramAverageCountChanged)
     Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
     Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
     Q_PROPERTY(int bins READ bins WRITE setBins NOTIFY binsChanged)
@@ -21,11 +23,12 @@ private:
     void normalizeHistogram();
     float m_min = 0;
     float m_max = 10;
-
+    int m_histogramAverageCount;
+    int m_timesteps = 0;
 protected:
     int m_bins = 100;
-    QVector<float> m_histogramValues;
-    QVector<QPointF> m_points;
+    QList<float> m_histogramValues;
+    QList<QPointF> m_points;
     QString m_name;
     QString m_xLabel;
     QString m_yLabel;
@@ -46,8 +49,10 @@ public:
     QString xLabel() const;
     QString yLabel() const;
     QString name() const;
-    QVector<QPointF> &points();
+    QList<QPointF> &points();
+    Q_INVOKABLE void saveHistogramValues(QUrl filename);
     Q_INVOKABLE void updateSeries(QAbstractSeries *series);
+    int histogramAverageCount() const;
 
 public slots:
     void setBins(int bins);
@@ -56,7 +61,8 @@ public slots:
     void setXLabel(QString xLabel);
     void setYLabel(QString yLabel);
     void setName(QString name);
-    void setPoints(QVector<QPointF> points);
+    void setPoints(QList<QPointF> points);
+    void setHistogramAverageCount(int histogramAverageCount);
 
 signals:
     void binsChanged(int bins);
@@ -66,7 +72,8 @@ signals:
     void xLabelChanged(QString xLabel);
     void yLabelChanged(QString yLabel);
     void nameChanged(QString name);
-    void pointsChanged(QVector<QPointF> points);
+    void pointsChanged(QList<QPointF> points);
+    void histogramAverageCountChanged(int histogramAverageCount);
 };
 
 #endif // STATISTIC_H

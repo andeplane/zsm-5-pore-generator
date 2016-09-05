@@ -59,12 +59,14 @@ void DistributionStatistic::setExponentialDistributionMean(float exponentialDist
 
 void DistributionStatistic::update() {
     if(m_type == Type::None) return;
-    m_points.resize(bins());
+    m_points.clear();
+    m_points.reserve(bins());
 
     float dx = (max() - min()) / (bins() - 1);
     for(int bin = 0; bin < bins(); bin++) {
         float x = min() + bin*dx;
-        m_points[bin].setX(x);
+        m_points.push_back(QPointF(x,0));
+
     }
 
     if(m_type == Type::Normal) {

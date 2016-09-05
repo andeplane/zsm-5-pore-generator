@@ -17,7 +17,7 @@ void LengthRatio::compute(Zsm5geometry *geometry)
     QVector<float> &z = geometry->deltaZVector();
 
     int numberOfPores = x.size()*y.size()*z.size();
-    m_histogramValues.resize(numberOfPores);
+    m_histogramValues.clear();
     float min = 1e9;
     float max = 0;
     int poreIndex = 0;
@@ -37,7 +37,7 @@ void LengthRatio::compute(Zsm5geometry *geometry)
                 dydz = std::max(dydz, 1.0f/dydz);
 
                 const float maxRatio = std::max(std::max(dxdy, dxdz), dydz);
-                m_histogramValues[poreIndex++] = maxRatio;
+                m_histogramValues.push_back(maxRatio);
                 min = std::min(min, maxRatio);
                 max = std::max(max, maxRatio);
             }

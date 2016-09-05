@@ -127,6 +127,13 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     monteCarlo->data()->updateQML();
 
     m_concentration = new Concentration(MDInput);
+
+
+    m_concentration->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
+    m_cumulativeVolume->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
+    m_dvlogd->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
+    m_lengthRatio->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
+    m_poreSizeDistribution->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
 }
 
 void NoGUI::run() {
@@ -251,6 +258,11 @@ Statistic *NoGUI::lengthRatio() const
     return m_lengthRatio;
 }
 
+Statistic *NoGUI::currentStatistic() const
+{
+    return m_currentStatistic;
+}
+
 void NoGUI::setModel(Statistic *model)
 {
     if (m_model == model)
@@ -312,5 +324,14 @@ void NoGUI::setLengthRatio(Statistic *lengthRatio)
 
     m_lengthRatio = lengthRatio;
     emit lengthRatioChanged(lengthRatio);
+}
+
+void NoGUI::setCurrentStatistic(Statistic *currentStatistic)
+{
+    if (m_currentStatistic == currentStatistic)
+        return;
+
+    m_currentStatistic = currentStatistic;
+    emit currentStatisticChanged(currentStatistic);
 }
 

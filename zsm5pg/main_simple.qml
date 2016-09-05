@@ -1,6 +1,8 @@
 import QtQuick 2.5
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
+import QtQuick.Dialogs 1.2
+import Qt.labs.settings 1.0
 import QtCharts 2.1
 import Zeolite 1.0
 
@@ -63,113 +65,9 @@ Window {
             var finished = noGUI.tick()
             if(finished) {
                 stop()
+                Qt.quit()
             }
         }
-    }
-
-//    function updateModel() {
-//        model.clear()
-//        for(var i=0; i<modelStatistic.bins; i++) {
-//            var x = modelStatistic.xValues[i]
-//            var y = modelStatistic.yValues[i]
-//            if(!isNaN(x) && !isNaN(x)) model.append(x,y)
-//        }
-//    }
-
-//    function updatePSD() {
-//        if(currentStatistic == undefined) return
-//        psd.clear()
-
-//        for(var i=0; i<currentStatistic.bins; i++) {
-//            var x = currentStatistic.xValues[i]
-//            var y = currentStatistic.yValues[i]
-//            if(!isNaN(x) && !isNaN(x)) psd.append(x,y)
-//        }
-//    }
-
-//    function updateData() {
-//        data.clear()
-//        for(var i=0; i<dataStatistic.bins; i++) {
-//            var x = dataStatistic.xValues[i]
-//            var y = dataStatistic.yValues[i]
-//            if(!isNaN(x) && !isNaN(x)) data.append(x,y)
-//        }
-//    }
-
-//    onModelStatisticChanged: {
-//        updateModel()
-
-//        modelStatistic.histogramReady.connect(function() {
-//            updateModel()
-//        })
-//    }
-
-//    onPoreSizeDistributionChanged: {
-//        updatePSD()
-
-//        poreSizeDistribution.histogramReady.connect(function() {
-//            updatePSD()
-//        })
-//    }
-
-//    onCumulativeVolumeChanged: {
-//        updatePSD()
-
-//        cumulativeVolume.histogramReady.connect(function() {
-//            updatePSD()
-//        })
-//    }
-
-//    onLengthRatioChanged: {
-//        updatePSD()
-
-//        lengthRatio.histogramReady.connect(function() {
-//            updatePSD()
-//        })
-//    }
-
-//    onDataStatisticChanged: {
-//        updateData()
-//        dataStatistic.histogramReady.connect(function() {
-//            updateData()
-//        })
-//    }
-
-    function fitData() {
-//        if(dataStatistic==null || modelStatistic==null) return
-//        var xMin = 1e10
-//        var xMax = -1e10
-//        var yMin = 1e10
-//        var yMax = -1e10
-
-//        for(var i=0; i<dataStatistic.bins; i++) {
-//            var x = dataStatistic.xValues[i]
-//            var y = dataStatistic.yValues[i]
-//            if(!isNaN(x) && !isNaN(x)) {
-//                xMin = Math.min(xMin, x)
-//                xMax = Math.max(xMax, x)
-//                yMin = Math.min(yMin, y)
-//                yMax = Math.max(yMax, y)
-//            }
-//        }
-
-//        for(var i=0; i<modelStatistic.bins; i++) {
-//            var x = modelStatistic.xValues[i]
-//            var y = modelStatistic.yValues[i]
-//            if(!isNaN(x) && !isNaN(x))  {
-//                xMin = Math.min(xMin, x)
-//                xMax = Math.max(xMax, x)
-//                yMin = Math.min(yMin, y)
-//                yMax = Math.max(yMax, y)
-//            }
-//        }
-
-//        if(isNaN(xMin) || isNaN(xMax) || isNaN(yMin) || isNaN(yMax)) return;
-
-//        _axisX.min = xMin
-//        _axisX.max = xMax
-//        _axisY.min = yMin
-//        _axisY.max = yMax
     }
 
     ChartView {
@@ -251,5 +149,25 @@ Window {
         onClicked: {
             fitData()
         }
+    }
+
+    Button {
+        text: "Save histogram source"
+        onClicked: {
+            fileDialogSave.visible = true
+        }
+    }
+
+    FileDialog {
+        id: fileDialogSave
+        selectExisting : false
+        title: "Please choose a location to save"
+
+        onAccepted: {
+            currentStatistic.saveHistogramValues(fileUrl)
+        }
+    }
+    Settings {
+        property alias lastOpenedFolderSave: fileDialogSave.folder
     }
 }

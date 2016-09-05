@@ -46,11 +46,12 @@ void CumulativeVolume::compute(Zsm5geometry *geometry)
     gsl_sort_vector(poreVolumesNormalized);
 
     // Set the x values and be ready to make plot data
-    m_points.resize(bins());
+    m_points.clear();
+    m_points.reserve(bins());
     float dx = (max() - min()) / (bins() - 1);
     for(int i=0; i<bins(); i++) {
-        m_points[i].setX(min() + i*dx);
-        m_points[i].setY(0);
+        float x = min() + i*dx;
+        m_points.push_back(QPointF(x,0));
     }
 
     for(int i=0; i<numberOfPores; i++) {

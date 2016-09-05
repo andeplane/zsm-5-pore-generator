@@ -4,14 +4,19 @@
 #include <gsl/gsl_histogram.h>
 #include <QFile>
 #include <cmath>
-Statistic::Statistic()
+Statistic::Statistic() : m_histogramAverageCount(100)
 {
     m_name = "Statistic";
 }
 
 void Statistic::compute(Zsm5geometry *geometry)
 {
-
+    if(m_timesteps >= m_histogramAverageCount) {
+        // we should start removing values in the beginning of the list
+        int valuesPerTimestep = m_histogramValues.size() / m_histogramAverageCount;
+        m_histogramValues.erase(m_histogramValues.begin(), m_histogramValues.begin() + valuesPerTimestep);
+    }
+    m_timesteps++;
 }
 
 int Statistic::bins() const
@@ -43,6 +48,23 @@ void Statistic::save(QString filename)
         float y = m_points[i].y();
         stream << x << " " << y << "\n";
     }
+    file.close();
+}
+
+void Statistic::saveHistogramValues(QUrl filename)
+{
+    QFile file(filename.toLocalFile());
+    if(!file.open(QFileDevice::WriteOnly | QFileDevice::Text)) {
+        qDebug() << "Error, could not not save file " << filename;
+        return;
+    }
+    qDebug() << "Saved histogram values to " << filename;
+
+    QTextStream stream(&file);
+    for(int i=0; i<m_histogramValues.count(); i++) {
+        stream << m_histogramValues[i] << " ";
+    }
+    stream << "\n";
     file.close();
 }
 
@@ -164,7 +186,7 @@ QString Statistic::name() const
     return m_name;
 }
 
-QVector<QPointF> &Statistic::points()
+QList<QPointF> &Statistic::points()
 {
     return m_points;
 }
@@ -246,6 +268,11 @@ void Statistic::updateSeries(QAbstractSeries *series) {
     }
 }
 
+int Statistic::histogramAverageCount() const
+{
+    return m_histogramAverageCount;
+}
+
 void Statistic::setName(QString name)
 {
     if (m_name == name)
@@ -255,11 +282,20 @@ void Statistic::setName(QString name)
     emit nameChanged(name);
 }
 
-void Statistic::setPoints(QVector<QPointF> points)
+void Statistic::setPoints(QList<QPointF> points)
 {
     if (m_points == points)
         return;
 
     m_points = points;
     emit pointsChanged(points);
+}
+
+void Statistic::setHistogramAverageCount(int histogramAverageCount)
+{
+    if (m_histogramAverageCount == histogramAverageCount)
+        return;
+
+    m_histogramAverageCount = histogramAverageCount;
+    emit histogramAverageCountChanged(histogramAverageCount);
 }
