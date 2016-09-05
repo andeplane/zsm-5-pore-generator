@@ -1,6 +1,8 @@
 #ifndef MONTECARLO_H
 #define MONTECARLO_H
+#include <QFile>
 #include <QObject>
+#include <fstream>
 #include "zsm5geometry.h"
 #include "statistics/statistics.h"
 
@@ -16,7 +18,15 @@ class MonteCarlo : public QObject
     Q_PROPERTY(int accepted READ accepted WRITE setAccepted NOTIFY acceptedChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
     Q_PROPERTY(float chiSquared READ chiSquared WRITE setChiSquared NOTIFY chiSquaredChanged)
+    Q_PROPERTY(float targetAcceptanceRatio READ targetAcceptanceRatio WRITE setTargetAcceptanceRatio NOTIFY targetAcceptanceRatioChanged)
+    Q_PROPERTY(float acceptanceRatio READ acceptanceRatio WRITE setAcceptanceRatio NOTIFY acceptanceRatioChanged)
+    Q_PROPERTY(float acceptanceRatioAdjustmentTimeScale READ acceptanceRatioAdjustmentTimeScale WRITE setAcceptanceRatioAdjustmentTimeScale NOTIFY acceptanceRatioAdjustmentTimeScaleChanged)
+    Q_PROPERTY(QString filename READ filename WRITE setFilename NOTIFY filenameChanged)
+private:
+    QFile m_file;
     Zsm5geometry* m_geometry = nullptr;
+    float m_acceptanceRatio = 1;
+    float m_targetAcceptanceRatio = 0.7;
     float m_standardDeviation = 1.0;
     float m_chiSquared = 0.0;
     float m_temperature = 1.0;
@@ -26,7 +36,11 @@ class MonteCarlo : public QObject
     Statistic* m_model = nullptr;
     Statistic* m_data = nullptr;
     bool m_debug = false;
+    QString m_filename;
+    float m_acceptanceRatioAdjustmentTimeScale = 0.1;
+    void updateRandomWalkFraction();
 
+    void writeToFile();
 public:
     MonteCarlo();
     Zsm5geometry* geometry() const;
@@ -40,8 +54,10 @@ public:
     bool running() const;
     float acceptanceRatio();
     float chiSquared() const;
-
     void setDebug(bool debug);
+    float targetAcceptanceRatio() const;
+    float acceptanceRatioAdjustmentTimeScale() const;
+    QString filename() const;
 
 public slots:
     void setGeometry(Zsm5geometry* geometry);
@@ -53,6 +69,10 @@ public slots:
     void setModel(Statistic* model);
     void setData(Statistic* data);
     void setChiSquared(float chiSquared);
+    void setTargetAcceptanceRatio(float targetAcceptanceRatio);
+    void setAcceptanceRatio(float acceptanceRatio);
+    void setAcceptanceRatioAdjustmentTimeScale(float acceptanceRatioAdjustmentTimeScale);
+    void setFilename(QString filename);
 
 signals:
     void geometryChanged(Zsm5geometry* geometry);
@@ -64,6 +84,10 @@ signals:
     void modelChanged(Statistic* model);
     void dataChanged(Statistic* data);
     void chiSquaredChanged(float chiSquared);
+    void targetAcceptanceRatioChanged(float targetAcceptanceRatio);
+    void acceptanceRatioChanged(float acceptanceRatio);
+    void acceptanceRatioAdjustmentTimeScaleChanged(float acceptanceRatioAdjustmentTimeScale);
+    void filenameChanged(QString filename);
 };
 
 #endif // MONTECARLO_H

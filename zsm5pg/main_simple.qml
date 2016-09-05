@@ -44,7 +44,7 @@ Window {
         for(var i=0; i<modelStatistic.bins; i++) {
             var x = modelStatistic.xValues[i]
             var y = modelStatistic.yValues[i]
-            model.append(x,y)
+            if(!isNaN(x) && !isNaN(x)) model.append(x,y)
         }
     }
 
@@ -55,7 +55,7 @@ Window {
         for(var i=0; i<currentStatistic.bins; i++) {
             var x = currentStatistic.xValues[i]
             var y = currentStatistic.yValues[i]
-            psd.append(x,y)
+            if(!isNaN(x) && !isNaN(x)) psd.append(x,y)
         }
     }
 
@@ -64,7 +64,7 @@ Window {
         for(var i=0; i<dataStatistic.bins; i++) {
             var x = dataStatistic.xValues[i]
             var y = dataStatistic.yValues[i]
-            data.append(x,y)
+            if(!isNaN(x) && !isNaN(x)) data.append(x,y)
         }
     }
 
@@ -117,21 +117,23 @@ Window {
         for(var i=0; i<dataStatistic.bins; i++) {
             var x = dataStatistic.xValues[i]
             var y = dataStatistic.yValues[i]
-
-            xMin = Math.min(xMin, x)
-            xMax = Math.max(xMax, x)
-            yMin = Math.min(yMin, y)
-            yMax = Math.max(yMax, y)
+            if(!isNaN(x) && !isNaN(x)) {
+                xMin = Math.min(xMin, x)
+                xMax = Math.max(xMax, x)
+                yMin = Math.min(yMin, y)
+                yMax = Math.max(yMax, y)
+            }
         }
 
         for(var i=0; i<modelStatistic.bins; i++) {
             var x = modelStatistic.xValues[i]
             var y = modelStatistic.yValues[i]
-
-            xMin = Math.min(xMin, x)
-            xMax = Math.max(xMax, x)
-            yMin = Math.min(yMin, y)
-            yMax = Math.max(yMax, y)
+            if(!isNaN(x) && !isNaN(x))  {
+                xMin = Math.min(xMin, x)
+                xMax = Math.max(xMax, x)
+                yMin = Math.min(yMin, y)
+                yMax = Math.max(yMax, y)
+            }
         }
 
         if(isNaN(xMin) || isNaN(xMax) || isNaN(yMin) || isNaN(yMax)) return;
@@ -191,7 +193,7 @@ Window {
         width: parent.width*0.5
         height: parent.height
         antialiasing: true
-        title: currentStatistic.name
+        title: currentStatistic ? currentStatistic.name : ""
 
         LineSeries {
             id: psd
@@ -203,16 +205,16 @@ Window {
         ValueAxis {
             id: __axisX
             min: 0
-            max: currentStatistic.max
+            max: currentStatistic ? currentStatistic.max : 1
             tickCount: 5
-            titleText: currentStatistic.xLabel
+            titleText: currentStatistic ? currentStatistic.xLabel : ""
         }
         ValueAxis {
             id: __axisY
             min: 0
             max: 2.0
             tickCount: 5
-            titleText: currentStatistic.yLabel
+            titleText: currentStatistic ? currentStatistic.yLabel : ""
         }
     }
 

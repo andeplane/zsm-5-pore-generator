@@ -50,8 +50,8 @@ public:
     float max() const;
     void save(QString filename);
     void load(QString filename);
-    virtual double eval(double x);
     double chiSquared(Statistic *statistic);
+    virtual double eval(double x);
     void emitReady();
     void setXValuesRaw(const QVector<float> &xValuesRaw);
     void setYValuesRaw(const QVector<float> &yValuesRaw);

@@ -45,9 +45,9 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         float dx = Random::nextGaussianf(0, standardDeviation);
         float dy = Random::nextGaussianf(0, standardDeviation);
         float dz = Random::nextGaussianf(0, standardDeviation);
-        if(m_deltaXVector[i] + dx > 2 && Random::nextFloat() < 1.0) m_deltaXVector[i] += dx;
-        if(m_deltaYVector[i] + dy > 2 && Random::nextFloat() < 1.0) m_deltaYVector[i] += dy;
-        if(m_deltaZVector[i] + dz > 2 && Random::nextFloat() < 1.0) m_deltaZVector[i] += dz;
+        if(m_deltaXVector[i] + dx > 2 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
+        if(m_deltaYVector[i] + dy > 2 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
+        if(m_deltaZVector[i] + dz > 2 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
     }
 }
 
@@ -71,6 +71,11 @@ void Zsm5geometry::resize(int newNumberOfPlanes) {
     }
 
     setPlanesPerDimension(newNumberOfPlanes);
+}
+
+float Zsm5geometry::randomWalkFraction() const
+{
+    return m_randomWalkFraction;
 }
 
 void Zsm5geometry::save(QString filename)
@@ -129,6 +134,18 @@ void Zsm5geometry::load(QString filename)
     }
 }
 
+QVector<float> &Zsm5geometry::deltaXVector() { return m_deltaXVector; }
+
+QVector<float> &Zsm5geometry::deltaYVector() { return m_deltaYVector; }
+
+QVector<float> &Zsm5geometry::deltaZVector() { return m_deltaZVector; }
+
+void Zsm5geometry::setDeltaXVector(const QVector<float> &deltaX) { m_deltaXVector = deltaX; }
+
+void Zsm5geometry::setDeltaYVector(const QVector<float> &deltaY) { m_deltaYVector = deltaY; }
+
+void Zsm5geometry::setDeltaZVector(const QVector<float> &deltaZ) { m_deltaZVector = deltaZ; }
+
 float Zsm5geometry::lengthScale() const
 {
     return m_lengthScale;
@@ -154,4 +171,13 @@ void Zsm5geometry::setLengthScale(float lengthScale)
 
     m_lengthScale = lengthScale;
     emit lengthScaleChanged(lengthScale);
+}
+
+void Zsm5geometry::setRandomWalkFraction(float randomWalkFraction)
+{
+    if (m_randomWalkFraction == randomWalkFraction)
+        return;
+
+    m_randomWalkFraction = randomWalkFraction;
+    emit randomWalkFractionChanged(randomWalkFraction);
 }

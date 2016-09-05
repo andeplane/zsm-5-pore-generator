@@ -140,13 +140,17 @@ double Statistic::eval(double x)
 double Statistic::chiSquared(Statistic *statistic)
 {
     double chiSquared = 0;
+    double sum = 0;
     for(int bin = 0; bin<m_xValuesRaw.size(); bin++) {
         double x = m_xValuesRaw[bin];
         double y_this = m_yValuesRaw[bin];
         double y_other = statistic->eval(x);
-        double delta = y_this - y_other;
+        double delta = (y_this - y_other) / (y_other + std::numeric_limits<double>::min());
+        // double delta = (y_this - y_other);
+        // sum += abs(y_other);
         chiSquared += delta*delta;
     }
+    // return chiSquared / sum;
     return chiSquared;
 }
 

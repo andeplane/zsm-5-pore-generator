@@ -14,7 +14,7 @@ NoGUI::NoGUI()
     m_poreSizeDistribution = new PoreSizeStatistic();
     m_poreSizeDistribution->setMin(0);
     m_poreSizeDistribution->setMax(20);
-    m_poreSizeDistribution->setBins(30);
+    m_poreSizeDistribution->setBins(100);
 
     m_cumulativeVolume = new CumulativeVolume();
     m_cumulativeVolume->setMin(0);
@@ -24,7 +24,7 @@ NoGUI::NoGUI()
     m_dvlogd = new DVDLogd();
     m_dvlogd->setMin(0);
     m_dvlogd->setMax(20);
-    m_dvlogd->setBins(30);
+    m_dvlogd->setBins(100);
 
     m_lengthRatio = new LengthRatio();
     m_lengthRatio->setMin(0);
@@ -105,9 +105,17 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         geometry->resize(planesPerDimension);
     }
 
+    float randomWalkFraction = iniFile.getDouble("randomWalkFraction");
+    geometry->setRandomWalkFraction(randomWalkFraction);
+
     statistic->setMin(xMin);
     statistic->setMax(xMin + 3*delta);
     statistic->setBins(bins);
+    m_poreSizeDistribution->setBins(bins);
+    m_cumulativeVolume->setBins(bins);
+    m_dvlogd->setBins(bins);
+    m_lengthRatio->setBins(bins);
+    monteCarlo->setFilename(QString("%1/%2").arg(m_filepath).arg(iniFile.getString("mcFilename")));
     monteCarlo->setDebug(iniFile.getBool("verbose"));
     monteCarlo->setModel(statistic);
     monteCarlo->setRunning(true);
@@ -131,8 +139,8 @@ void NoGUI::run() {
         if( (step % printEvery) == 0) {
             double timeLeft = m_elapsedTime / (step+1) * (steps-step) / 1000.; // seconds
             QTextStream logStream(&m_log);
-            qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.";
-            logStream << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.\n";
+            qDebug() << "MC step " << step << "/" << steps << ". χ^2: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << " and random walk fraction " << geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";
+            logStream << "MC step " << step << "/" << steps << ". χ^2: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << " and random walk fraction " << geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.\n";
         }
     }
 
@@ -188,8 +196,8 @@ bool NoGUI::tick()
     if( (step % printEvery) == 0) {
         double timeLeft = m_elapsedTime / (step+1) * (steps-step) / 1000.; // seconds
         QTextStream logStream(&m_log);
-        qDebug() << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.";
-        logStream << "MC step " << step << " of " << steps << ". Current chi squared: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << ". Estimated time left: " << timeLeft << " seconds.\n";
+        qDebug() << "MC step " << step << "/" << steps << ". χ^2: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << " and random walk fraction " << geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";
+        logStream << "MC step " << step << "/" << steps << ". χ^2: " << monteCarlo->chiSquared() << " with acceptance ratio " << monteCarlo->acceptanceRatio() << " and random walk fraction " << geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.\n";
         m_poreSizeDistribution->compute(geometry);
         m_poreSizeDistribution->updateQML();
 
