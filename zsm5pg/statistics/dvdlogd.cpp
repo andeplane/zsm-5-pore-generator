@@ -1,5 +1,5 @@
 #include "dvdlogd.h"
-#include "../zsm5geometry.h"
+#include "../planegeometry.h"
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort_vector.h>
 #include <cmath>
@@ -13,7 +13,7 @@ DVDLogd::DVDLogd()
 }
 
 
-void DVDLogd::compute(Zsm5geometry *geometry)
+void DVDLogd::compute(PlaneGeometry *geometry)
 {
     if(!geometry) return;
 

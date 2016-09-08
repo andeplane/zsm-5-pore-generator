@@ -1,5 +1,5 @@
 #include "nogui.h"
-#include "zsm5geometry.h"
+#include "planegeometry.h"
 #include "montecarlo.h"
 #include "statistics/statistics.h"
 #include <QString>
@@ -8,7 +8,7 @@
 #include "random.h"
 NoGUI::NoGUI()
 {
-    geometry = new Zsm5geometry();
+    geometry = new PlaneGeometry();
     monteCarlo = new MonteCarlo();
     m_currentStatistic = new PoreSizeStatistic();
     m_poreSizeDistribution = new PoreSizeStatistic();
@@ -127,13 +127,19 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     monteCarlo->data()->updateQML();
 
     m_concentration = new Concentration(MDInput);
-
-
     m_concentration->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_cumulativeVolume->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_dvlogd->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_lengthRatio->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_poreSizeDistribution->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
+
+    geometry->setMode(iniFile.getInt("mode"));
+    m_concentration->setMode(iniFile.getInt("mode"));
+    m_cumulativeVolume->setMode(iniFile.getInt("mode"));
+    m_dvlogd->setMode(iniFile.getInt("mode"));
+    m_lengthRatio->setMode(iniFile.getInt("mode"));
+    m_poreSizeDistribution->setMode(iniFile.getInt("mode"));
+    m_currentStatistic->setMode(iniFile.getInt("mode"));
 }
 
 void NoGUI::run() {

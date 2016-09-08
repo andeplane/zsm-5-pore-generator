@@ -13,7 +13,7 @@ public:
 
     // Statistic interface
 public:
-    virtual void compute(class Zsm5geometry *geometry) override;
+    virtual void compute(class PlaneGeometry *geometry) override;
 };
 
 #endif // DVDLOGD_H

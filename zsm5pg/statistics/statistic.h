@@ -19,13 +19,16 @@ class Statistic : public QObject
     Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
     Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
     Q_PROPERTY(int bins READ bins WRITE setBins NOTIFY binsChanged)
+    Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
 private:
     void normalizeHistogram();
     float m_min = 0;
     float m_max = 10;
     int m_histogramAverageCount;
     int m_timesteps = 0;
+
 protected:
+    int m_mode = 1;
     int m_bins = 100;
     QList<float> m_histogramValues;
     QList<QPointF> m_points;
@@ -35,7 +38,7 @@ protected:
 
 public:
     Statistic();
-    virtual void compute(class Zsm5geometry *geometry);
+    virtual void compute(class PlaneGeometry *geometry);
     void computeHistogram();
     int bins() const;
     float min() const;
@@ -54,6 +57,8 @@ public:
     Q_INVOKABLE void updateSeries(QAbstractSeries *series);
     int histogramAverageCount() const;
 
+    int mode() const;
+
 public slots:
     void setBins(int bins);
     void setMin(float min);
@@ -63,6 +68,8 @@ public slots:
     void setName(QString name);
     void setPoints(QList<QPointF> points);
     void setHistogramAverageCount(int histogramAverageCount);
+
+    void setMode(int mode);
 
 signals:
     void binsChanged(int bins);
@@ -74,6 +81,7 @@ signals:
     void nameChanged(QString name);
     void pointsChanged(QList<QPointF> points);
     void histogramAverageCountChanged(int histogramAverageCount);
+    void modeChanged(int mode);
 };
 
 #endif // STATISTIC_H

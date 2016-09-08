@@ -3,13 +3,13 @@
 #include <QFile>
 #include <QObject>
 #include <fstream>
-#include "zsm5geometry.h"
+#include "planegeometry.h"
 #include "statistics/statistics.h"
 
 class MonteCarlo : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(Zsm5geometry* geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+    Q_PROPERTY(PlaneGeometry* geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
     Q_PROPERTY(Statistic* model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(Statistic* data READ data WRITE setData NOTIFY dataChanged)
     Q_PROPERTY(float standardDeviation READ standardDeviation WRITE setStandardDeviation NOTIFY standardDeviationChanged)
@@ -24,7 +24,7 @@ class MonteCarlo : public QObject
     Q_PROPERTY(QString filename READ filename WRITE setFilename NOTIFY filenameChanged)
 private:
     QFile m_file;
-    Zsm5geometry* m_geometry = nullptr;
+    PlaneGeometry* m_geometry = nullptr;
     float m_acceptanceRatio = 1;
     float m_targetAcceptanceRatio = 0.7;
     float m_standardDeviation = 1.0;
@@ -43,7 +43,7 @@ private:
     void writeToFile();
 public:
     MonteCarlo();
-    Zsm5geometry* geometry() const;
+    PlaneGeometry* geometry() const;
     Statistic* model() const;
     Statistic* data() const;
     void tick();
@@ -60,7 +60,7 @@ public:
     QString filename() const;
 
 public slots:
-    void setGeometry(Zsm5geometry* geometry);
+    void setGeometry(PlaneGeometry* geometry);
     void setStandardDeviation(float standardDeviation);
     void setTemperature(float temperature);
     void setSteps(int steps);
@@ -75,7 +75,7 @@ public slots:
     void setFilename(QString filename);
 
 signals:
-    void geometryChanged(Zsm5geometry* geometry);
+    void geometryChanged(PlaneGeometry* geometry);
     void standardDeviationChanged(float standardDeviation);
     void temperatureChanged(float temperature);
     void stepsChanged(int steps);

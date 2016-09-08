@@ -3,7 +3,6 @@
 
 #include <QVector>
 #include "statistic.h"
-#include "zsm5geometry.h"
 class PoreVolumeStatistic : public Statistic
 {
     Q_OBJECT
@@ -14,7 +13,7 @@ public:
     PoreVolumeStatistic();
 
 public:
-    virtual void compute(Zsm5geometry *geometry) override;
+    virtual void compute(class PlaneGeometry *geometry) override;
 };
 
 #endif // POREVOLUMESTATISTIC_H

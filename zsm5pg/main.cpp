@@ -5,7 +5,7 @@
 #include <QVector>
 #include "mysimulator.h"
 #include "statistics/statistics.h"
-#include "zsm5geometry.h"
+#include "planegeometry.h"
 #include "montecarlo.h"
 #include "inifile.h"
 #include "nogui.h"
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         qmlRegisterType<MySimulator>("MySimulator", 1, 0, "MySimulator");
         qmlRegisterType<PoreSizeStatistic>("Zeolite", 1, 0, "PoreSizeStatistic");
         qmlRegisterType<PoreVolumeStatistic>("Zeolite", 1, 0, "PoreVolumeStatistic");
-        qmlRegisterType<Zsm5geometry>("Zeolite", 1, 0, "Zsm5geometry");
+        qmlRegisterType<PlaneGeometry>("Zeolite", 1, 0, "Zsm5geometry");
         qmlRegisterType<MonteCarlo>("Zeolite", 1, 0, "MonteCarlo");
         qmlRegisterType<Statistic>("Zeolite", 1, 0, "Statistic");
 

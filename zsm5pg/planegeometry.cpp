@@ -1,32 +1,32 @@
-#include "zsm5geometry.h"
+#include "planegeometry.h"
 #include "random.h"
 #include <cstdlib>
 #include <QDebug>
 #include <QFile>
 #include <QUrl>
-Zsm5geometry::Zsm5geometry()
+PlaneGeometry::PlaneGeometry()
 {
 
 }
 
-Zsm5geometry::~Zsm5geometry()
+PlaneGeometry::~PlaneGeometry()
 {
     m_deltaXVector.clear();
     m_deltaYVector.clear();
     m_deltaZVector.clear();
 }
 
-int Zsm5geometry::planesPerDimension() const
+int PlaneGeometry::planesPerDimension() const
 {
     return m_planesPerDimension;
 }
 
-void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
+void PlaneGeometry::setPlanesPerDimension(int planesPerDimension)
 {
     m_planesPerDimension = planesPerDimension;
 }
 
-void Zsm5geometry::reset(float min, float max) {
+void PlaneGeometry::reset(float min, float max) {
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
@@ -39,19 +39,32 @@ void Zsm5geometry::reset(float min, float max) {
     }
 }
 
-void Zsm5geometry::randomWalkStep(float standardDeviation)
+void PlaneGeometry::randomWalkStep(float standardDeviation)
 {
-    for(int i=0; i<m_planesPerDimension; i++) {
-        float dx = Random::nextGaussianf(0, standardDeviation);
-        float dy = Random::nextGaussianf(0, standardDeviation);
-        float dz = Random::nextGaussianf(0, standardDeviation);
-        if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
-        if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
-        if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+    if(m_mode == 0) {
+        qDebug() << "RW mode 0";
+        for(int i=0; i<m_planesPerDimension; i++) {
+            float dx = Random::nextGaussianf(0, standardDeviation);
+            float dy = Random::nextGaussianf(0, standardDeviation);
+            float dz = Random::nextGaussianf(0, standardDeviation);
+            if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
+            if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
+            if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+        }
+    } else {
+        qDebug() << "RW mode 1";
+        for(int i=0; i<m_planesPerDimension; i++) {
+            int dx = Random::nextInt(-1, 1);
+            int dy = Random::nextInt(-1, 1);
+            int dz = Random::nextInt(-1, 1);
+            if(m_deltaXVector[i] + dx >= 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
+            if(m_deltaYVector[i] + dy >= 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
+            if(m_deltaZVector[i] + dz >= 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+        }
     }
 }
 
-void Zsm5geometry::resize(int newNumberOfPlanes) {
+void PlaneGeometry::resize(int newNumberOfPlanes) {
     if(newNumberOfPlanes > m_planesPerDimension) {
         int delta = newNumberOfPlanes - m_planesPerDimension;
         m_deltaXVector.resize(m_planesPerDimension + delta);
@@ -73,12 +86,17 @@ void Zsm5geometry::resize(int newNumberOfPlanes) {
     setPlanesPerDimension(newNumberOfPlanes);
 }
 
-float Zsm5geometry::randomWalkFraction() const
+float PlaneGeometry::randomWalkFraction() const
 {
     return m_randomWalkFraction;
 }
 
-void Zsm5geometry::save(QString filename)
+int PlaneGeometry::mode() const
+{
+    return m_mode;
+}
+
+void PlaneGeometry::save(QString filename)
 {
     //QFile file(QUrl(filename).toLocalFile());
     QFile file(filename);
@@ -95,7 +113,7 @@ void Zsm5geometry::save(QString filename)
     file.close();
 }
 
-void Zsm5geometry::load(QString filename)
+void PlaneGeometry::load(QString filename)
 {
     //QFile file(QUrl(filename).toLocalFile());
     QFile file(filename);
@@ -134,24 +152,24 @@ void Zsm5geometry::load(QString filename)
     }
 }
 
-QVector<float> &Zsm5geometry::deltaXVector() { return m_deltaXVector; }
+QVector<float> &PlaneGeometry::deltaXVector() { return m_deltaXVector; }
 
-QVector<float> &Zsm5geometry::deltaYVector() { return m_deltaYVector; }
+QVector<float> &PlaneGeometry::deltaYVector() { return m_deltaYVector; }
 
-QVector<float> &Zsm5geometry::deltaZVector() { return m_deltaZVector; }
+QVector<float> &PlaneGeometry::deltaZVector() { return m_deltaZVector; }
 
-void Zsm5geometry::setDeltaXVector(const QVector<float> &deltaX) { m_deltaXVector = deltaX; }
+void PlaneGeometry::setDeltaXVector(const QVector<float> &deltaX) { m_deltaXVector = deltaX; }
 
-void Zsm5geometry::setDeltaYVector(const QVector<float> &deltaY) { m_deltaYVector = deltaY; }
+void PlaneGeometry::setDeltaYVector(const QVector<float> &deltaY) { m_deltaYVector = deltaY; }
 
-void Zsm5geometry::setDeltaZVector(const QVector<float> &deltaZ) { m_deltaZVector = deltaZ; }
+void PlaneGeometry::setDeltaZVector(const QVector<float> &deltaZ) { m_deltaZVector = deltaZ; }
 
-float Zsm5geometry::lengthScale() const
+float PlaneGeometry::lengthScale() const
 {
     return m_lengthScale;
 }
 
-double Zsm5geometry::totalVolume()
+double PlaneGeometry::totalVolume()
 {
     double L[3];
     L[0] = 0; L[1] = 0; L[2] = 0;
@@ -164,7 +182,7 @@ double Zsm5geometry::totalVolume()
     return L[0]*L[1]*L[2];
 }
 
-void Zsm5geometry::setLengthScale(float lengthScale)
+void PlaneGeometry::setLengthScale(float lengthScale)
 {
     if (m_lengthScale == lengthScale)
         return;
@@ -173,11 +191,20 @@ void Zsm5geometry::setLengthScale(float lengthScale)
     emit lengthScaleChanged(lengthScale);
 }
 
-void Zsm5geometry::setRandomWalkFraction(float randomWalkFraction)
+void PlaneGeometry::setRandomWalkFraction(float randomWalkFraction)
 {
     if (m_randomWalkFraction == randomWalkFraction)
         return;
 
     m_randomWalkFraction = randomWalkFraction;
     emit randomWalkFractionChanged(randomWalkFraction);
+}
+
+void PlaneGeometry::setMode(int mode)
+{
+    if (m_mode == mode)
+        return;
+
+    m_mode = mode;
+    emit modeChanged(mode);
 }

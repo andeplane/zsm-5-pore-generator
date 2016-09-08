@@ -21,7 +21,7 @@ MonteCarlo::MonteCarlo()
 
 }
 
-Zsm5geometry *MonteCarlo::geometry() const
+PlaneGeometry *MonteCarlo::geometry() const
 {
     return m_geometry;
 }
@@ -150,7 +150,7 @@ Statistic *MonteCarlo::data() const
     return m_data;
 }
 
-void MonteCarlo::setGeometry(Zsm5geometry *geometry)
+void MonteCarlo::setGeometry(PlaneGeometry *geometry)
 {
     if (m_geometry == geometry)
         return;

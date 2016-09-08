@@ -1,5 +1,5 @@
 #include "lengthratio.h"
-#include "../zsm5geometry.h"
+#include "../planegeometry.h"
 #include <QDebug>
 LengthRatio::LengthRatio()
 {
@@ -8,8 +8,7 @@ LengthRatio::LengthRatio()
     m_name = "Length ratio";
 }
 
-
-void LengthRatio::compute(Zsm5geometry *geometry)
+void LengthRatio::compute(PlaneGeometry *geometry)
 {
     if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();

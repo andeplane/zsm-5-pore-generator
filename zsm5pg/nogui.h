@@ -35,7 +35,7 @@ public:
     int steps = 0; // total timesteps
     int step = 0; // current timestep
     int printEvery = 100;
-    class Zsm5geometry *geometry = nullptr;
+    class PlaneGeometry *geometry = nullptr;
     class Statistic *m_currentStatistic = nullptr;
     class MonteCarlo* monteCarlo = nullptr;
     void loadIniFile(IniFile &iniFile);

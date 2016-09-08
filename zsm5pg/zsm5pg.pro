@@ -8,7 +8,6 @@ LIBS += -L/usr/local/lib -lgsl
 # DEFINES += POREISCBRT
 SOURCES += main.cpp \
     mysimulator.cpp \
-    zsm5geometry.cpp \
     statistics/statistic.cpp \
     statistics/poresizestatistic.cpp \
     montecarlo.cpp \
@@ -19,7 +18,9 @@ SOURCES += main.cpp \
     statistics/concentration.cpp \
     statistics/cumulativevolume.cpp \
     statistics/lengthratio.cpp \
-    statistics/dvdlogd.cpp
+    statistics/dvdlogd.cpp \
+    planegeometry.cpp \
+    geometry.cpp
 
 RESOURCES += qml.qrc
 
@@ -32,7 +33,6 @@ include(../SimVis/library_deployment.pri)
 
 HEADERS += \
     mysimulator.h \
-    zsm5geometry.h \
     statistics/statistic.h \
     statistics/poresizestatistic.h \
     random.h \
@@ -45,4 +45,6 @@ HEADERS += \
     statistics/concentration.h \
     statistics/cumulativevolume.h \
     statistics/lengthratio.h \
-    statistics/dvdlogd.h
+    statistics/dvdlogd.h \
+    planegeometry.h \
+    geometry.h

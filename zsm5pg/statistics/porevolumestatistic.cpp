@@ -1,5 +1,5 @@
 #include "porevolumestatistic.h"
-
+#include "planegeometry.h"
 PoreVolumeStatistic::PoreVolumeStatistic()
 {
     m_name = "PoreVolume";
@@ -7,7 +7,7 @@ PoreVolumeStatistic::PoreVolumeStatistic()
     m_yLabel = "P(V)";
 }
 
-void PoreVolumeStatistic::compute(Zsm5geometry *geometry)
+void PoreVolumeStatistic::compute(PlaneGeometry *geometry)
 {
     if(!geometry) return;
     Statistic::compute(geometry);

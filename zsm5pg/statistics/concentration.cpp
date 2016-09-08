@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <cmath>
 #include <QTextStream>
-#include "../zsm5geometry.h"
+#include "../planegeometry.h"
 Concentration::Concentration(QString adsorptionMatrixFilename)
 {
     QFile file(adsorptionMatrixFilename);
@@ -44,14 +44,9 @@ Concentration::Concentration(QString adsorptionMatrixFilename)
     m_name = "Concentration";
     m_xLabel = "Pressure [p/p0]";
     m_yLabel = "V_ads/cm^3";
-
 }
 
-
-void Concentration::compute(Zsm5geometry *geometry)
-{
-    if(!geometry) return;
-
+void Concentration::computeMode0(PlaneGeometry *geometry) {
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -153,4 +148,89 @@ void Concentration::compute(Zsm5geometry *geometry)
         m_points.push_back(QPointF(m_pressures[i], volumeAdsorbedCm3PerMassZeolite));
     }
     setBins(m_points.size());
+}
+
+void Concentration::computeMode1(PlaneGeometry *geometry) {
+    QVector<float> &x = geometry->deltaXVector();
+    QVector<float> &y = geometry->deltaYVector();
+    QVector<float> &z = geometry->deltaZVector();
+
+    QVector<float> numberOfAdsorbedAtoms;
+    numberOfAdsorbedAtoms.resize(m_pressures.size());
+    for(float &v : numberOfAdsorbedAtoms) {
+        v = 0.0;
+    }
+
+    int outside = 0;
+    int inside = 0;
+    double totalArea = 0.0;
+    for(int i=0; i<x.size(); i++) {
+        float deltas[3];
+        deltas[0] = x[i];
+        deltas[1] = y[i];
+        deltas[2] = z[i];
+        for(int a=0; a<3; a++) {
+
+            float poreSize = deltas[a];
+            const float poreVolume = poreSize*poreSize*poreSize;
+            const float poreArea = 6*poreSize*poreSize;
+
+            int H = round(poreSize);  // 1
+
+            if(H>19) {
+                H = 19; // force this
+            }
+
+            if(H>=2 && H<=19) {
+                for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+                    float N_ads = m_values[H][pIndex]/m_volumes[H]*poreVolume;
+                    numberOfAdsorbedAtoms[pIndex] += N_ads;
+                    totalArea += poreArea;
+                }
+                inside++;
+            } else outside++;
+        }
+    }
+
+    float cubicCentimetersPerLiter = 1000;
+    float argonMass = 39.948;
+    float avogadro = 6.0221409e+23;
+    float argonDensity = 1.784;
+    float argonLiterPerMol = argonMass / argonDensity;
+
+    float thickness  = 1.5;
+    float totalZeoliteVolume = totalArea*thickness;
+    float volumeOfZeoliteUnitCell = 5.21128;
+    float massOfZeoliteUnitCell = 192*15.9994 + 96*28.0855;
+    float numberOfZeoliteUnitCells = totalZeoliteVolume / volumeOfZeoliteUnitCell;
+    float totalZeoliteMass = numberOfZeoliteUnitCells*massOfZeoliteUnitCell;
+    float totalZeoliteMassGrams = totalZeoliteMass/avogadro;
+
+    int numberOfUnitCellsBulkSystem = 200; // This is from MD.
+    // float totalZeoliteMassBulkSystemGrams = numberOfUnitCellsBulkSystem*massOfZeoliteUnitCell/avogadro;
+    float totalZeoliteVolumeBulkSystem = volumeOfZeoliteUnitCell*numberOfUnitCellsBulkSystem;
+    float bulkSystemFactor = totalZeoliteVolume / totalZeoliteVolumeBulkSystem;
+
+    m_points.clear();
+    for(int i=0; i<m_pressures.size(); i++) {
+        float N_adsorbed = numberOfAdsorbedAtoms[i];
+        N_adsorbed += bulkSystemFactor*m_values[1][i];
+        // N_adsorbed *= 1.41;
+        float N_molesAdsorbed = N_adsorbed/avogadro;
+        float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
+        float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;
+        float volumeAdsorbedCm3PerMassZeolite = volumeAdsorbedCm3 / totalZeoliteMassGrams;
+        m_points.push_back(QPointF(m_pressures[i], volumeAdsorbedCm3PerMassZeolite));
+    }
+    setBins(m_points.size());
+}
+
+void Concentration::compute(PlaneGeometry *geometry)
+{
+    if(!geometry) return;
+    if(m_mode==0) {
+        computeMode0(geometry);
+    } else {
+        computeMode1(geometry);
+    }
 }

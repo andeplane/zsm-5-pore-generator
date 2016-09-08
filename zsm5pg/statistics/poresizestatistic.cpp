@@ -1,4 +1,5 @@
 #include "poresizestatistic.h"
+#include "planegeometry.h"
 #include <cmath>
 #include <QDebug>
 // #define POREISCBRT
@@ -9,9 +10,7 @@ PoreSizeStatistic::PoreSizeStatistic()
     m_yLabel = "P(d)";
 }
 
-void PoreSizeStatistic::compute(Zsm5geometry *geometry)
-{
-    if(!geometry) return;
+void PoreSizeStatistic::computeMode0(PlaneGeometry *geometry) {
     Statistic::compute(geometry);
     qDebug() << "Histogram size: " << m_histogramValues.size();
     QVector<float> &x = geometry->deltaXVector();
@@ -56,6 +55,41 @@ void PoreSizeStatistic::compute(Zsm5geometry *geometry)
     }
     computeHistogram();
     updateQML();
-//    qDebug() << m_xValuesRaw;
-//    qDebug() << m_yValuesRaw;
+}
+
+void PoreSizeStatistic::computeMode1(PlaneGeometry *geometry) {
+    Statistic::compute(geometry);
+    QVector<float> &x = geometry->deltaXVector();
+    QVector<float> &y = geometry->deltaYVector();
+    QVector<float> &z = geometry->deltaZVector();
+    int numberOfPores = x.size() + y.size() + z.size();
+    m_poreVolumes.resize(numberOfPores);
+    int poreIndex = 0;
+    for(int i=0; i<x.size(); i++) {
+        float poreSizes[3];
+        poreSizes[0] = x[i];
+        poreSizes[1] = y[i];
+        poreSizes[2] = z[i];
+        for(int a=0; a<3; a++) {
+            const float poreSize = poreSizes[a];
+            const float volume = poreSize*poreSize*poreSize;
+            m_poreVolumes[poreIndex++] = poreSize;
+        }
+    }
+
+    for(int i=0; i<numberOfPores; i++) {
+        m_histogramValues.push_back(m_poreVolumes[i]);
+    }
+    computeHistogram();
+    updateQML();
+}
+
+void PoreSizeStatistic::compute(PlaneGeometry *geometry)
+{
+    if(!geometry) return;
+    if(m_mode == 0) {
+        computeMode0(geometry);
+    } else {
+        computeMode1(geometry);
+    }
 }

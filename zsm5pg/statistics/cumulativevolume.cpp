@@ -1,5 +1,5 @@
 #include "cumulativevolume.h"
-#include "../zsm5geometry.h"
+#include "../planegeometry.h"
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort_vector.h>
 #include <cmath>
@@ -8,7 +8,7 @@ CumulativeVolume::CumulativeVolume()
 
 }
 
-void CumulativeVolume::compute(Zsm5geometry *geometry)
+void CumulativeVolume::compute(PlaneGeometry *geometry)
 {
     if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();
