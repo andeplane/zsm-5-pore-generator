@@ -26,9 +26,9 @@ private:
     float m_max = 10;
     int m_histogramAverageCount;
     int m_timesteps = 0;
-    int m_mode = 0;
 
 protected:
+    int m_mode = 0;
     int m_bins = 100;
     QList<float> m_histogramValues;
     QList<QPointF> m_points;

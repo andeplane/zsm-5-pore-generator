@@ -13,6 +13,8 @@ private:
     QVector<float> m_pressures;
     QVector<QVector<float>> m_values;
     QVector<float> m_volumes;
+    void computeMode0(Zsm5geometry *geometry);
+    void computeMode1(Zsm5geometry *geometry);
 };
 
 #endif // CONCENTRATION_H

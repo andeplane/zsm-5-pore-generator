@@ -216,14 +216,14 @@ bool NoGUI::tick()
         m_poreSizeDistribution->compute(geometry);
         m_poreSizeDistribution->updateQML();
 
-        m_cumulativeVolume->compute(geometry);
-        m_cumulativeVolume->updateQML();
+//        m_cumulativeVolume->compute(geometry);
+//        m_cumulativeVolume->updateQML();
 
-        m_dvlogd->compute(geometry);
-        m_dvlogd->updateQML();
+//        m_dvlogd->compute(geometry);
+//        m_dvlogd->updateQML();
 
-        m_lengthRatio->compute(geometry);
-        m_lengthRatio->updateQML();
+//        m_lengthRatio->compute(geometry);
+//        m_lengthRatio->updateQML();
 
         monteCarlo->model()->updateQML();
         m_concentration->compute(geometry);
