@@ -134,6 +134,15 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     m_dvlogd->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_lengthRatio->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_poreSizeDistribution->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
+
+    int mode = iniFile.getInt("mode");
+    m_concentration->setMode(mode);
+    m_cumulativeVolume->setMode(mode);
+    m_currentStatistic->setMode(mode);
+    geometry->setMode(mode);
+    m_dvlogd->setMode(mode);
+    m_lengthRatio->setMode(mode);
+    m_poreSizeDistribution->setMode(mode);
 }
 
 void NoGUI::run() {

@@ -41,6 +41,7 @@ void Zsm5geometry::reset(float min, float max) {
 
 void Zsm5geometry::randomWalkStep(float standardDeviation)
 {
+    if(m_mode == 0) {
     for(int i=0; i<m_planesPerDimension; i++) {
         float dx = Random::nextGaussianf(0, standardDeviation);
         float dy = Random::nextGaussianf(0, standardDeviation);
@@ -48,6 +49,16 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
         if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
         if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+    }
+    } else {
+        for(int i=0; i<m_planesPerDimension; i++) {
+            int dx = Random::nextInt(-1,1);
+            int dy = Random::nextInt(-1,1);
+            int dz = Random::nextInt(-1,1);
+            if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
+            if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
+            if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+        }
     }
 }
 
@@ -76,6 +87,11 @@ void Zsm5geometry::resize(int newNumberOfPlanes) {
 float Zsm5geometry::randomWalkFraction() const
 {
     return m_randomWalkFraction;
+}
+
+int Zsm5geometry::mode() const
+{
+    return m_mode;
 }
 
 void Zsm5geometry::save(QString filename)
@@ -180,4 +196,13 @@ void Zsm5geometry::setRandomWalkFraction(float randomWalkFraction)
 
     m_randomWalkFraction = randomWalkFraction;
     emit randomWalkFractionChanged(randomWalkFraction);
+}
+
+void Zsm5geometry::setMode(int mode)
+{
+    if (m_mode == mode)
+        return;
+
+    m_mode = mode;
+    emit modeChanged(mode);
 }

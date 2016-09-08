@@ -273,6 +273,11 @@ int Statistic::histogramAverageCount() const
     return m_histogramAverageCount;
 }
 
+int Statistic::mode() const
+{
+    return m_mode;
+}
+
 void Statistic::setName(QString name)
 {
     if (m_name == name)
@@ -298,4 +303,13 @@ void Statistic::setHistogramAverageCount(int histogramAverageCount)
 
     m_histogramAverageCount = histogramAverageCount;
     emit histogramAverageCountChanged(histogramAverageCount);
+}
+
+void Statistic::setMode(int mode)
+{
+    if (m_mode == mode)
+        return;
+
+    m_mode = mode;
+    emit modeChanged(mode);
 }

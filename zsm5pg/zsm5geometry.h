@@ -8,6 +8,7 @@ class Zsm5geometry : public QObject
     Q_PROPERTY(int planesPerDimension READ planesPerDimension WRITE setPlanesPerDimension NOTIFY planesPerDimensionChanged)
     Q_PROPERTY(float lengthScale READ lengthScale WRITE setLengthScale NOTIFY lengthScaleChanged)
     Q_PROPERTY(float randomWalkFraction READ randomWalkFraction WRITE setRandomWalkFraction NOTIFY randomWalkFractionChanged)
+    Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
 private:
     QVector<float> m_deltaXVector;
     QVector<float> m_deltaYVector;
@@ -15,6 +16,7 @@ private:
     int m_planesPerDimension = 10;
     float m_lengthScale = 5;
     float m_randomWalkFraction = 1.0;
+    int m_mode = 0;
 
 public:
     Zsm5geometry();
@@ -39,15 +41,20 @@ public:
 
     float randomWalkFraction() const;
 
+    int mode() const;
+
 public slots:
     void setLengthScale(float lengthScale);
 
     void setRandomWalkFraction(float randomWalkFraction);
 
+    void setMode(int mode);
+
 signals:
     void planesPerDimensionChanged(int planesPerDimension);
     void lengthScaleChanged(float lengthScale);
     void randomWalkFractionChanged(float randomWalkFraction);
+    void modeChanged(int mode);
 };
 
 #endif // ZSM5GEOMETRY_H
