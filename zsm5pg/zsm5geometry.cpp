@@ -51,6 +51,7 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
         if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
     }
     } else {
+        // qDebug() << "planes = [";
         for(int i=0; i<m_planesPerDimension; i++) {
             int dx = Random::nextInt(-1,1);
             int dy = Random::nextInt(-1,1);
@@ -58,7 +59,10 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
             if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
             if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
             if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+            // qDebug() << m_deltaXVector[i] << " " << m_deltaYVector[i] << " " << m_deltaZVector[i];
         }
+        // qDebug() << "];";
+
     }
 }
 

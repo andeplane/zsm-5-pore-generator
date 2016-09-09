@@ -154,8 +154,6 @@ void Concentration::computeMode0(Zsm5geometry *geometry) {
 }
 
 void Concentration::computeMode1(Zsm5geometry *geometry) {
-    if(!geometry) return;
-
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -168,56 +166,35 @@ void Concentration::computeMode1(Zsm5geometry *geometry) {
 
     int outside = 0;
     int inside = 0;
+    double totalArea = 0.0;
     for(int i=0; i<x.size(); i++) {
-        const float dx = x[i];
-        for(int j=0; j<y.size(); j++) {
-            const float dy = y[j];
-            for(int k=0; k<z.size(); k++) {
-                const float dz = z[k];
-                float poreSize = std::min(std::min(dx, dy), dz);
-                const float poreVolume = dx*dy*dz;
-#ifdef POREISCBRT
-                poreSize = cbrt(poreVolume);
-#endif
-                // int H = std::roundf(poreSize);
+        float deltas[3];
+        deltas[0] = x[i];
+        deltas[1] = y[i];
+        deltas[2] = z[i];
+        for(int a=0; a<3; a++) {
+            float poreSize = deltas[a];
+            const float poreVolume = poreSize*poreSize*poreSize;
+            const float poreArea = 6*poreSize*poreSize;
 
-                float H = poreSize;  // 1
+            int H = round(poreSize);
 
-                int H0 = poreSize; // 19
-                int H1 = int(poreSize)+1;  // 20
-                float dH = H1-H0;  // 1
-                float fraction = (H1-H) / dH;  // (20-19.5) / 1 = 0.5
-                if(H1>19) {
-                    fraction = 1.0; // 1.0
-                    H1 = 19; // force this
-                }
-
-                if(H>=2 && H<=19) {
-                    for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-                        float N_ads0 = m_values[H0][pIndex]/m_volumes[H0]*poreVolume;
-                        float N_ads1 = m_values[H1][pIndex]/m_volumes[H1]*poreVolume;
-                        float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
-                        // float N_ads = m_values[H][pIndex];
-                        numberOfAdsorbedAtoms[pIndex] += N_ads;
-                    }
-                    inside++;
-                } else outside++;
+            if(H>19) {
+                H = 19; // force this
             }
+
+            if(H>=2 && H<=19) {
+                for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+                    float N_ads = m_values[H][pIndex]/m_volumes[H]*poreVolume;
+                    numberOfAdsorbedAtoms[pIndex] += N_ads;
+                }
+                totalArea += poreArea;
+                inside++;
+            } else outside++;
         }
     }
 
-    float lx = 0;
-    float ly = 0;
-    float lz = 0;
-    for(const float &dx : x) {
-        lx += dx;
-    }
-    for(const float &dy : y) {
-        ly += dy;
-    }
-    for(const float &dz : z) {
-        lz += dz;
-    }
+    // qDebug() << "Got Nads = " << numberOfAdsorbedAtoms << " and "
 
     float cubicCentimetersPerLiter = 1000;
     float argonMass = 39.948;
@@ -225,15 +202,8 @@ void Concentration::computeMode1(Zsm5geometry *geometry) {
     float argonDensity = 1.784;
     float argonLiterPerMol = argonMass / argonDensity;
 
-    float xPlaneArea = ly*lz;
-    float yPlaneArea = lx*lz;
-    float zPlaneArea = lx*ly;
     float thickness  = 1.5;
-    float xPlaneVolume = xPlaneArea*thickness;
-    float yPlaneVolume = yPlaneArea*thickness;
-    float zPlaneVolume = zPlaneArea*thickness;
-
-    float totalZeoliteVolume = geometry->planesPerDimension()*(xPlaneVolume + yPlaneVolume + zPlaneVolume);
+    float totalZeoliteVolume = totalArea*thickness;
     float volumeOfZeoliteUnitCell = 5.21128;
     float massOfZeoliteUnitCell = 192*15.9994 + 96*28.0855;
     float numberOfZeoliteUnitCells = totalZeoliteVolume / volumeOfZeoliteUnitCell;

@@ -44,6 +44,8 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         exit(1);
     }
 
+    int mode = iniFile.getInt("mode");
+
     QString MDInput = iniFile.getString("MDInput");
     QString statisticType = iniFile.getString("statisticType");
     if(statisticType.compare("poreVolume") == 0) {
@@ -56,6 +58,7 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         qDebug() << "Error, could not find statistic type " << statisticType;
         exit(1);
     }
+    m_currentStatistic->setMode(mode);
     printEvery = iniFile.getInt("printEvery");
 
     // Monte carlo properties
@@ -88,6 +91,8 @@ void NoGUI::loadIniFile(IniFile &iniFile)
         data->load(iniFile.getString("dataType"));
         monteCarlo->setData(data);
     }
+
+    monteCarlo->data()->setMode(mode);
 
     QFileInfo fileInfo2(QString("%1/geometry.txt").arg(m_filepath));
     int planesPerDimension = iniFile.getInt("planesPerDimension");
@@ -135,7 +140,6 @@ void NoGUI::loadIniFile(IniFile &iniFile)
     m_lengthRatio->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
     m_poreSizeDistribution->setHistogramAverageCount(iniFile.getInt("histogramAverageCount"));
 
-    int mode = iniFile.getInt("mode");
     m_concentration->setMode(mode);
     m_cumulativeVolume->setMode(mode);
     m_currentStatistic->setMode(mode);
@@ -164,10 +168,11 @@ void NoGUI::run() {
 }
 
 NoGUI::~NoGUI() {
+    qDebug() << "Destructor thing";
     m_poreSizeDistribution->compute(geometry);
-    m_cumulativeVolume->compute(geometry);
-    m_dvlogd->compute(geometry);
-    m_lengthRatio->compute(geometry);
+//    m_cumulativeVolume->compute(geometry);
+//    m_dvlogd->compute(geometry);
+//    m_lengthRatio->compute(geometry);
     m_concentration->compute(geometry);
     m_model->compute(geometry);
 
@@ -175,9 +180,9 @@ NoGUI::~NoGUI() {
     if(m_data) m_data->save(QString("%1/data.txt").arg(m_filepath));
     if(m_poreSizeDistribution) m_poreSizeDistribution->save(QString("%1/poreSizeDistribution.txt").arg(m_filepath));
     if(m_concentration) m_concentration->save(QString("%1/concentration.txt").arg(m_filepath));
-    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1/cumulativeVolume.txt").arg(m_filepath));
-    if(m_dvlogd) m_dvlogd->save(QString("%1/dvlogd.txt").arg(m_filepath));
-    if(m_lengthRatio) m_lengthRatio->save(QString("%1/lengthRatio.txt").arg(m_filepath));
+//    if(m_cumulativeVolume) m_cumulativeVolume->save(QString("%1/cumulativeVolume.txt").arg(m_filepath));
+//    if(m_dvlogd) m_dvlogd->save(QString("%1/dvlogd.txt").arg(m_filepath));
+//    if(m_lengthRatio) m_lengthRatio->save(QString("%1/lengthRatio.txt").arg(m_filepath));
     if(geometry) geometry->save(QString("%1/geometry.txt").arg(m_filepath));
     QFile chiSquareFile(QString("%1/ChiSquare=%2").arg(m_filepath).arg(monteCarlo->chiSquared()));
     chiSquareFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -191,6 +196,7 @@ NoGUI::~NoGUI() {
     QTextStream in(&chiSquareFile);
     in << monteCarlo->chiSquared();
     chiSquareFile.close();
+    qDebug() << "Done with destructor";
 }
 
 bool NoGUI::tick()
