@@ -46,6 +46,9 @@ void NoGUI::loadIniFile(IniFile &iniFile)
 
     int mode = iniFile.getInt("mode");
 
+    geometry->setMode(mode);
+    geometry->reset(2,19);
+
     QString MDInput = iniFile.getString("MDInput");
     QString statisticType = iniFile.getString("statisticType");
     if(statisticType.compare("poreVolume") == 0) {

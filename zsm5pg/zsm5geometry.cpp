@@ -32,10 +32,18 @@ void Zsm5geometry::reset(float min, float max) {
     m_deltaZVector.resize(m_planesPerDimension);
 
     float delta = max - min;
-    for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-        m_deltaXVector[planeId] = 2.0*min + Random::nextFloat()*delta;
-        m_deltaYVector[planeId] = 2.0*min + Random::nextFloat()*delta;
-        m_deltaZVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+    if(m_mode == 0) {
+        for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
+            m_deltaXVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+            m_deltaYVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+            m_deltaZVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+        }
+    } else {
+        for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
+            m_deltaXVector[planeId] = Random::nextInt(18,19);
+            m_deltaYVector[planeId] = Random::nextInt(18,19);
+            m_deltaZVector[planeId] = Random::nextInt(18,19);
+        }
     }
 }
 
