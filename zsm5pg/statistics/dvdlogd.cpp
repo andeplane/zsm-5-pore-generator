@@ -13,7 +13,7 @@ DVDLogd::DVDLogd()
 }
 
 
-void DVDLogd::compute(Zsm5geometry *geometry)
+void DVDLogd::compute(Geometry *geometry)
 {
     if(!geometry) return;
 

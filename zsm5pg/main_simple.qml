@@ -11,13 +11,13 @@ Window {
     visible: true
     width: 1500
     height: 900
-    property Statistic modelStatistic
-    property Statistic dataStatistic
+//    property Statistic modelStatistic
+//    property Statistic dataStatistic
     property Statistic poreSizeDistribution
-    property Statistic cumulativeVolume
+//    property Statistic cumulativeVolume
     property Statistic currentStatistic
-    property Statistic dvlogd
-    property Statistic lengthRatio
+//    property Statistic dvlogd
+//    property Statistic lengthRatio
     property NoGUI noGUI
 
     onCurrentStatisticChanged: {

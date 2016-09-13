@@ -18,7 +18,7 @@ double MySimulator::time() const
     return m_time;
 }
 
-Zsm5geometry *MySimulator::geometry() const
+Geometry *MySimulator::geometry() const
 {
     return m_geometry;
 }
@@ -47,7 +47,7 @@ void MySimulator::setTime(double time)
     emit timeChanged(time);
 }
 
-void MySimulator::setGeometry(Zsm5geometry *geometry)
+void MySimulator::setGeometry(Geometry *geometry)
 {
     if (m_geometry == geometry)
         return;

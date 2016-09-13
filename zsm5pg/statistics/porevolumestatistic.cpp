@@ -7,7 +7,7 @@ PoreVolumeStatistic::PoreVolumeStatistic()
     m_yLabel = "P(V)";
 }
 
-void PoreVolumeStatistic::compute(Zsm5geometry *geometry)
+void PoreVolumeStatistic::compute(Geometry *geometry)
 {
     if(!geometry) return;
     Statistic::compute(geometry);

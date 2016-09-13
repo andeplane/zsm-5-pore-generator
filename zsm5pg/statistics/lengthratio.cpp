@@ -9,7 +9,7 @@ LengthRatio::LengthRatio()
 }
 
 
-void LengthRatio::compute(Zsm5geometry *geometry)
+void LengthRatio::compute(Geometry *geometry)
 {
     if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();

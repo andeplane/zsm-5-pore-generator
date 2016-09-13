@@ -9,7 +9,7 @@ PoreSizeStatistic::PoreSizeStatistic()
     m_yLabel = "P(d)";
 }
 
-void PoreSizeStatistic::computeMode0(Zsm5geometry *geometry)
+void PoreSizeStatistic::computeMode0(Geometry *geometry)
 {
     if(!geometry) return;
     Statistic::compute(geometry);
@@ -60,7 +60,7 @@ void PoreSizeStatistic::computeMode0(Zsm5geometry *geometry)
 //    qDebug() << m_yValuesRaw;
 }
 
-void PoreSizeStatistic::computeMode1(Zsm5geometry *geometry) {
+void PoreSizeStatistic::computeMode1(Geometry *geometry) {
     Statistic::compute(geometry);
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
@@ -87,7 +87,7 @@ void PoreSizeStatistic::computeMode1(Zsm5geometry *geometry) {
     updateQML();
 }
 
-void PoreSizeStatistic::compute(Zsm5geometry *geometry)
+void PoreSizeStatistic::compute(Geometry *geometry)
 {
     if(m_mode==0) computeMode0(geometry);
     if(m_mode==1) computeMode1(geometry);

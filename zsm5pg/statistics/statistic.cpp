@@ -4,12 +4,13 @@
 #include <gsl/gsl_histogram.h>
 #include <QFile>
 #include <cmath>
+#include "inifile.h"
 Statistic::Statistic() : m_histogramAverageCount(100)
 {
     m_name = "Statistic";
 }
 
-void Statistic::compute(Zsm5geometry *geometry)
+void Statistic::compute(Geometry *geometry)
 {
     if(m_timesteps >= m_histogramAverageCount) {
         // we should start removing values in the beginning of the list

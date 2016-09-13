@@ -8,7 +8,7 @@ CumulativeVolume::CumulativeVolume()
 
 }
 
-void CumulativeVolume::compute(Zsm5geometry *geometry)
+void CumulativeVolume::compute(Geometry *geometry)
 {
     if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();

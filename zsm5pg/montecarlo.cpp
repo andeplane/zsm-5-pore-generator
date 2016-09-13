@@ -1,3 +1,4 @@
+#include "inifile.h"
 #include "montecarlo.h"
 #include "random.h"
 #include <QDebug>
@@ -21,27 +22,40 @@ MonteCarlo::MonteCarlo()
 
 }
 
-Zsm5geometry *MonteCarlo::geometry() const
+Geometry *MonteCarlo::geometry() const
 {
     return m_geometry;
 }
 
 void MonteCarlo::tick()
 {
-    if(!m_model || !m_data || !m_geometry || !m_running) return;
-    if(m_debug) qDebug() << "Starting monte carlo step. Current chi squared: " << m_model->chiSquared(m_data);
+    if(!isValid()) return;
     QVector<float> x = m_geometry->deltaXVector();
     QVector<float> y = m_geometry->deltaYVector();
     QVector<float> z = m_geometry->deltaZVector();
 
-    QList<QPointF> points = m_model->points();
+    QList<QList<QPointF>> points;
+    double chiSquared1 = 0;
+    for(int i=0; i<m_models.size(); i++) {
+        Statistic *model = m_models.at(i).value<Statistic*>();
+        Statistic *data = m_datas.at(i).value<Statistic*>();
+        chiSquared1 += model->chiSquared(data);
+        points.push_back(model->points());
+    }
 
-    float chiSquared1 = m_model->chiSquared(m_data);
+    if(m_debug) qDebug() << "Starting monte carlo step. Current chi squared: " << chiSquared1;
     if(m_debug) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
     m_geometry->randomWalkStep(m_standardDeviation);
-    m_model->compute(m_geometry);
-    float chiSquared2 = m_model->chiSquared(m_data);
-    float deltaChiSquared = chiSquared2 - chiSquared1;
+
+    double chiSquared2 = 0;
+    for(int i=0; i<m_models.size(); i++) {
+        Statistic *model = m_models.at(i).value<Statistic*>();
+        Statistic *data = m_datas.at(i).value<Statistic*>();
+        model->compute(m_geometry);
+        chiSquared2 += model->chiSquared(data);
+    }
+
+    double deltaChiSquared = chiSquared2 - chiSquared1;
     if(m_debug) qDebug() << "New chi squared: " << chiSquared2 << " with deltaChiSquared: " << deltaChiSquared;
 
     bool accepted = deltaChiSquared < 0 || Random::nextFloat() < exp(-deltaChiSquared / m_temperature);
@@ -56,13 +70,24 @@ void MonteCarlo::tick()
         m_geometry->setDeltaXVector(x);
         m_geometry->setDeltaYVector(y);
         m_geometry->setDeltaZVector(z);
-        m_model->setPoints(points);
+        for(int i=0; i<m_models.size(); i++) {
+            Statistic *model = m_models.at(i).value<Statistic*>();
+            model->setPoints(points.at(i));
+        }
         setChiSquared(chiSquared1);
         if(m_debug) qDebug() << "     STEP REJECTED";
     }
     if(m_steps % 20 == 0) {
         updateRandomWalkFraction();
     }
+    points.clear();
+}
+
+void MonteCarlo::loadInifile(IniFile *iniFile)
+{
+    setStandardDeviation(iniFile->getDouble("mcStandardDeviation"));
+    setTemperature(iniFile->getDouble("mcTemperature"));
+    setFilename(QString("%1/%2").arg(m_filePath).arg(iniFile->getString("mcFilename")));
 }
 
 void MonteCarlo::writeToFile() {
@@ -131,6 +156,11 @@ bool MonteCarlo::running() const
     return m_running;
 }
 
+bool MonteCarlo::isValid() const
+{
+    return m_geometry && m_running && m_models.size()==m_datas.size();
+}
+
 float MonteCarlo::acceptanceRatioAdjustmentTimeScale() const
 {
     return m_acceptanceRatioAdjustmentTimeScale;
@@ -141,22 +171,27 @@ QString MonteCarlo::filename() const
     return m_filename;
 }
 
+QVariantList MonteCarlo::models() const
+{
+    return m_models;
+}
+
+QVariantList MonteCarlo::datas() const
+{
+    return m_datas;
+}
+
+QString MonteCarlo::filePath() const
+{
+    return m_filePath;
+}
+
 float MonteCarlo::chiSquared() const
 {
     return m_chiSquared;
 }
 
-Statistic *MonteCarlo::model() const
-{
-    return m_model;
-}
-
-Statistic *MonteCarlo::data() const
-{
-    return m_data;
-}
-
-void MonteCarlo::setGeometry(Zsm5geometry *geometry)
+void MonteCarlo::setGeometry(Geometry *geometry)
 {
     if (m_geometry == geometry)
         return;
@@ -210,24 +245,6 @@ void MonteCarlo::setRunning(bool running)
     emit runningChanged(running);
 }
 
-void MonteCarlo::setModel(Statistic *model)
-{
-    if (m_model == model)
-        return;
-
-    m_model = model;
-    emit modelChanged(model);
-}
-
-void MonteCarlo::setData(Statistic *data)
-{
-    if (m_data == data)
-        return;
-
-    m_data = data;
-    emit dataChanged(data);
-}
-
 void MonteCarlo::setChiSquared(float chiSquared)
 {
     if (m_chiSquared == chiSquared)
@@ -271,4 +288,31 @@ void MonteCarlo::setFilename(QString filename)
 
     m_filename = filename;
     emit filenameChanged(filename);
+}
+
+void MonteCarlo::setModels(QVariantList models)
+{
+    if (m_models == models)
+        return;
+
+    m_models = models;
+    emit modelsChanged(models);
+}
+
+void MonteCarlo::setDatas(QVariantList datas)
+{
+    if (m_datas == datas)
+        return;
+
+    m_datas = datas;
+    emit datasChanged(datas);
+}
+
+void MonteCarlo::setFilePath(QString filePath)
+{
+    if (m_filePath == filePath)
+        return;
+
+    m_filePath = filePath;
+    emit filePathChanged(filePath);
 }

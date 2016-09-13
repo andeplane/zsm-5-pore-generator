@@ -38,7 +38,7 @@ protected:
 
 public:
     Statistic();
-    virtual void compute(class Zsm5geometry *geometry);
+    virtual void compute(class Geometry *geometry);
     void computeHistogram();
     int bins() const;
     float min() const;
@@ -56,7 +56,6 @@ public:
     Q_INVOKABLE void saveHistogramValues(QUrl filename);
     Q_INVOKABLE void updateSeries(QAbstractSeries *series);
     int histogramAverageCount() const;
-
     int mode() const;
 
 public slots:
@@ -69,6 +68,7 @@ public slots:
     void setPoints(QList<QPointF> points);
     void setHistogramAverageCount(int histogramAverageCount);
     void setMode(int mode);
+    virtual void loadIniFile(class IniFile *iniFile) { Q_UNUSED(iniFile); }
 
 signals:
     void binsChanged(int bins);

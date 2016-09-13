@@ -3,12 +3,16 @@
 #include <QUrl>
 #include <QDebug>
 
-IniFile::IniFile(QString filename) :
-    m_filename(filename)
+IniFile::IniFile(QObject *parent) :
+    QObject(parent)
 {
-    QFile file(filename);
+
+}
+
+void IniFile::loadFile() {
+    QFile file(m_filename);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Could not open " << filename;
+        qDebug() << "Could not open " << m_filename;
         exit(1);
     }
 
@@ -29,6 +33,7 @@ IniFile::IniFile(QString filename) :
     }
 
     file.close();
+    setReady(true);
 }
 
 QString IniFile::getString(QString key)
@@ -117,6 +122,32 @@ QVector<int> IniFile::getIntArray(QString key)
 
 bool IniFile::contains(QString key) {
     return m_keyValuePairs.contains(key);
+}
+
+QString IniFile::filename() { return m_filename; }
+
+bool IniFile::ready() const
+{
+    return m_ready;
+}
+
+void IniFile::setFilename(QString filename)
+{
+    if (m_filename == filename)
+        return;
+
+    m_filename = filename;
+    emit filenameChanged(filename);
+    loadFile();
+}
+
+void IniFile::setReady(bool ready)
+{
+    if (m_ready == ready)
+        return;
+
+    m_ready = ready;
+    emit readyChanged(ready);
 }
 
 bool IniFile::hasKey(QString key)

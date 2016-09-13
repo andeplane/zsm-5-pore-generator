@@ -8,14 +8,14 @@ class PoreSizeStatistic : public Statistic
     Q_OBJECT
 private:
     QVector<float> m_poreVolumes;
-    void computeMode0(Zsm5geometry *geometry);
-    void computeMode1(Zsm5geometry *geometry);
+    void computeMode0(Geometry *geometry);
+    void computeMode1(Geometry *geometry);
 public:
     PoreSizeStatistic();
 public:
     // Statistic interface
 public:
-    virtual void compute(Zsm5geometry *geometry) override;
+    virtual void compute(Geometry *geometry) override;
 };
 
 #endif // PORESIZESTATISTIC_H

@@ -4,11 +4,15 @@
 #include <cmath>
 #include <QTextStream>
 #include "../zsm5geometry.h"
-Concentration::Concentration(QString adsorptionMatrixFilename)
+Concentration::Concentration(QObject *parent) : QObject(parent)
 {
-    QFile file(adsorptionMatrixFilename);
+
+}
+
+void Concentration::readFile() {
+    QFile file(m_fileName);
     if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
-        qDebug() << "Could not find adsorption matrix file " << adsorptionMatrixFilename;
+        qDebug() << "Could not find adsorption matrix file " << m_fileName;
         exit(1);
     }
     m_values.resize(20); // We don't use index 0 in this because it is nice to use the H values as lookup index (they start on 1)
@@ -44,10 +48,9 @@ Concentration::Concentration(QString adsorptionMatrixFilename)
     m_name = "Concentration";
     m_xLabel = "Pressure [p/p0]";
     m_yLabel = "V_ads/cm^3";
-
 }
 
-void Concentration::computeMode0(Zsm5geometry *geometry) {
+void Concentration::computeMode0(Geometry *geometry) {
     if(!geometry) return;
 
     QVector<float> &x = geometry->deltaXVector();
@@ -153,7 +156,7 @@ void Concentration::computeMode0(Zsm5geometry *geometry) {
     setBins(m_points.size());
 }
 
-void Concentration::computeMode1(Zsm5geometry *geometry) {
+void Concentration::computeMode1(Geometry *geometry) {
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -229,8 +232,30 @@ void Concentration::computeMode1(Zsm5geometry *geometry) {
     setBins(m_points.size());
 }
 
-void Concentration::compute(Zsm5geometry *geometry)
+void Concentration::compute(Geometry *geometry)
 {
     if(m_mode==0) computeMode0(geometry);
     if(m_mode==1) computeMode1(geometry);
+}
+
+QString Concentration::fileName() const
+{
+    return m_fileName;
+}
+
+void Concentration::setFileName(QString fileName)
+{
+    if (m_fileName == fileName)
+        return;
+
+    m_fileName = fileName;
+    emit fileNameChanged(fileName);
+    if(!m_fileName.isEmpty()) {
+        readFile();
+    }
+}
+
+bool Concentration::isValid()
+{
+    return m_pressures.size() > 0; // hack, but works.
 }

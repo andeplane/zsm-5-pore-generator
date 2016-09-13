@@ -17,7 +17,7 @@ class MyWorker : public SimulatorWorker
     Q_OBJECT
 private:
     QVector<SimVis::TriangleCollectionVBOData> m_vertices;
-    Zsm5geometry *m_geometry = nullptr;
+    Geometry *m_geometry = nullptr;
     Statistic *m_statistic = nullptr;
     MonteCarlo* m_monteCarlo = nullptr;
     unsigned long m_timeElapsed = 0;
@@ -36,14 +36,14 @@ class MySimulator : public Simulator
 {
     Q_OBJECT
     Q_PROPERTY(double time READ time WRITE setTime NOTIFY timeChanged)
-    Q_PROPERTY(Zsm5geometry* geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+    Q_PROPERTY(Geometry* geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
     Q_PROPERTY(Statistic* statistic READ statistic WRITE setStatistic NOTIFY statisticChanged)
     Q_PROPERTY(MonteCarlo* monteCarlo READ monteCarlo WRITE setMonteCarlo NOTIFY monteCarloChanged)
     Q_PROPERTY(float tickTime READ tickTime WRITE setTickTime NOTIFY tickTimeChanged)
 private:
     bool m_reset = true;
     double m_time = 0;
-    Zsm5geometry* m_geometry = nullptr;
+    Geometry* m_geometry = nullptr;
     Statistic* m_statistic = nullptr;
     MonteCarlo* m_monteCarlo = nullptr;
     float m_tickTime = 0;
@@ -52,21 +52,21 @@ public:
     MySimulator();
     ~MySimulator();
     double time() const;
-    Zsm5geometry* geometry() const;
+    Geometry* geometry() const;
     Statistic* statistic() const;
     MonteCarlo* monteCarlo() const;
     float tickTime() const;
 
 public slots:
     void setTime(double time);
-    void setGeometry(Zsm5geometry* geometry);
+    void setGeometry(Geometry* geometry);
     void setStatistic(Statistic* statistic);
     void setMonteCarlo(MonteCarlo* monteCarlo);
     void setTickTime(float tickTime);
 
 signals:
     void timeChanged(double time);
-    void geometryChanged(Zsm5geometry* geometry);
+    void geometryChanged(Geometry* geometry);
     void statisticChanged(Statistic* statistic);
     void monteCarloChanged(MonteCarlo* monteCarlo);
     void tickTimeChanged(float tickTime);

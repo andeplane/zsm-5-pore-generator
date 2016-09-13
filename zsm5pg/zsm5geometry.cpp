@@ -1,32 +1,53 @@
 #include "zsm5geometry.h"
 #include "random.h"
+#include "inifile.h"
 #include <cstdlib>
 #include <QDebug>
 #include <QFile>
 #include <QUrl>
-Zsm5geometry::Zsm5geometry()
+#include <QFileInfo>
+Geometry::Geometry()
 {
 
 }
 
-Zsm5geometry::~Zsm5geometry()
+Geometry::~Geometry()
 {
     m_deltaXVector.clear();
     m_deltaYVector.clear();
     m_deltaZVector.clear();
 }
 
-int Zsm5geometry::planesPerDimension() const
+void Geometry::loadIniFile(IniFile *iniFile)
+{
+    QFileInfo fileInfo(QString("%1/geometry.txt").arg(m_filePath));
+    int planesPerDimension = iniFile->getInt("planesPerDimension");
+    bool loadPrevious = iniFile->getBool("loadPrevious") && fileInfo.exists();
+    if(loadPrevious) {
+        load(QString("%1/geometry.txt").arg(m_filePath));
+        if(this->planesPerDimension() != planesPerDimension) {
+            qDebug() << "Resizing from " << this->planesPerDimension() << " planes per dimension to " << planesPerDimension;
+            resize(planesPerDimension);
+        }
+    } else {
+        setPlanesPerDimension(planesPerDimension);
+        reset(2, 19);
+    }
+
+    setRandomWalkFraction(iniFile->getDouble("randomWalkFraction"));
+}
+
+int Geometry::planesPerDimension() const
 {
     return m_planesPerDimension;
 }
 
-void Zsm5geometry::setPlanesPerDimension(int planesPerDimension)
+void Geometry::setPlanesPerDimension(int planesPerDimension)
 {
     m_planesPerDimension = planesPerDimension;
 }
 
-void Zsm5geometry::reset(float min, float max) {
+void Geometry::reset(float min, float max) {
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
@@ -47,7 +68,7 @@ void Zsm5geometry::reset(float min, float max) {
     }
 }
 
-void Zsm5geometry::randomWalkStep(float standardDeviation)
+void Geometry::randomWalkStep(float standardDeviation)
 {
     if(m_mode == 0) {
     for(int i=0; i<m_planesPerDimension; i++) {
@@ -74,7 +95,7 @@ void Zsm5geometry::randomWalkStep(float standardDeviation)
     }
 }
 
-void Zsm5geometry::resize(int newNumberOfPlanes) {
+void Geometry::resize(int newNumberOfPlanes) {
     if(newNumberOfPlanes > m_planesPerDimension) {
         int delta = newNumberOfPlanes - m_planesPerDimension;
         m_deltaXVector.resize(m_planesPerDimension + delta);
@@ -96,17 +117,22 @@ void Zsm5geometry::resize(int newNumberOfPlanes) {
     setPlanesPerDimension(newNumberOfPlanes);
 }
 
-float Zsm5geometry::randomWalkFraction() const
+float Geometry::randomWalkFraction() const
 {
     return m_randomWalkFraction;
 }
 
-int Zsm5geometry::mode() const
+int Geometry::mode() const
 {
     return m_mode;
 }
 
-void Zsm5geometry::save(QString filename)
+QString Geometry::filePath() const
+{
+    return m_filePath;
+}
+
+void Geometry::save(QString filename)
 {
     //QFile file(QUrl(filename).toLocalFile());
     QFile file(filename);
@@ -123,9 +149,8 @@ void Zsm5geometry::save(QString filename)
     file.close();
 }
 
-void Zsm5geometry::load(QString filename)
+void Geometry::load(QString filename)
 {
-    //QFile file(QUrl(filename).toLocalFile());
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Could not open file "+filename;
@@ -140,7 +165,7 @@ void Zsm5geometry::load(QString filename)
         QStringList words = line.split(" ");
         if(words.count() ==1) {
             bool castOk;
-            m_planesPerDimension = QString(words[0]).toFloat(&castOk);
+            setPlanesPerDimension(QString(words[0]).toFloat(&castOk));
             m_deltaXVector.resize(m_planesPerDimension);
             m_deltaYVector.resize(m_planesPerDimension);
             m_deltaZVector.resize(m_planesPerDimension);
@@ -162,24 +187,24 @@ void Zsm5geometry::load(QString filename)
     }
 }
 
-QVector<float> &Zsm5geometry::deltaXVector() { return m_deltaXVector; }
+QVector<float> &Geometry::deltaXVector() { return m_deltaXVector; }
 
-QVector<float> &Zsm5geometry::deltaYVector() { return m_deltaYVector; }
+QVector<float> &Geometry::deltaYVector() { return m_deltaYVector; }
 
-QVector<float> &Zsm5geometry::deltaZVector() { return m_deltaZVector; }
+QVector<float> &Geometry::deltaZVector() { return m_deltaZVector; }
 
-void Zsm5geometry::setDeltaXVector(const QVector<float> &deltaX) { m_deltaXVector = deltaX; }
+void Geometry::setDeltaXVector(const QVector<float> &deltaX) { m_deltaXVector = deltaX; }
 
-void Zsm5geometry::setDeltaYVector(const QVector<float> &deltaY) { m_deltaYVector = deltaY; }
+void Geometry::setDeltaYVector(const QVector<float> &deltaY) { m_deltaYVector = deltaY; }
 
-void Zsm5geometry::setDeltaZVector(const QVector<float> &deltaZ) { m_deltaZVector = deltaZ; }
+void Geometry::setDeltaZVector(const QVector<float> &deltaZ) { m_deltaZVector = deltaZ; }
 
-float Zsm5geometry::lengthScale() const
+float Geometry::lengthScale() const
 {
     return m_lengthScale;
 }
 
-double Zsm5geometry::totalVolume()
+double Geometry::totalVolume()
 {
     double L[3];
     L[0] = 0; L[1] = 0; L[2] = 0;
@@ -192,7 +217,7 @@ double Zsm5geometry::totalVolume()
     return L[0]*L[1]*L[2];
 }
 
-void Zsm5geometry::setLengthScale(float lengthScale)
+void Geometry::setLengthScale(float lengthScale)
 {
     if (m_lengthScale == lengthScale)
         return;
@@ -201,7 +226,7 @@ void Zsm5geometry::setLengthScale(float lengthScale)
     emit lengthScaleChanged(lengthScale);
 }
 
-void Zsm5geometry::setRandomWalkFraction(float randomWalkFraction)
+void Geometry::setRandomWalkFraction(float randomWalkFraction)
 {
     if (m_randomWalkFraction == randomWalkFraction)
         return;
@@ -210,11 +235,20 @@ void Zsm5geometry::setRandomWalkFraction(float randomWalkFraction)
     emit randomWalkFractionChanged(randomWalkFraction);
 }
 
-void Zsm5geometry::setMode(int mode)
+void Geometry::setMode(int mode)
 {
     if (m_mode == mode)
         return;
 
     m_mode = mode;
     emit modeChanged(mode);
+}
+
+void Geometry::setFilePath(QString filePath)
+{
+    if (m_filePath == filePath)
+        return;
+
+    m_filePath = filePath;
+    emit filePathChanged(filePath);
 }

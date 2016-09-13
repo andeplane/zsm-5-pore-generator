@@ -14,7 +14,7 @@ public:
     PoreVolumeStatistic();
 
 public:
-    virtual void compute(Zsm5geometry *geometry) override;
+    virtual void compute(Geometry *geometry) override;
 };
 
 #endif // POREVOLUMESTATISTIC_H
