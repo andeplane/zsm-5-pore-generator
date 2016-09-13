@@ -21,14 +21,19 @@ class Statistic : public QObject
     Q_PROPERTY(int bins READ bins WRITE setBins NOTIFY binsChanged)
     Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(bool isValid READ isValid WRITE setIsValid NOTIFY isValidChanged)
+    Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY(QString sourceKey READ sourceKey WRITE setSourceKey NOTIFY sourceKeyChanged)
+    Q_PROPERTY(bool constant READ constant WRITE setConstant NOTIFY constantChanged)
+
 protected:
     void normalizeHistogram();
+    bool m_constant = true;
     float m_min = 0;
     float m_max = 10;
     int m_histogramAverageCount;
     int m_timesteps = 0;
     bool m_isValid = false;
+    QString m_filePath;
     QString m_sourceKey;
 
 protected:
@@ -63,6 +68,9 @@ public:
     int mode() const;
     bool isValid() const;
     QString sourceKey() const;
+    QString filePath() const;
+
+    bool constant() const;
 
 public slots:
     void setBins(int bins);
@@ -77,6 +85,9 @@ public slots:
     virtual void loadIniFile(class IniFile *iniFile);
     void setIsValid(bool isValid);
     void setSourceKey(QString sourceKey);
+    void setFilePath(QString filePath);
+
+    void setConstant(bool constant);
 
 signals:
     void binsChanged(int bins);
@@ -91,6 +102,8 @@ signals:
     void modeChanged(int mode);
     void isValidChanged(bool isValid);
     void sourceKeyChanged(QString sourceKey);
+    void filePathChanged(QString filePath);
+    void constantChanged(bool constant);
 };
 
 #endif // STATISTIC_H

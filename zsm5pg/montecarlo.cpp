@@ -29,7 +29,10 @@ Geometry *MonteCarlo::geometry() const
 
 void MonteCarlo::tick()
 {
-    if(!isValid()) return;
+    if(!isValid()) {
+        qDebug() << "Error, MonteCarlo not ready...";
+        exit(1);
+    }
     QVector<float> x = m_geometry->deltaXVector();
     QVector<float> y = m_geometry->deltaYVector();
     QVector<float> z = m_geometry->deltaZVector();
@@ -88,6 +91,10 @@ void MonteCarlo::loadIniFile(IniFile *iniFile)
     setStandardDeviation(iniFile->getDouble("mcStandardDeviation"));
     setTemperature(iniFile->getDouble("mcTemperature"));
     setFilename(QString("%1/%2").arg(m_filePath).arg(iniFile->getString("mcFilename")));
+    qDebug() << "MonteCarlo loaded ini file with ";
+    qDebug() << "  Standard deviation: " << m_standardDeviation;
+    qDebug() << "  Temperature: " << m_temperature;
+    qDebug() << "  Filename: " << m_filename;
 }
 
 void MonteCarlo::writeToFile() {
@@ -151,14 +158,9 @@ int MonteCarlo::accepted() const
     return m_accepted;
 }
 
-bool MonteCarlo::running() const
-{
-    return m_running;
-}
-
 bool MonteCarlo::isValid() const
 {
-    return m_geometry && m_running && m_models.size()==m_datas.size();
+    return m_geometry && m_models.size()==m_datas.size();
 }
 
 float MonteCarlo::acceptanceRatioAdjustmentTimeScale() const
@@ -234,15 +236,6 @@ void MonteCarlo::setAccepted(int accepted)
 
     m_accepted = accepted;
     emit acceptedChanged(accepted);
-}
-
-void MonteCarlo::setRunning(bool running)
-{
-    if (m_running == running)
-        return;
-
-    m_running = running;
-    emit runningChanged(running);
 }
 
 void MonteCarlo::setChiSquared(float chiSquared)

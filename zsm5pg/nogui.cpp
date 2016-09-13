@@ -23,9 +23,16 @@ void NoGUI::loadIniFile(IniFile *iniFile)
         qDebug() << "Could not open file " << QString("%1/log.txt").arg(m_filePath);
         exit(1);
     }
-    setVisualize(iniFile->getInt("visualize"));
+    setVisualize(iniFile->getBool("visualize"));
     setTimesteps(iniFile->getInt("mcSteps"));
     setPrintEvery(iniFile->getInt("printEvery"));
+    qDebug() << "NoGUI loaded ini file with ";
+    qDebug() << "  Log file: " << m_log.fileName();
+    qDebug() << "  Mode: " << m_mode;
+    qDebug() << "  Seed: " << iniFile->getInt("seed");
+    qDebug() << "  Visualize: " << m_visualize;
+    qDebug() << "  Timesteps: " << m_timesteps;
+    qDebug() << "  Print every: " << m_printEvery;
 }
 
 void NoGUI::run(int steps) {
@@ -57,19 +64,36 @@ bool NoGUI::isValid()
     }
 
     if(!m_geometry->isValid()) return false;
-    return true; }
+    if(!m_monteCarlo->isValid()) return false;
+
+    return true;
+}
 
 int NoGUI::printEvery() const
 {
     return m_printEvery;
 }
 
+Geometry *NoGUI::geometry() const
+{
+    return m_geometry;
+}
+
+bool NoGUI::finished() const
+{
+    return m_finished;
+}
+
 NoGUI::~NoGUI() {
 
 }
 
-bool NoGUI::tick()
+void NoGUI::tick()
 {
+    if(!isValid()) {
+        qDebug() << "Error, NoGUI or children not ready...";
+        exit(1);
+    }
     QElapsedTimer timer;
     timer.start();
     m_monteCarlo->tick();
@@ -85,12 +109,16 @@ bool NoGUI::tick()
             for(QVariant &variant : m_statistics) {
                 Statistic *statistic = variant.value<Statistic*>();
                 statistic->compute(m_geometry);
-                statistic->updateQML();
+                if(m_visualize) {
+                    statistic->updateQML();
+                }
             }
         }
     }
 
-    return false;
+    if(m_timestep >= m_timesteps) {
+        setFinished(true);
+    }
 }
 
 QVariantList NoGUI::statistics() const
@@ -193,5 +221,23 @@ void NoGUI::setPrintEvery(int printEvery)
 
     m_printEvery = printEvery;
     emit printEveryChanged(printEvery);
+}
+
+void NoGUI::setGeometry(Geometry *geometry)
+{
+    if (m_geometry == geometry)
+        return;
+
+    m_geometry = geometry;
+    emit geometryChanged(geometry);
+}
+
+void NoGUI::setFinished(bool finished)
+{
+    if (m_finished == finished)
+        return;
+
+    m_finished = finished;
+    emit finishedChanged(finished);
 }
 

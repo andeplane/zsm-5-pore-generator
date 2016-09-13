@@ -13,6 +13,7 @@ Statistic::Statistic(QObject *parent) : QObject(parent),
 
 void Statistic::compute(Geometry *geometry)
 {
+    if(m_constant) return;
     if(m_timesteps >= m_histogramAverageCount) {
         // we should start removing values in the beginning of the list
         int valuesPerTimestep = m_histogramValues.size() / m_histogramAverageCount;
@@ -290,6 +291,16 @@ QString Statistic::sourceKey() const
     return m_sourceKey;
 }
 
+QString Statistic::filePath() const
+{
+    return m_filePath;
+}
+
+bool Statistic::constant() const
+{
+    return m_constant;
+}
+
 void Statistic::setName(QString name)
 {
     if (m_name == name)
@@ -331,11 +342,19 @@ void Statistic::loadIniFile(IniFile *iniFile) {
     setMax(iniFile->getDouble("xMax"));
     setBins(iniFile->getInt("bins"));
     setMode(iniFile->getInt("mode"));
-    setHistogramAverageCount(iniFile->getInt("histogramAverageCount"));
-    if(m_sourceKey.isEmpty()) return;
 
-    QString fileName = iniFile->getString(m_sourceKey);
+    setHistogramAverageCount(iniFile->getInt("histogramAverageCount"));
+    qDebug() << "Statistic loaded ini file with ";
+    qDebug() << "  Min: " << m_min;
+    qDebug() << "  Max: " << m_max;
+    qDebug() << "  Bins: " << m_bins;
+    qDebug() << "  Mode: " << m_mode;
+
+    if(m_sourceKey.isEmpty()) return;
+    QString fileName = QString("%1/%2").arg(m_filePath).arg(iniFile->getString(m_sourceKey));
     load(fileName);
+    setIsValid(true);
+    qDebug() << "  Filename: " << fileName;
 }
 
 void Statistic::setIsValid(bool isValid)
@@ -354,4 +373,22 @@ void Statistic::setSourceKey(QString sourceKey)
 
     m_sourceKey = sourceKey;
     emit sourceKeyChanged(sourceKey);
+}
+
+void Statistic::setFilePath(QString filePath)
+{
+    if (m_filePath == filePath)
+        return;
+
+    m_filePath = filePath;
+    emit filePathChanged(filePath);
+}
+
+void Statistic::setConstant(bool constant)
+{
+    if (m_constant == constant)
+        return;
+
+    m_constant = constant;
+    emit constantChanged(constant);
 }

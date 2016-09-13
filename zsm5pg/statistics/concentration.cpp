@@ -7,7 +7,7 @@
 #include "../geometry.h"
 Concentration::Concentration(QObject *parent) : Statistic(parent)
 {
-
+    setConstant(false);
 }
 
 void Concentration::readFile(QString fileName) {
@@ -247,10 +247,20 @@ bool Concentration::isValid()
 
 void Concentration::loadIniFile(IniFile *iniFile)
 {
+    qDebug() << "Concentration starting to load ini file...";
+    // First set source key to blank so parent won't attempt loading the file
+    QString sourceKey = m_sourceKey;
+    setSourceKey("");
     Statistic::loadIniFile(iniFile);
+    setSourceKey(sourceKey);
 
     if(m_sourceKey.isEmpty()) return;
-    QString fileName = iniFile->getString(m_sourceKey);
+    QString fileName = QString("%1/%2").arg(m_filePath).arg(iniFile->getString(m_sourceKey));
     readFile(fileName);
     m_points.clear(); // Clear what we read in base class
+
+    qDebug() << "Concentration loaded ini file with ";
+    qDebug() << "  Source key: " << m_sourceKey;
+    qDebug() << "  Filename: " << fileName;
+    setIsValid(true);
 }

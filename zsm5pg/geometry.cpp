@@ -36,6 +36,13 @@ void Geometry::loadIniFile(IniFile *iniFile)
 
     setRandomWalkFraction(iniFile->getDouble("randomWalkFraction"));
     setIsValid(true);
+    setMode(iniFile->getInt("mode"));
+
+    qDebug() << "Geometry loaded ini file with ";
+    qDebug() << "  Mode: " << m_mode;
+    qDebug() << "  Planes per dimension: " << m_planesPerDimension;
+    qDebug() << "  Load previous: " << (loadPrevious ? "true" : "false");
+    qDebug() << "  Random walk fraction: " << m_randomWalkFraction;
 }
 
 int Geometry::planesPerDimension() const
