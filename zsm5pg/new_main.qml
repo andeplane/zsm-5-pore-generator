@@ -17,6 +17,7 @@ Window {
     onCurrentStatisticChanged: {
         currentStatistic.histogramReady.connect(function() {
             currentStatistic.updateSeries(statisticSeries)
+            ___axisX.applyNiceNumbers()
         })
         currentStatistic.updateSeries(statisticSeries)
     }
@@ -28,16 +29,17 @@ Window {
             simulator.loadIniFile(iniFile)
             geometry.loadIniFile(iniFile)
             monteCarlo.loadIniFile(iniFile)
-            adsorption.loadIniFile(iniFile)
-            desorption.loadIniFile(iniFile)
+            adsorptionModel.loadIniFile(iniFile)
+            desorptionModel.loadIniFile(iniFile)
             adsorptionData.loadIniFile(iniFile)
             desorptionData.loadIniFile(iniFile)
+            poreSizeStatistic.loadIniFile(iniFile)
             currentStatistic = poreSizeStatistic
         }
     }
 
     Concentration {
-        id: adsorption
+        id: adsorptionModel
         constant: false
         filePath: simulator.filePath
         name: "adsorption"
@@ -51,7 +53,7 @@ Window {
     }
 
     Concentration {
-        id: desorption
+        id: desorptionModel
         constant: false
         filePath: simulator.filePath
         name: "desorption"
@@ -114,8 +116,8 @@ Window {
         }
 
         statistics: [
-            adsorption,
-            desorption,
+            adsorptionModel,
+            desorptionModel,
             adsorptionData,
             desorptionData,
             poreSizeStatistic
@@ -131,12 +133,12 @@ Window {
             geometry: geometry
             filePath: simulator.filePath
             models: [
-                adsorption//,
-                // desorption
+                adsorptionModel,
+                desorptionModel
             ]
             datas: [
-                adsorptionData//,
-                //desorptionData
+                adsorptionData,
+                desorptionData
             ]
         }
     }
@@ -178,7 +180,7 @@ Window {
         ValueAxis {
             id: _axisY
             min: 0
-            max: 1000.0
+            max: 500.0
             tickCount: 5
             titleText: "c"
         }
@@ -222,7 +224,7 @@ Window {
         ValueAxis {
             id: __axisY
             min: 0
-            max: 1000.0
+            max: 500.0
             tickCount: 5
             titleText: "c"
         }

@@ -155,6 +155,8 @@ void Concentration::computeMode0(Geometry *geometry) {
         m_points.push_back(QPointF(m_pressures[i], volumeAdsorbedCm3PerMassZeolite));
     }
     setBins(m_points.size());
+    setMin(0);
+    setMax(1.0);
 }
 
 void Concentration::computeMode1(Geometry *geometry) {
@@ -197,8 +199,6 @@ void Concentration::computeMode1(Geometry *geometry) {
             } else outside++;
         }
     }
-
-    // qDebug() << "Got Nads = " << numberOfAdsorbedAtoms << " and "
 
     float cubicCentimetersPerLiter = 1000;
     float argonMass = 39.948;
@@ -257,7 +257,7 @@ void Concentration::loadIniFile(IniFile *iniFile)
     setSourceKey(sourceKey);
 
     if(m_sourceKey.isEmpty()) return;
-    QString fileName = QString("%1/%2").arg(m_filePath).arg(iniFile->getString(m_sourceKey));
+    QString fileName = iniFile->getString(m_sourceKey);
     readFile(fileName);
     m_points.clear(); // Clear what we read in base class
 

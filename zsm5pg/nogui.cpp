@@ -98,8 +98,24 @@ NoGUI::~NoGUI() {
 void NoGUI::tick()
 {
     if(!isValid()) {
-        qDebug() << "Error, NoGUI or children not ready...";
-        exit(1);
+        for(QVariant &variant : m_statistics) {
+            Statistic *statistic = variant.value<Statistic*>();
+            statistic->compute(m_geometry, m_timestep);
+        }
+
+        for(QVariant &variant : m_models) {
+            Statistic *statistic = variant.value<Statistic*>();
+            statistic->compute(m_geometry, m_timestep);
+        }
+
+        for(QVariant &variant : m_datas) {
+            Statistic *statistic = variant.value<Statistic*>();
+            statistic->compute(m_geometry, m_timestep);
+        }
+        if(!isValid()) {
+            qDebug() << "Error, NoGUI or children not ready...";
+            exit(1);
+        }
     }
     QElapsedTimer timer;
     timer.start();

@@ -55,7 +55,7 @@ void PoreSizeStatistic::computeMode0(Geometry *geometry)
         m_histogramValues.push_back(m_poreVolumes[i]);
     }
     computeHistogram();
-    updateQML();
+//    updateQML();
 //    qDebug() << m_xValuesRaw;
 //    qDebug() << m_yValuesRaw;
 }

@@ -42,7 +42,9 @@ void MonteCarlo::tick(int step)
     for(int i=0; i<m_models.size(); i++) {
         Statistic *model = m_models.at(i).value<Statistic*>();
         Statistic *data = m_datas.at(i).value<Statistic*>();
+        model->compute(m_geometry, step);
         chiSquared1 += model->chiSquared(data);
+        // qDebug() << "Contribution from " << i << ": " << model->chiSquared(data);
         points.push_back(model->points());
     }
 

@@ -133,17 +133,15 @@ double Statistic::eval(double x)
 double Statistic::chiSquared(Statistic *statistic)
 {
     double chiSquared = 0;
-    double sum = 0;
     for(int bin = 0; bin<m_points.size(); bin++) {
         double x = m_points[bin].x();
         double y_this = m_points[bin].y();
         double y_other = statistic->eval(x);
         double delta = (y_this - y_other) / (y_other + std::numeric_limits<double>::min());
-        // double delta = (y_this - y_other);
-        // sum += abs(y_other);
+        // qDebug() << "x: " << x << ", bin: " << bin << ": " << y_this << " and " << y_other << " gives delta = " << delta;
+        // qDebug() << "delta[" << bin << "] = " << delta;
         chiSquared += delta*delta;
     }
-    // return chiSquared / sum;
     return chiSquared;
 }
 
@@ -288,7 +286,7 @@ int Statistic::mode() const
 
 bool Statistic::isValid() const
 {
-    return m_isValid;
+    return m_isValid && m_points.size();
 }
 
 QString Statistic::sourceKey() const
@@ -356,7 +354,8 @@ void Statistic::loadIniFile(IniFile *iniFile) {
     qDebug() << "  Mode: " << m_mode;
 
     if(m_sourceKey.isEmpty()) return;
-    QString fileName = QString("%1/%2").arg(m_filePath).arg(iniFile->getString(m_sourceKey));
+    // QString fileName = QString("%1/%2").arg(m_filePath).arg(iniFile->getString(m_sourceKey));
+    QString fileName = iniFile->getString(m_sourceKey);
     load(fileName);
     setIsValid(true);
     qDebug() << "  Filename: " << fileName;
