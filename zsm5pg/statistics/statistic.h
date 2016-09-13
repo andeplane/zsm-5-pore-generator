@@ -37,7 +37,7 @@ protected:
     QString m_yLabel;
 
 public:
-    Statistic();
+    explicit Statistic(QObject *parent = nullptr);
     virtual void compute(class Geometry *geometry);
     void computeHistogram();
     int bins() const;

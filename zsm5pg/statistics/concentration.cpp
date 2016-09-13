@@ -4,7 +4,7 @@
 #include <cmath>
 #include <QTextStream>
 #include "../zsm5geometry.h"
-Concentration::Concentration(QObject *parent) : QObject(parent)
+Concentration::Concentration(QObject *parent) : Statistic(parent)
 {
 
 }

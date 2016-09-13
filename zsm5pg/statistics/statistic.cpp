@@ -5,7 +5,8 @@
 #include <QFile>
 #include <cmath>
 #include "inifile.h"
-Statistic::Statistic() : m_histogramAverageCount(100)
+Statistic::Statistic(QObject *parent) : QObject(parent),
+    m_histogramAverageCount(100)
 {
     m_name = "Statistic";
 }

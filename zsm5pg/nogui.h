@@ -12,10 +12,11 @@ class NoGUI : public QObject
     Q_OBJECT
     Q_PROPERTY(QVariantList statistics READ statistics WRITE setStatistics NOTIFY statisticsChanged)
     Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
-    Q_PROPERTY(MonteCarlo* m_monteCarlo READ m_monteCarlo WRITE setMonteCarlo NOTIFY monteCarloChanged)
+    Q_PROPERTY(MonteCarlo* monteCarlo READ monteCarlo WRITE setMonteCarlo NOTIFY monteCarloChanged)
     Q_PROPERTY(int timestep READ timestep WRITE setTimestep NOTIFY timestepChanged)
     Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(bool visualize READ visualize WRITE setVisualize NOTIFY visualizeChanged)
+    Q_PROPERTY(int timesteps READ timesteps WRITE setTimesteps NOTIFY timestepsChanged)
 private:
     Concentration* m_concentration = nullptr;
     Statistic* m_poreSizeDistribution = nullptr;
@@ -30,40 +31,33 @@ private:
     QString m_filePath;
     int m_mode = 0;
     bool m_visualize = false;
+    int m_timesteps = 0;
 
 public:
     NoGUI();
     ~NoGUI();
-    int step = 0; // current timestep
     int printEvery = 100;
     void loadIniFile(IniFile *iniFile);
-    Q_INVOKABLE void run();
     Q_INVOKABLE bool tick();
-    Concentration* concentration() const;
-    Statistic* poreSizeDistribution() const;
-    Statistic* currentStatistic() const;
+    Q_INVOKABLE void run(int steps);
     QVariantList statistics() const;
     MonteCarlo* monteCarlo() const;
     int timestep() const;
     QString filePath() const;
     int mode() const;
     bool visualize() const;
+    int timesteps() const;
 
 public slots:
-    void setConcentration(Concentration* concentration);
-    void setPoreSizeDistribution(Statistic* poreSizeDistribution);
-    void setCurrentStatistic(Statistic* currentStatistic);
     void setStatistics(QVariantList statistics);
     void setMonteCarlo(MonteCarlo* monteCarlo);
     void setTimestep(int timestep);
     void setFilePath(QString filePath);
     void setMode(int mode);
     void setVisualize(bool visualize);
+    void setTimesteps(int timesteps);
 
 signals:
-    void concentrationChanged(Concentration* concentration);
-    void poreSizeDistributionChanged(Statistic* poreSizeDistribution);
-    void currentStatisticChanged(Statistic* m_currentStatistic);
     void statisticsChanged(QVariantList statistics);
     void monteCarloChanged(MonteCarlo* m_monteCarlo);
     void timestepChanged(int timestep);
@@ -71,6 +65,7 @@ signals:
     void modeChanged(int mode);
     void iniFileChanged(IniFile* iniFile);
     void visualizeChanged(bool visualize);
+    void timestepsChanged(int timesteps);
 };
 
 #endif // NOGUI_H
