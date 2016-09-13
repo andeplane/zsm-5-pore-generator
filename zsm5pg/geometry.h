@@ -11,6 +11,7 @@ class Geometry : public QObject
     Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
     Q_PROPERTY(bool isValid READ isValid WRITE setIsValid NOTIFY isValidChanged)
+    Q_PROPERTY(bool verbose READ verbose WRITE setVerbose NOTIFY verboseChanged)
 private:
     QVector<float> m_deltaXVector;
     QVector<float> m_deltaYVector;
@@ -21,6 +22,7 @@ private:
     int m_mode = 0;
     QString m_filePath;
     bool m_isValid = false;
+    bool m_verbose = false;
 
 public:
     Geometry();
@@ -44,6 +46,7 @@ public:
     int mode() const;
     QString filePath() const;
     bool isValid() const;
+    bool verbose() const;
 
 public slots:
     void setLengthScale(float lengthScale);
@@ -52,6 +55,7 @@ public slots:
     void setFilePath(QString filePath);
     void setIsValid(bool isValid);
     void loadIniFile(class IniFile *iniFile);
+    void setVerbose(bool verbose);
 
 signals:
     void planesPerDimensionChanged(int planesPerDimension);
@@ -60,6 +64,7 @@ signals:
     void modeChanged(int mode);
     void filePathChanged(QString filePath);
     void isValidChanged(bool isValid);
+    void verboseChanged(bool verbose);
 };
 
 #endif // GEOMETRY_H

@@ -23,10 +23,15 @@ void Geometry::loadIniFile(IniFile *iniFile)
     QFileInfo fileInfo(QString("%1/geometry.txt").arg(m_filePath));
     int planesPerDimension = iniFile->getInt("planesPerDimension");
     bool loadPrevious = iniFile->getBool("loadPrevious") && fileInfo.exists();
+    setRandomWalkFraction(iniFile->getDouble("randomWalkFraction"));
+    setIsValid(true);
+    setMode(iniFile->getInt("mode"));
+    setVerbose(iniFile->getBool("verbose"));
+
     if(loadPrevious) {
         load(QString("%1/geometry.txt").arg(m_filePath));
         if(this->planesPerDimension() != planesPerDimension) {
-            qDebug() << "Resizing from " << this->planesPerDimension() << " planes per dimension to " << planesPerDimension;
+            if(m_verbose) qDebug() << "Resizing from " << this->planesPerDimension() << " planes per dimension to " << planesPerDimension;
             resize(planesPerDimension);
         }
     } else {
@@ -34,15 +39,21 @@ void Geometry::loadIniFile(IniFile *iniFile)
         reset(2, 19);
     }
 
-    setRandomWalkFraction(iniFile->getDouble("randomWalkFraction"));
-    setIsValid(true);
-    setMode(iniFile->getInt("mode"));
-
     qDebug() << "Geometry loaded ini file with ";
     qDebug() << "  Mode: " << m_mode;
+    qDebug() << "  Verbose: " << m_verbose;
     qDebug() << "  Planes per dimension: " << m_planesPerDimension;
     qDebug() << "  Load previous: " << (loadPrevious ? "true" : "false");
     qDebug() << "  Random walk fraction: " << m_randomWalkFraction;
+}
+
+void Geometry::setVerbose(bool verbose)
+{
+    if (m_verbose == verbose)
+            return;
+
+        m_verbose = verbose;
+        emit verboseChanged(verbose);
 }
 
 int Geometry::planesPerDimension() const
@@ -56,22 +67,29 @@ void Geometry::setPlanesPerDimension(int planesPerDimension)
 }
 
 void Geometry::reset(float min, float max) {
+    if(m_verbose) qDebug() << "Resetting with min: " << min << " and max: " << max << " and planes per dim: " << m_planesPerDimension;
     m_deltaXVector.resize(m_planesPerDimension);
     m_deltaYVector.resize(m_planesPerDimension);
     m_deltaZVector.resize(m_planesPerDimension);
 
-    float delta = max - min;
     if(m_mode == 0) {
+        float delta = max - min;
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
             m_deltaXVector[planeId] = 2.0*min + Random::nextFloat()*delta;
             m_deltaYVector[planeId] = 2.0*min + Random::nextFloat()*delta;
             m_deltaZVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+            if(m_verbose) qDebug() << "Plane (" << planeId << ", X): " << m_deltaXVector[planeId];
+            if(m_verbose) qDebug() << "Plane (" << planeId << ", Y): " << m_deltaYVector[planeId];
+            if(m_verbose) qDebug() << "Plane (" << planeId << ", Z): " << m_deltaZVector[planeId];
         }
     } else {
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
             m_deltaXVector[planeId] = Random::nextInt(int(min),int(max));
             m_deltaYVector[planeId] = Random::nextInt(int(min), int(max));
             m_deltaZVector[planeId] = Random::nextInt(int(min), int(max));
+            if(m_verbose) qDebug() << "Plane " << (3*planeId+0) <<": " << m_deltaXVector[planeId];
+            if(m_verbose) qDebug() << "Plane " << (3*planeId+1) <<": " << m_deltaYVector[planeId];
+            if(m_verbose) qDebug() << "Plane " << (3*planeId+2) <<": " << m_deltaZVector[planeId];
         }
     }
 }
@@ -79,23 +97,30 @@ void Geometry::reset(float min, float max) {
 void Geometry::randomWalkStep(float standardDeviation)
 {
     if(m_mode == 0) {
-    for(int i=0; i<m_planesPerDimension; i++) {
+    for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
         float dx = Random::nextGaussianf(0, standardDeviation);
         float dy = Random::nextGaussianf(0, standardDeviation);
         float dz = Random::nextGaussianf(0, standardDeviation);
-        if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
-        if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
-        if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+        if(m_deltaXVector[planeId] + dx > 2 && m_deltaXVector[planeId] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[planeId] += dx;
+        if(m_deltaYVector[planeId] + dy > 2 && m_deltaYVector[planeId] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[planeId] += dy;
+        if(m_deltaZVector[planeId] + dz > 2 && m_deltaZVector[planeId] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[planeId] += dz;
+        if(m_verbose) qDebug() << "Changed plane (" << planeId << ", X): " << m_deltaXVector[planeId];
+        if(m_verbose) qDebug() << "Changed plane (" << planeId << ", Y): " << m_deltaYVector[planeId];
+        if(m_verbose) qDebug() << "Changed plane (" << planeId << ", Z): " << m_deltaZVector[planeId];
     }
     } else {
         // qDebug() << "planes = [";
-        for(int i=0; i<m_planesPerDimension; i++) {
+        for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
             int dx = Random::nextInt(-1,1);
             int dy = Random::nextInt(-1,1);
             int dz = Random::nextInt(-1,1);
-            if(m_deltaXVector[i] + dx > 2 && m_deltaXVector[i] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[i] += dx;
-            if(m_deltaYVector[i] + dy > 2 && m_deltaYVector[i] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[i] += dy;
-            if(m_deltaZVector[i] + dz > 2 && m_deltaZVector[i] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[i] += dz;
+            if(m_deltaXVector[planeId] + dx > 2 && m_deltaXVector[planeId] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaXVector[planeId] += dx;
+            if(m_deltaYVector[planeId] + dy > 2 && m_deltaYVector[planeId] + dy < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaYVector[planeId] += dy;
+            if(m_deltaZVector[planeId] + dz > 2 && m_deltaZVector[planeId] + dz < 20 && Random::nextFloat() < m_randomWalkFraction) m_deltaZVector[planeId] += dz;
+
+            if(m_verbose) qDebug() << "Changed plane " << (3*planeId+0) <<": " << m_deltaXVector[planeId];
+            if(m_verbose) qDebug() << "Changed plane " << (3*planeId+1) <<": " << m_deltaYVector[planeId];
+            if(m_verbose) qDebug() << "Changed plane " << (3*planeId+2) <<": " << m_deltaZVector[planeId];
             // qDebug() << m_deltaXVector[i] << " " << m_deltaYVector[i] << " " << m_deltaZVector[i];
         }
         // qDebug() << "];";
@@ -143,6 +168,11 @@ QString Geometry::filePath() const
 bool Geometry::isValid() const
 {
     return m_isValid;
+}
+
+bool Geometry::verbose() const
+{
+    return m_verbose;
 }
 
 void Geometry::save(QString filename)
