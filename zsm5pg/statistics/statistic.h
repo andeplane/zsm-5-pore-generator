@@ -20,12 +20,14 @@ class Statistic : public QObject
     Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
     Q_PROPERTY(int bins READ bins WRITE setBins NOTIFY binsChanged)
     Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(bool isValid READ isValid WRITE setIsValid NOTIFY isValidChanged)
 private:
     void normalizeHistogram();
     float m_min = 0;
     float m_max = 10;
     int m_histogramAverageCount;
     int m_timesteps = 0;
+    bool m_isValid = false;
 
 protected:
     int m_mode = 0;
@@ -57,6 +59,7 @@ public:
     Q_INVOKABLE void updateSeries(QAbstractSeries *series);
     int histogramAverageCount() const;
     int mode() const;
+    bool isValid() const;
 
 public slots:
     void setBins(int bins);
@@ -68,7 +71,8 @@ public slots:
     void setPoints(QList<QPointF> points);
     void setHistogramAverageCount(int histogramAverageCount);
     void setMode(int mode);
-    virtual void loadIniFile(class IniFile *iniFile) { Q_UNUSED(iniFile); }
+    virtual void loadIniFile(class IniFile *iniFile);
+    void setIsValid(bool isValid);
 
 signals:
     void binsChanged(int bins);
@@ -81,6 +85,7 @@ signals:
     void pointsChanged(QList<QPointF> points);
     void histogramAverageCountChanged(int histogramAverageCount);
     void modeChanged(int mode);
+    void isValidChanged(bool isValid);
 };
 
 #endif // STATISTIC_H

@@ -132,6 +132,11 @@ QString Geometry::filePath() const
     return m_filePath;
 }
 
+bool Geometry::isValid() const
+{
+    return m_isValid;
+}
+
 void Geometry::save(QString filename)
 {
     //QFile file(QUrl(filename).toLocalFile());
@@ -251,4 +256,13 @@ void Geometry::setFilePath(QString filePath)
 
     m_filePath = filePath;
     emit filePathChanged(filePath);
+}
+
+void Geometry::setIsValid(bool isValid)
+{
+    if (m_isValid == isValid)
+        return;
+
+    m_isValid = isValid;
+    emit isValidChanged(isValid);
 }

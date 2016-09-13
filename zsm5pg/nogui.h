@@ -47,6 +47,7 @@ public:
     int mode() const;
     bool visualize() const;
     int timesteps() const;
+    bool isValid();
 
 public slots:
     void setStatistics(QVariantList statistics);

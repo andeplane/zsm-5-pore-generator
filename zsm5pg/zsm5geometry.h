@@ -1,5 +1,5 @@
-#ifndef ZSM5GEOMETRY_H
-#define ZSM5GEOMETRY_H
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 #include <QObject>
 #include <QVector>
 class Geometry : public QObject
@@ -10,6 +10,7 @@ class Geometry : public QObject
     Q_PROPERTY(float randomWalkFraction READ randomWalkFraction WRITE setRandomWalkFraction NOTIFY randomWalkFractionChanged)
     Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
+    Q_PROPERTY(bool isValid READ isValid WRITE setIsValid NOTIFY isValidChanged)
 private:
     QVector<float> m_deltaXVector;
     QVector<float> m_deltaYVector;
@@ -19,6 +20,7 @@ private:
     float m_randomWalkFraction = 1.0;
     int m_mode = 0;
     QString m_filePath;
+    bool m_isValid = false;
 
 public:
     Geometry();
@@ -42,12 +44,14 @@ public:
     float randomWalkFraction() const;
     int mode() const;
     QString filePath() const;
+    bool isValid() const;
 
 public slots:
     void setLengthScale(float lengthScale);
     void setRandomWalkFraction(float randomWalkFraction);
     void setMode(int mode);
     void setFilePath(QString filePath);
+    void setIsValid(bool isValid);
 
 signals:
     void planesPerDimensionChanged(int planesPerDimension);
@@ -55,6 +59,7 @@ signals:
     void randomWalkFractionChanged(float randomWalkFraction);
     void modeChanged(int mode);
     void filePathChanged(QString filePath);
+    void isValidChanged(bool isValid);
 };
 
-#endif // ZSM5GEOMETRY_H
+#endif // GEOMETRY_H

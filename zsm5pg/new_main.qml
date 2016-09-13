@@ -17,7 +17,8 @@ Window {
         id: inifile
         filename: iniFilename
         onReadyChanged: {
-
+            adsorption.loadIniFile(iniFile)
+            desorption.loadIniFile(iniFile)
         }
     }
 

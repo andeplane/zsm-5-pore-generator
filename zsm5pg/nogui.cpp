@@ -37,6 +37,26 @@ int NoGUI::timesteps() const
     return m_timesteps;
 }
 
+bool NoGUI::isValid()
+{
+    for(QVariant &variant : m_statistics) {
+        Statistic *statistic = variant.value<Statistic*>();
+        if(!statistic->isValid()) return false;
+    }
+
+    for(QVariant &variant : m_models) {
+        Statistic *statistic = variant.value<Statistic*>();
+        if(!statistic->isValid()) return false;
+    }
+
+    for(QVariant &variant : m_datas) {
+        Statistic *statistic = variant.value<Statistic*>();
+        if(!statistic->isValid()) return false;
+    }
+
+    if(!m_geometry->isValid()) return false;
+    return true; }
+
 NoGUI::~NoGUI() {
 
 }

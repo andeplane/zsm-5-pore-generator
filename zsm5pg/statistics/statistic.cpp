@@ -280,6 +280,11 @@ int Statistic::mode() const
     return m_mode;
 }
 
+bool Statistic::isValid() const
+{
+    return m_isValid;
+}
+
 void Statistic::setName(QString name)
 {
     if (m_name == name)
@@ -314,4 +319,15 @@ void Statistic::setMode(int mode)
 
     m_mode = mode;
     emit modeChanged(mode);
+}
+
+void Statistic::loadIniFile(IniFile *iniFile) { Q_UNUSED(iniFile); }
+
+void Statistic::setIsValid(bool isValid)
+{
+    if (m_isValid == isValid)
+        return;
+
+    m_isValid = isValid;
+    emit isValidChanged(isValid);
 }
