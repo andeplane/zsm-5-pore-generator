@@ -9,7 +9,7 @@ class DVDLogd : public Statistic
 {
     Q_OBJECT
 public:
-    DVDLogd();
+    explicit DVDLogd(QObject *parent = nullptr);
 
     // Statistic interface
 public:

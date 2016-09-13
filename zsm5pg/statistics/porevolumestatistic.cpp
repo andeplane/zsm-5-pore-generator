@@ -1,6 +1,6 @@
 #include "porevolumestatistic.h"
 
-PoreVolumeStatistic::PoreVolumeStatistic()
+PoreVolumeStatistic::PoreVolumeStatistic(QObject *parent) : Statistic(parent)
 {
     m_name = "PoreVolume";
     m_xLabel = "Pore volume [nm^3]";

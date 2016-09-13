@@ -1,7 +1,7 @@
 #include "lengthratio.h"
 #include "../zsm5geometry.h"
 #include <QDebug>
-LengthRatio::LengthRatio()
+LengthRatio::LengthRatio(QObject *parent) : Statistic(parent)
 {
     m_xLabel = "Pore length ratio";
     m_yLabel = "Probability";

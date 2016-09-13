@@ -19,7 +19,6 @@ void Concentration::readFile() {
     m_volumes.resize(20);
     QTextStream in(&file);
     while (!in.atEnd()) {
-
         QString line = in.readLine().trimmed();
         QStringList splitted = line.split(" ");
         if(splitted.size() == 4) {
@@ -48,6 +47,7 @@ void Concentration::readFile() {
     m_name = "Concentration";
     m_xLabel = "Pressure [p/p0]";
     m_yLabel = "V_ads/cm^3";
+    setIsValid(true);
 }
 
 void Concentration::computeMode0(Geometry *geometry) {

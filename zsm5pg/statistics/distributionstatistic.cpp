@@ -15,7 +15,7 @@ void DistributionStatistic::setType(DistributionStatistic::Type type, float xMin
     emit typeChanged(); // Will trigger update
 }
 
-DistributionStatistic::DistributionStatistic() {
+DistributionStatistic::DistributionStatistic(QObject *parent) : Statistic(parent) {
     connect(this, &DistributionStatistic::maxChanged, this, &DistributionStatistic::update);
     connect(this, &DistributionStatistic::minChanged, this, &DistributionStatistic::update);
     connect(this, &DistributionStatistic::typeChanged, this, &DistributionStatistic::update);

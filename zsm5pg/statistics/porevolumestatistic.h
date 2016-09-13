@@ -11,7 +11,7 @@ private:
     QVector<float> m_poreVolumes;
 
 public:
-    PoreVolumeStatistic();
+    explicit PoreVolumeStatistic(QObject *parent = nullptr);
 
 public:
     virtual void compute(Geometry *geometry) override;

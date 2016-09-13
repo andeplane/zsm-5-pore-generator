@@ -3,7 +3,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort_vector.h>
 #include <cmath>
-CumulativeVolume::CumulativeVolume()
+CumulativeVolume::CumulativeVolume(QObject *parent) : Statistic(parent)
 {
 
 }

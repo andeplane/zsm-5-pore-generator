@@ -7,7 +7,7 @@ class CumulativeVolume : public Statistic
 {
     Q_OBJECT
 public:
-    CumulativeVolume();
+    explicit CumulativeVolume(QObject *parent = nullptr);
 
     // Statistic interface
 public:

@@ -7,7 +7,7 @@ class LengthRatio : public Statistic
 {
     Q_OBJECT
 public:
-    LengthRatio();
+    explicit LengthRatio(QObject *parent = nullptr);
 
     // Statistic interface
 public:

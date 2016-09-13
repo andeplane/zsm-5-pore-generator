@@ -11,7 +11,7 @@ private:
     void computeMode0(Geometry *geometry);
     void computeMode1(Geometry *geometry);
 public:
-    PoreSizeStatistic();
+    explicit PoreSizeStatistic(QObject *parent = nullptr);
 public:
     // Statistic interface
 public:

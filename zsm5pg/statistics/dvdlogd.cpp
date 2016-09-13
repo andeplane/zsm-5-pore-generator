@@ -5,7 +5,7 @@
 #include <cmath>
 #include <QDebug>
 
-DVDLogd::DVDLogd()
+DVDLogd::DVDLogd(QObject *parent) : Statistic(parent)
 {
     m_name = "DVDLogD";
     m_xLabel = "Pore size [nm]";

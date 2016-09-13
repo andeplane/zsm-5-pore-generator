@@ -9,7 +9,7 @@ class DistributionStatistic : public Statistic
 public:
     enum class Type {None, Normal, Exponential};
 
-    DistributionStatistic();
+    explicit DistributionStatistic(QObject *parent = nullptr);
     Type type() const;
     void setType(Type type, float xMin, float xMax, int points = 100);
 

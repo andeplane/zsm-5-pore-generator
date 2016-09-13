@@ -2,7 +2,7 @@
 #include <cmath>
 #include <QDebug>
 // #define POREISCBRT
-PoreSizeStatistic::PoreSizeStatistic()
+PoreSizeStatistic::PoreSizeStatistic(QObject *parent) : Statistic(parent)
 {
     m_name = "PoreSize";
     m_xLabel = "Pore size [nm]";

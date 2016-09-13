@@ -35,6 +35,7 @@ void Geometry::loadIniFile(IniFile *iniFile)
     }
 
     setRandomWalkFraction(iniFile->getDouble("randomWalkFraction"));
+    setIsValid(true);
 }
 
 int Geometry::planesPerDimension() const
