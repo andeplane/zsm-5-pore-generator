@@ -17,6 +17,7 @@ class NoGUI : public QObject
     Q_PROPERTY(int mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(bool visualize READ visualize WRITE setVisualize NOTIFY visualizeChanged)
     Q_PROPERTY(int timesteps READ timesteps WRITE setTimesteps NOTIFY timestepsChanged)
+    Q_PROPERTY(int printEvery READ printEvery WRITE setPrintEvery NOTIFY printEveryChanged)
 private:
     Concentration* m_concentration = nullptr;
     Statistic* m_poreSizeDistribution = nullptr;
@@ -32,11 +33,11 @@ private:
     int m_mode = 0;
     bool m_visualize = false;
     int m_timesteps = 0;
+    int m_printEvery = 100;
 
 public:
     NoGUI();
     ~NoGUI();
-    int printEvery = 100;
     Q_INVOKABLE void loadIniFile(IniFile *iniFile);
     Q_INVOKABLE bool tick();
     Q_INVOKABLE void run(int steps);
@@ -49,6 +50,8 @@ public:
     int timesteps() const;
     bool isValid();
 
+    int printEvery() const;
+
 public slots:
     void setStatistics(QVariantList statistics);
     void setMonteCarlo(MonteCarlo* monteCarlo);
@@ -57,6 +60,8 @@ public slots:
     void setMode(int mode);
     void setVisualize(bool visualize);
     void setTimesteps(int timesteps);
+
+    void setPrintEvery(int printEvery);
 
 signals:
     void statisticsChanged(QVariantList statistics);
@@ -67,6 +72,7 @@ signals:
     void iniFileChanged(IniFile* iniFile);
     void visualizeChanged(bool visualize);
     void timestepsChanged(int timesteps);
+    void printEveryChanged(int printEvery);
 };
 
 #endif // NOGUI_H

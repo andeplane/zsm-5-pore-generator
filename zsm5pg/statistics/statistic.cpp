@@ -327,6 +327,11 @@ void Statistic::setMode(int mode)
 }
 
 void Statistic::loadIniFile(IniFile *iniFile) {
+    setMin(iniFile->getDouble("xMin"));
+    setMax(iniFile->getDouble("xMax"));
+    setBins(iniFile->getInt("bins"));
+    setMode(iniFile->getInt("mode"));
+    setHistogramAverageCount(iniFile->getInt("histogramAverageCount"));
     if(m_sourceKey.isEmpty()) return;
 
     QString fileName = iniFile->getString(m_sourceKey);

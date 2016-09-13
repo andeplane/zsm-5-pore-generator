@@ -30,11 +30,13 @@ Window {
     Concentration {
         id: adsorption
         name: "adsorption"
+        sourceKey: "adsorptionModel"
     }
 
     Concentration {
         id: desorption
         name: "desorption"
+        sourceKey: "desorptionModel"
     }
 
     Statistic {
@@ -52,6 +54,16 @@ Window {
     PoreSizeStatistic {
         id: poreSizeStatistic
         name: "poresizestatistic"
+    }
+
+    Timer {
+        interval: 1
+        repeat: true
+        running: true
+        onTriggered: {
+            simulator.tick()
+
+        }
     }
 
     NoGUI {

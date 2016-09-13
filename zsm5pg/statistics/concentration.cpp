@@ -247,8 +247,10 @@ bool Concentration::isValid()
 
 void Concentration::loadIniFile(IniFile *iniFile)
 {
+    Statistic::loadIniFile(iniFile);
+
     if(m_sourceKey.isEmpty()) return;
     QString fileName = iniFile->getString(m_sourceKey);
     readFile(fileName);
-    setIsValid(true);
+    m_points.clear(); // Clear what we read in base class
 }

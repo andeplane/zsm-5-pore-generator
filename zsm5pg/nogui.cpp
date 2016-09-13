@@ -24,6 +24,8 @@ void NoGUI::loadIniFile(IniFile *iniFile)
         exit(1);
     }
     setVisualize(iniFile->getInt("visualize"));
+    setTimesteps(iniFile->getInt("mcSteps"));
+    setPrintEvery(iniFile->getInt("printEvery"));
 }
 
 void NoGUI::run(int steps) {
@@ -57,6 +59,11 @@ bool NoGUI::isValid()
     if(!m_geometry->isValid()) return false;
     return true; }
 
+int NoGUI::printEvery() const
+{
+    return m_printEvery;
+}
+
 NoGUI::~NoGUI() {
 
 }
@@ -69,7 +76,7 @@ bool NoGUI::tick()
     m_elapsedTime += timer.elapsed();
 
     m_timestep++;
-    if( (m_timestep % printEvery) == 0) {
+    if( (m_timestep % m_printEvery) == 0) {
         double timeLeft = m_elapsedTime / (m_timestep+1) * (m_timesteps-m_timestep) / 1000.; // seconds
         QTextStream logStream(&m_log);
         qDebug() << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << m_monteCarlo->chiSquared() << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";
@@ -177,5 +184,14 @@ void NoGUI::setTimesteps(int timesteps)
 
     m_timesteps = timesteps;
     emit timestepsChanged(timesteps);
+}
+
+void NoGUI::setPrintEvery(int printEvery)
+{
+    if (m_printEvery == printEvery)
+        return;
+
+    m_printEvery = printEvery;
+    emit printEveryChanged(printEvery);
 }
 
