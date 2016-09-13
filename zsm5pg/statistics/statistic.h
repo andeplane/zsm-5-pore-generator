@@ -48,6 +48,7 @@ protected:
 
 public:
     explicit Statistic(QObject *parent = nullptr);
+    virtual ~Statistic();
     virtual void compute(class Geometry *geometry, int timestep);
     void computeHistogram();
     int bins() const;
@@ -70,8 +71,8 @@ public:
     bool isValid() const;
     QString sourceKey() const;
     QString filePath() const;
-
     bool constant() const;
+    void setDirty();
 
 public slots:
     void setBins(int bins);

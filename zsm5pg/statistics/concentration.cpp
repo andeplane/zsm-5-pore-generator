@@ -45,7 +45,6 @@ void Concentration::readFile(QString fileName) {
         }
     }
 
-    m_name = "Concentration";
     m_xLabel = "Pressure [p/p0]";
     m_yLabel = "V_ads/cm^3";
     setIsValid(true);

@@ -11,6 +11,12 @@ Statistic::Statistic(QObject *parent) : QObject(parent),
     m_name = "Statistic";
 }
 
+Statistic::~Statistic()
+{
+    QString fileName = QString("%1/%2.txt").arg(m_filePath).arg(m_name);
+    save(fileName);
+}
+
 void Statistic::compute(Geometry *geometry, int timestep)
 {
     if(m_constant) return;
@@ -40,11 +46,12 @@ float Statistic::max() const
     return m_max;
 }
 
-void Statistic::save(QString filename)
+void Statistic::save(QString fileName)
 {
-    QFile file(filename);
+    qDebug() << "Saving with filename " << fileName;
+    QFile file(fileName);
     if(!file.open(QFileDevice::WriteOnly | QFileDevice::Text)) {
-        qDebug() << "Error, could not not save file " << filename;
+        qDebug() << "Error, could not not save file " << fileName;
         return;
     }
 
@@ -304,11 +311,17 @@ bool Statistic::constant() const
     return m_constant;
 }
 
+void Statistic::setDirty()
+{
+    m_lastComputed = -1;
+}
+
 void Statistic::setName(QString name)
 {
     if (m_name == name)
         return;
 
+    qDebug() << "Setting name: " << name;
     m_name = name;
     emit nameChanged(name);
 }

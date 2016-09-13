@@ -93,10 +93,10 @@ Window {
     }
 
     PoreSizeStatistic {
-        constant: false
         id: poreSizeStatistic
+        constant: false
         filePath: simulator.filePath
-        name: "poresizestatistic"
+        name: "poreSizeDistribution"
     }
 
     Timer {
@@ -151,6 +151,14 @@ Window {
         legend.visible: true
         title: "Adsorption"
 
+        LineSeries {
+            id: adsorptionDataSeries
+            name: "Data"
+            color: "red"
+            axisX: _axisX
+            axisY: _axisY
+        }
+
         ScatterSeries {
             id: adsorptionModelSeries
             name: "Model"
@@ -160,14 +168,6 @@ Window {
             color: Qt.rgba(1,1,1,0)
             borderColor: "black"
             borderWidth: 1
-        }
-
-        LineSeries {
-            id: adsorptionDataSeries
-            name: "Data"
-            color: "red"
-            axisX: _axisX
-            axisY: _axisY
         }
 
         ValueAxis {
@@ -195,6 +195,14 @@ Window {
         legend.visible: true
         title: "Desorption"
 
+        LineSeries {
+            id: desorptionDataSeries
+            name: "Data"
+            color: "red"
+            axisX: __axisX
+            axisY: __axisY
+        }
+
         ScatterSeries {
             id: desorptionModelSeries
             name: "Model"
@@ -204,14 +212,6 @@ Window {
             color: Qt.rgba(1,1,1,0)
             borderColor: "black"
             borderWidth: 1
-        }
-
-        LineSeries {
-            id: desorptionDataSeries
-            name: "Data"
-            color: "red"
-            axisX: __axisX
-            axisY: __axisY
         }
 
         ValueAxis {

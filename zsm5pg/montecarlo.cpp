@@ -38,29 +38,33 @@ void MonteCarlo::tick(int step)
     QVector<float> z = m_geometry->deltaZVector();
 
     QList<QList<QPointF>> points;
-    double chiSquared1 = 0;
+    float chiSquared1 = 0;
     for(int i=0; i<m_models.size(); i++) {
         Statistic *model = m_models.at(i).value<Statistic*>();
         Statistic *data = m_datas.at(i).value<Statistic*>();
         model->compute(m_geometry, step);
         chiSquared1 += model->chiSquared(data);
-        // qDebug() << "Contribution from " << i << ": " << model->chiSquared(data);
         points.push_back(model->points());
     }
 
     if(m_verbose) qDebug() << "Starting monte carlo step. Current chi squared: " << chiSquared1;
     if(m_verbose) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
-    m_geometry->randomWalkStep(m_standardDeviation);
 
-    double chiSquared2 = 0;
+    bool anyChanges = m_geometry->randomWalkStep(m_standardDeviation);
+    if(!anyChanges) {
+        return;
+    }
+
+    float chiSquared2 = 0;
     for(int i=0; i<m_models.size(); i++) {
         Statistic *model = m_models.at(i).value<Statistic*>();
         Statistic *data = m_datas.at(i).value<Statistic*>();
+        model->setDirty();
         model->compute(m_geometry, step);
         chiSquared2 += model->chiSquared(data);
     }
 
-    double deltaChiSquared = chiSquared2 - chiSquared1;
+    float deltaChiSquared = chiSquared2 - chiSquared1;
     if(m_verbose) qDebug() << "New chi squared: " << chiSquared2 << " with deltaChiSquared: " << deltaChiSquared;
 
     bool accepted = deltaChiSquared < 0 || Random::nextFloat() < exp(-deltaChiSquared / m_temperature);

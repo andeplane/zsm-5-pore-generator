@@ -22,11 +22,11 @@ class NoGUI : public QObject
     Q_PROPERTY(bool finished READ finished WRITE setFinished NOTIFY finishedChanged)
     Q_PROPERTY(bool verbose READ verbose WRITE setVerbose NOTIFY verboseChanged)
 private:
+    QElapsedTimer m_timer;
     Concentration* m_concentration = nullptr;
     Statistic* m_poreSizeDistribution = nullptr;
     Geometry *m_geometry = nullptr;
     MonteCarlo* m_monteCarlo = nullptr;
-    double m_elapsedTime = 0;
     int m_timestep = 0;
     QFile m_log;
     QVariantList m_models;

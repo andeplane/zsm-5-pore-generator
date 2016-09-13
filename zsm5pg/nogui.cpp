@@ -117,13 +117,11 @@ void NoGUI::tick()
             exit(1);
         }
     }
-    QElapsedTimer timer;
-    timer.start();
+    if(!m_timer.isValid()) m_timer.start();
     m_monteCarlo->tick(m_timestep);
-    m_elapsedTime += timer.elapsed();
 
     if( (m_timestep % m_printEvery) == 0) {
-        double timeLeft = m_elapsedTime / (m_timestep+1) * (m_timesteps-m_timestep) / 1000.; // seconds
+        double timeLeft = m_timer.elapsed() / ( double(m_timestep+1)) * (m_timesteps-m_timestep) / 1000.; // seconds
         QTextStream logStream(&m_log);
         qDebug() << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << m_monteCarlo->chiSquared() << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";
         logStream << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << m_monteCarlo->chiSquared() << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.\n";

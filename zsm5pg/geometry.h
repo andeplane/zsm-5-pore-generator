@@ -28,8 +28,8 @@ public:
     Geometry();
     ~Geometry();
     void reset(float min, float max);
-    void randomWalkStep(float standardDeviation);
-    Q_INVOKABLE void save(QString filename);
+    bool randomWalkStep(float standardDeviation);
+    Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString filename);
     QVector<float> &deltaXVector();
     QVector<float> &deltaYVector();

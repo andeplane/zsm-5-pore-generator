@@ -5,7 +5,7 @@
 // #define POREISCBRT
 PoreSizeStatistic::PoreSizeStatistic(QObject *parent) : Statistic(parent)
 {
-    m_name = "PoreSize";
+    m_name = "poreSizeDistribution";
     m_xLabel = "Pore size [nm]";
     m_yLabel = "P(d)";
     setIsValid(true);
@@ -13,7 +13,6 @@ PoreSizeStatistic::PoreSizeStatistic(QObject *parent) : Statistic(parent)
 
 void PoreSizeStatistic::computeMode0(Geometry *geometry)
 {
-    qDebug() << "Histogram size: " << m_histogramValues.size();
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -51,13 +50,9 @@ void PoreSizeStatistic::computeMode0(Geometry *geometry)
     }
 
     for(int i=0; i<numberOfPores; i++) {
-        // m_histogramValues[i] = cbrt(m_poreVolumes[i]);
         m_histogramValues.push_back(m_poreVolumes[i]);
     }
     computeHistogram();
-//    updateQML();
-//    qDebug() << m_xValuesRaw;
-//    qDebug() << m_yValuesRaw;
 }
 
 void PoreSizeStatistic::computeMode1(Geometry *geometry) {
