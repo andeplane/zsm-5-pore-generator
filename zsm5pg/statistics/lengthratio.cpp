@@ -1,5 +1,5 @@
 #include "lengthratio.h"
-#include "../zsm5geometry.h"
+#include "../geometry.h"
 #include <QDebug>
 LengthRatio::LengthRatio(QObject *parent) : Statistic(parent)
 {

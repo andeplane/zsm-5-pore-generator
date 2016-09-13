@@ -2,7 +2,7 @@
 #define PORESIZESTATISTIC_H
 
 #include "statistic.h"
-#include "zsm5geometry.h"
+#include "geometry.h"
 class PoreSizeStatistic : public Statistic
 {
     Q_OBJECT

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <cmath>
 #include <QTextStream>
-#include "../zsm5geometry.h"
+#include "../geometry.h"
 Concentration::Concentration(QObject *parent) : Statistic(parent)
 {
 

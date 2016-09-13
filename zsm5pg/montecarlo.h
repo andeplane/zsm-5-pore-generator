@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QObject>
 #include <fstream>
-#include "zsm5geometry.h"
+#include "geometry.h"
 #include "statistics/statistics.h"
 
 class MonteCarlo : public QObject

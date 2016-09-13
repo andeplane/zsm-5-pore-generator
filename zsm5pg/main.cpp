@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QVector>
 #include "statistics/statistics.h"
-#include "zsm5geometry.h"
+#include "geometry.h"
 #include "montecarlo.h"
 #include "inifile.h"
 #include "nogui.h"

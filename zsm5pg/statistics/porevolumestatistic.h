@@ -3,7 +3,7 @@
 
 #include <QVector>
 #include "statistic.h"
-#include "zsm5geometry.h"
+#include "geometry.h"
 class PoreVolumeStatistic : public Statistic
 {
     Q_OBJECT

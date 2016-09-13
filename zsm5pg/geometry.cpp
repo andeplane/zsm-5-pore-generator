@@ -1,4 +1,4 @@
-#include "zsm5geometry.h"
+#include "geometry.h"
 #include "random.h"
 #include "inifile.h"
 #include <cstdlib>

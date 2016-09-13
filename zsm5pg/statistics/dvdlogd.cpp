@@ -1,5 +1,5 @@
 #include "dvdlogd.h"
-#include "../zsm5geometry.h"
+#include "../geometry.h"
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort_vector.h>
 #include <cmath>

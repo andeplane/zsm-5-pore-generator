@@ -1,5 +1,5 @@
 #include "nogui.h"
-#include "zsm5geometry.h"
+#include "geometry.h"
 #include "montecarlo.h"
 #include "statistics/statistics.h"
 #include <QString>
