@@ -22,6 +22,7 @@ class MonteCarlo : public QObject
     Q_PROPERTY(float acceptanceRatioAdjustmentTimeScale READ acceptanceRatioAdjustmentTimeScale WRITE setAcceptanceRatioAdjustmentTimeScale NOTIFY acceptanceRatioAdjustmentTimeScaleChanged)
     Q_PROPERTY(QString filename READ filename WRITE setFilename NOTIFY filenameChanged)
     Q_PROPERTY(QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged)
+    Q_PROPERTY(bool verbose READ verbose WRITE setVerbose NOTIFY verboseChanged)
 private:
     QFile m_file;
     Geometry* m_geometry = nullptr;
@@ -32,7 +33,7 @@ private:
     float m_temperature = 1.0;
     int m_steps = 0;
     int m_accepted = 0;
-    bool m_debug = false;
+    bool m_verbose = false;
     QVariantList m_models;
     QVariantList m_datas;
     QString m_filename;
@@ -44,7 +45,7 @@ private:
 public:
     MonteCarlo();
     Geometry* geometry() const;
-    void tick();
+    void tick(int step);
     float standardDeviation() const;
     float temperature() const;
     int steps() const;
@@ -59,6 +60,7 @@ public:
     QVariantList models() const;
     QVariantList datas() const;
     QString filePath() const;
+    bool verbose() const;
 
 public slots:
     void setGeometry(Geometry* geometry);
@@ -75,6 +77,7 @@ public slots:
     void setDatas(QVariantList datas);
     void setFilePath(QString filePath);
     void loadIniFile(class IniFile *iniFile);
+    void setVerbose(bool verbose);
 
 signals:
     void geometryChanged(Geometry* geometry);
@@ -90,6 +93,7 @@ signals:
     void modelsChanged(QVariantList models);
     void datasChanged(QVariantList datas);
     void filePathChanged(QString filePath);
+    void verboseChanged(bool verbose);
 };
 
 #endif // MONTECARLO_H

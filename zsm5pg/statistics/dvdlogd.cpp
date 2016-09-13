@@ -13,7 +13,7 @@ DVDLogd::DVDLogd(QObject *parent) : Statistic(parent)
 }
 
 
-void DVDLogd::compute(Geometry *geometry)
+void DVDLogd::compute(Geometry *geometry, int timestep)
 {
     if(!geometry) return;
 

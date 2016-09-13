@@ -11,7 +11,7 @@ public:
 
     // Statistic interface
 public:
-    virtual void compute(class Geometry *geometry) override;
+    virtual void compute(class Geometry *geometry, int timestep) override;
 };
 
 #endif // CUMULATIVEVOLUME_H

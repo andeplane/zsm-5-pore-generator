@@ -9,7 +9,7 @@ LengthRatio::LengthRatio(QObject *parent) : Statistic(parent)
 }
 
 
-void LengthRatio::compute(Geometry *geometry)
+void LengthRatio::compute(Geometry *geometry, int timestep)
 {
     if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();

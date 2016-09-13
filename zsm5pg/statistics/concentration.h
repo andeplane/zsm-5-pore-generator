@@ -9,7 +9,7 @@ class Concentration : public Statistic
 
 public:
     explicit Concentration(QObject *parent = nullptr);
-    virtual void compute(Geometry *geometry) override;
+    virtual void compute(class Geometry *geometry, int timestep) override;
 
 public slots:
 

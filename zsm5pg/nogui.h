@@ -20,6 +20,7 @@ class NoGUI : public QObject
     Q_PROPERTY(int timesteps READ timesteps WRITE setTimesteps NOTIFY timestepsChanged)
     Q_PROPERTY(int printEvery READ printEvery WRITE setPrintEvery NOTIFY printEveryChanged)
     Q_PROPERTY(bool finished READ finished WRITE setFinished NOTIFY finishedChanged)
+    Q_PROPERTY(bool verbose READ verbose WRITE setVerbose NOTIFY verboseChanged)
 private:
     Concentration* m_concentration = nullptr;
     Statistic* m_poreSizeDistribution = nullptr;
@@ -37,6 +38,7 @@ private:
     int m_timesteps = 0;
     int m_printEvery = 100;
     bool m_finished = false;
+    bool m_verbose = false;
 
 public:
     NoGUI();
@@ -55,6 +57,7 @@ public:
     int printEvery() const;
     Geometry* geometry() const;
     bool finished() const;
+    bool verbose() const;
 
 public slots:
     void setStatistics(QVariantList statistics);
@@ -67,6 +70,7 @@ public slots:
     void setPrintEvery(int printEvery);
     void setGeometry(Geometry* geometry);
     void setFinished(bool finished);
+    void setVerbose(bool verbose);
 
 signals:
     void statisticsChanged(QVariantList statistics);
@@ -80,6 +84,7 @@ signals:
     void printEveryChanged(int printEvery);
     void geometryChanged(Geometry* geometry);
     void finishedChanged(bool finished);
+    void verboseChanged(bool verbose);
 };
 
 #endif // NOGUI_H

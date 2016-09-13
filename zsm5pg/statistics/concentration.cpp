@@ -233,10 +233,12 @@ void Concentration::computeMode1(Geometry *geometry) {
     setBins(m_points.size());
 }
 
-void Concentration::compute(Geometry *geometry)
+void Concentration::compute(Geometry *geometry, int timestep)
 {
+    if(!geometry || m_lastComputed == timestep) return;
     if(m_mode==0) computeMode0(geometry);
     if(m_mode==1) computeMode1(geometry);
+    m_lastComputed = timestep;
 }
 
 bool Concentration::isValid()

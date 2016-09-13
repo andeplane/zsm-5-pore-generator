@@ -30,6 +30,7 @@ protected:
     bool m_constant = true;
     float m_min = 0;
     float m_max = 10;
+    int m_lastComputed = -1;
     int m_histogramAverageCount;
     int m_timesteps = 0;
     bool m_isValid = false;
@@ -47,7 +48,7 @@ protected:
 
 public:
     explicit Statistic(QObject *parent = nullptr);
-    virtual void compute(class Geometry *geometry);
+    virtual void compute(class Geometry *geometry, int timestep);
     void computeHistogram();
     int bins() const;
     float min() const;

@@ -2,20 +2,19 @@
 #define PORESIZESTATISTIC_H
 
 #include "statistic.h"
-#include "geometry.h"
 class PoreSizeStatistic : public Statistic
 {
     Q_OBJECT
 private:
     QVector<float> m_poreVolumes;
-    void computeMode0(Geometry *geometry);
-    void computeMode1(Geometry *geometry);
+    void computeMode0(class Geometry *geometry);
+    void computeMode1(class Geometry *geometry);
 public:
     explicit PoreSizeStatistic(QObject *parent = nullptr);
 public:
     // Statistic interface
 public:
-    virtual void compute(Geometry *geometry) override;
+    virtual void compute(class Geometry *geometry, int timestep) override;
 };
 
 #endif // PORESIZESTATISTIC_H

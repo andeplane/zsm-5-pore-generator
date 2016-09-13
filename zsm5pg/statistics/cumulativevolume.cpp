@@ -8,7 +8,7 @@ CumulativeVolume::CumulativeVolume(QObject *parent) : Statistic(parent)
 
 }
 
-void CumulativeVolume::compute(Geometry *geometry)
+void CumulativeVolume::compute(Geometry *geometry, int timestep)
 {
     if(!geometry) return;
     QVector<float> &x = geometry->deltaXVector();

@@ -26,9 +26,11 @@ void NoGUI::loadIniFile(IniFile *iniFile)
     setVisualize(iniFile->getBool("visualize"));
     setTimesteps(iniFile->getInt("mcSteps"));
     setPrintEvery(iniFile->getInt("printEvery"));
+    setVerbose(iniFile->getBool("verbose"));
     qDebug() << "NoGUI loaded ini file with ";
     qDebug() << "  Log file: " << m_log.fileName();
     qDebug() << "  Mode: " << m_mode;
+    qDebug() << "  Verbose: " << m_verbose;
     qDebug() << "  Seed: " << iniFile->getInt("seed");
     qDebug() << "  Visualize: " << m_visualize;
     qDebug() << "  Timesteps: " << m_timesteps;
@@ -84,6 +86,11 @@ bool NoGUI::finished() const
     return m_finished;
 }
 
+bool NoGUI::verbose() const
+{
+    return m_verbose;
+}
+
 NoGUI::~NoGUI() {
 
 }
@@ -96,10 +103,9 @@ void NoGUI::tick()
     }
     QElapsedTimer timer;
     timer.start();
-    m_monteCarlo->tick();
+    m_monteCarlo->tick(m_timestep);
     m_elapsedTime += timer.elapsed();
 
-    m_timestep++;
     if( (m_timestep % m_printEvery) == 0) {
         double timeLeft = m_elapsedTime / (m_timestep+1) * (m_timesteps-m_timestep) / 1000.; // seconds
         QTextStream logStream(&m_log);
@@ -108,13 +114,15 @@ void NoGUI::tick()
         if(m_visualize) {
             for(QVariant &variant : m_statistics) {
                 Statistic *statistic = variant.value<Statistic*>();
-                statistic->compute(m_geometry);
+                statistic->compute(m_geometry, m_timestep);
                 if(m_visualize) {
                     statistic->updateQML();
                 }
             }
         }
     }
+
+    m_timestep++;
 
     if(m_timestep >= m_timesteps) {
         setFinished(true);
@@ -239,5 +247,14 @@ void NoGUI::setFinished(bool finished)
 
     m_finished = finished;
     emit finishedChanged(finished);
+}
+
+void NoGUI::setVerbose(bool verbose)
+{
+    if (m_verbose == verbose)
+        return;
+
+    m_verbose = verbose;
+    emit verboseChanged(verbose);
 }
 

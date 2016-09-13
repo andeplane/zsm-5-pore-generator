@@ -4,7 +4,7 @@
 #include <QDebug>
 void MonteCarlo::setDebug(bool debug)
 {
-    m_debug = debug;
+    m_verbose = debug;
 }
 
 float MonteCarlo::targetAcceptanceRatio() const
@@ -27,7 +27,7 @@ Geometry *MonteCarlo::geometry() const
     return m_geometry;
 }
 
-void MonteCarlo::tick()
+void MonteCarlo::tick(int step)
 {
     if(!isValid()) {
         qDebug() << "Error, MonteCarlo not ready...";
@@ -46,20 +46,20 @@ void MonteCarlo::tick()
         points.push_back(model->points());
     }
 
-    if(m_debug) qDebug() << "Starting monte carlo step. Current chi squared: " << chiSquared1;
-    if(m_debug) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
+    if(m_verbose) qDebug() << "Starting monte carlo step. Current chi squared: " << chiSquared1;
+    if(m_verbose) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
     m_geometry->randomWalkStep(m_standardDeviation);
 
     double chiSquared2 = 0;
     for(int i=0; i<m_models.size(); i++) {
         Statistic *model = m_models.at(i).value<Statistic*>();
         Statistic *data = m_datas.at(i).value<Statistic*>();
-        model->compute(m_geometry);
+        model->compute(m_geometry, step);
         chiSquared2 += model->chiSquared(data);
     }
 
     double deltaChiSquared = chiSquared2 - chiSquared1;
-    if(m_debug) qDebug() << "New chi squared: " << chiSquared2 << " with deltaChiSquared: " << deltaChiSquared;
+    if(m_verbose) qDebug() << "New chi squared: " << chiSquared2 << " with deltaChiSquared: " << deltaChiSquared;
 
     bool accepted = deltaChiSquared < 0 || Random::nextFloat() < exp(-deltaChiSquared / m_temperature);
     setSteps(m_steps+1);
@@ -67,7 +67,7 @@ void MonteCarlo::tick()
     if(accepted) {
         setAccepted(m_accepted+1);
         setChiSquared(chiSquared2);
-        if(m_debug) qDebug() << "     STEP ACCEPTED";
+        if(m_verbose) qDebug() << "     STEP ACCEPTED";
         writeToFile();
     } else {
         m_geometry->setDeltaXVector(x);
@@ -78,7 +78,7 @@ void MonteCarlo::tick()
             model->setPoints(points.at(i));
         }
         setChiSquared(chiSquared1);
-        if(m_debug) qDebug() << "     STEP REJECTED";
+        if(m_verbose) qDebug() << "     STEP REJECTED";
     }
     if(m_steps % 20 == 0) {
         updateRandomWalkFraction();
@@ -91,17 +91,28 @@ void MonteCarlo::loadIniFile(IniFile *iniFile)
     setStandardDeviation(iniFile->getDouble("mcStandardDeviation"));
     setTemperature(iniFile->getDouble("mcTemperature"));
     setFilename(QString("%1/%2").arg(m_filePath).arg(iniFile->getString("mcFilename")));
+    setVerbose(iniFile->getBool("verbose"));
     qDebug() << "MonteCarlo loaded ini file with ";
+    qDebug() << "  Verbose: " << m_verbose;
     qDebug() << "  Standard deviation: " << m_standardDeviation;
     qDebug() << "  Temperature: " << m_temperature;
     qDebug() << "  Filename: " << m_filename;
+}
+
+void MonteCarlo::setVerbose(bool verbose)
+{
+    if (m_verbose == verbose)
+            return;
+
+        m_verbose = verbose;
+        emit verboseChanged(verbose);
 }
 
 void MonteCarlo::writeToFile() {
     if(m_filename.isEmpty()) return;
     if(!m_file.isOpen()) {
         m_file.setFileName(m_filename);
-        if(m_debug) qDebug() << "Opening MC file " << m_filename;
+        if(m_verbose) qDebug() << "Opening MC file " << m_filename;
         if (!m_file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) {
             qDebug() << "Error, could not open monte carlo file " << m_filename;
             exit(1);
@@ -131,7 +142,7 @@ void MonteCarlo::updateRandomWalkFraction() {
     float minimumRandomWalkFraction = 1.0 / (3*m_geometry->planesPerDimension());
 
     if(newRandomWalkFraction<minimumRandomWalkFraction) newRandomWalkFraction = minimumRandomWalkFraction;
-    if(m_debug) {
+    if(m_verbose) {
         qDebug() << "  Updating random walk fraction. Target acceptance ratio is " << m_targetAcceptanceRatio << ", current: " << m_acceptanceRatio;
         qDebug() << "  New random walk fraction (factor: " << factor << "): " << newRandomWalkFraction << "(old: " << m_geometry->randomWalkFraction() << ")";
     }
@@ -186,6 +197,11 @@ QVariantList MonteCarlo::datas() const
 QString MonteCarlo::filePath() const
 {
     return m_filePath;
+}
+
+bool MonteCarlo::verbose() const
+{
+    return m_verbose;
 }
 
 float MonteCarlo::chiSquared() const

@@ -1,4 +1,5 @@
 #include "poresizestatistic.h"
+#include "../geometry.h"
 #include <cmath>
 #include <QDebug>
 // #define POREISCBRT
@@ -7,12 +8,11 @@ PoreSizeStatistic::PoreSizeStatistic(QObject *parent) : Statistic(parent)
     m_name = "PoreSize";
     m_xLabel = "Pore size [nm]";
     m_yLabel = "P(d)";
+    setIsValid(true);
 }
 
 void PoreSizeStatistic::computeMode0(Geometry *geometry)
 {
-    if(!geometry) return;
-    Statistic::compute(geometry);
     qDebug() << "Histogram size: " << m_histogramValues.size();
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
@@ -61,7 +61,6 @@ void PoreSizeStatistic::computeMode0(Geometry *geometry)
 }
 
 void PoreSizeStatistic::computeMode1(Geometry *geometry) {
-    Statistic::compute(geometry);
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -87,8 +86,12 @@ void PoreSizeStatistic::computeMode1(Geometry *geometry) {
     updateQML();
 }
 
-void PoreSizeStatistic::compute(Geometry *geometry)
+void PoreSizeStatistic::compute(Geometry *geometry, int timestep)
 {
+    if(!geometry || m_lastComputed == timestep) return;
+
+    Statistic::compute(geometry, timestep);
     if(m_mode==0) computeMode0(geometry);
     if(m_mode==1) computeMode1(geometry);
+    m_lastComputed = timestep;
 }

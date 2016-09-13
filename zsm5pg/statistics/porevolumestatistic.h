@@ -3,7 +3,6 @@
 
 #include <QVector>
 #include "statistic.h"
-#include "geometry.h"
 class PoreVolumeStatistic : public Statistic
 {
     Q_OBJECT
@@ -14,7 +13,7 @@ public:
     explicit PoreVolumeStatistic(QObject *parent = nullptr);
 
 public:
-    virtual void compute(Geometry *geometry) override;
+    virtual void compute(class Geometry *geometry, int timestep) override;
 };
 
 #endif // POREVOLUMESTATISTIC_H

@@ -115,7 +115,10 @@ Window {
 
         statistics: [
             adsorption,
-            desorption
+            desorption,
+            adsorptionData,
+            desorptionData,
+            poreSizeStatistic
         ]
 
         geometry: Geometry {
@@ -128,12 +131,12 @@ Window {
             geometry: geometry
             filePath: simulator.filePath
             models: [
-                adsorption,
-                desorption
+                adsorption//,
+                // desorption
             ]
             datas: [
-                adsorptionData,
-                desorptionData
+                adsorptionData//,
+                //desorptionData
             ]
         }
     }

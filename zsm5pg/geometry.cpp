@@ -69,9 +69,9 @@ void Geometry::reset(float min, float max) {
         }
     } else {
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-            m_deltaXVector[planeId] = Random::nextInt(18,19);
-            m_deltaYVector[planeId] = Random::nextInt(18,19);
-            m_deltaZVector[planeId] = Random::nextInt(18,19);
+            m_deltaXVector[planeId] = Random::nextInt(int(min),int(max));
+            m_deltaYVector[planeId] = Random::nextInt(int(min), int(max));
+            m_deltaZVector[planeId] = Random::nextInt(int(min), int(max));
         }
     }
 }

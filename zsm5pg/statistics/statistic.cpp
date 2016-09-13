@@ -11,15 +11,18 @@ Statistic::Statistic(QObject *parent) : QObject(parent),
     m_name = "Statistic";
 }
 
-void Statistic::compute(Geometry *geometry)
+void Statistic::compute(Geometry *geometry, int timestep)
 {
     if(m_constant) return;
+    if(m_lastComputed == timestep) return;
+
     if(m_timesteps >= m_histogramAverageCount) {
         // we should start removing values in the beginning of the list
         int valuesPerTimestep = m_histogramValues.size() / m_histogramAverageCount;
         m_histogramValues.erase(m_histogramValues.begin(), m_histogramValues.begin() + valuesPerTimestep);
     }
     m_timesteps++;
+    m_lastComputed = timestep;
 }
 
 int Statistic::bins() const
@@ -99,6 +102,8 @@ void Statistic::load(QString fileName)
             }
         }
     }
+
+    qDebug() << "  loaded " << m_points.size() << " points from " << fileName;
 }
 
 void Statistic::emitReady()
