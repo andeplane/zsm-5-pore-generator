@@ -37,7 +37,7 @@ public:
     NoGUI();
     ~NoGUI();
     int printEvery = 100;
-    void loadIniFile(IniFile *iniFile);
+    Q_INVOKABLE void loadIniFile(IniFile *iniFile);
     Q_INVOKABLE bool tick();
     Q_INVOKABLE void run(int steps);
     QVariantList statistics() const;

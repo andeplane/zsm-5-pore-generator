@@ -3,16 +3,17 @@
 #include <QDebug>
 #include <cmath>
 #include <QTextStream>
+#include "../inifile.h"
 #include "../geometry.h"
 Concentration::Concentration(QObject *parent) : Statistic(parent)
 {
 
 }
 
-void Concentration::readFile() {
-    QFile file(m_fileName);
+void Concentration::readFile(QString fileName) {
+    QFile file(fileName);
     if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
-        qDebug() << "Could not find adsorption matrix file " << m_fileName;
+        qDebug() << "Could not find adsorption matrix file " << fileName;
         exit(1);
     }
     m_values.resize(20); // We don't use index 0 in this because it is nice to use the H values as lookup index (they start on 1)
@@ -238,24 +239,16 @@ void Concentration::compute(Geometry *geometry)
     if(m_mode==1) computeMode1(geometry);
 }
 
-QString Concentration::fileName() const
-{
-    return m_fileName;
-}
-
-void Concentration::setFileName(QString fileName)
-{
-    if (m_fileName == fileName)
-        return;
-
-    m_fileName = fileName;
-    emit fileNameChanged(fileName);
-    if(!m_fileName.isEmpty()) {
-        readFile();
-    }
-}
-
 bool Concentration::isValid()
 {
     return m_pressures.size() > 0; // hack, but works.
+}
+
+
+void Concentration::loadIniFile(IniFile *iniFile)
+{
+    if(m_sourceKey.isEmpty()) return;
+    QString fileName = iniFile->getString(m_sourceKey);
+    readFile(fileName);
+    setIsValid(true);
 }

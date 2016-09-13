@@ -47,7 +47,6 @@ public:
     MonteCarlo();
     Geometry* geometry() const;
     void tick();
-    void loadInifile(class IniFile *iniFile);
     float standardDeviation() const;
     float temperature() const;
     int steps() const;
@@ -79,6 +78,7 @@ public slots:
     void setModels(QVariantList models);
     void setDatas(QVariantList datas);
     void setFilePath(QString filePath);
+    void loadIniFile(class IniFile *iniFile);
 
 signals:
     void geometryChanged(Geometry* geometry);

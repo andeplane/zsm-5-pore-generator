@@ -17,21 +17,41 @@ Window {
         id: inifile
         filename: iniFilename
         onReadyChanged: {
+            simulator.loadIniFile(iniFile)
+            geometry.loadIniFile(iniFile)
+            monteCarlo.loadIniFile(iniFile)
             adsorption.loadIniFile(iniFile)
             desorption.loadIniFile(iniFile)
+            adsorptionData.loadIniFile(iniFile)
+            desorptionData.loadIniFile(iniFile)
         }
     }
 
     Concentration {
         id: adsorption
+        name: "adsorption"
     }
 
     Concentration {
         id: desorption
+        name: "desorption"
+    }
+
+    Statistic {
+        id: adsorptionData
+        name: "adsorptionData"
+        sourceKey: "adsorptionData"
+    }
+
+    Statistic {
+        id: desorptionData
+        name: "desorptionData"
+        sourceKey: "desorptionData"
     }
 
     PoreSizeStatistic {
         id: poreSizeStatistic
+        name: "poresizestatistic"
     }
 
     NoGUI {
@@ -47,6 +67,7 @@ Window {
             mode: simulator.mode
         }
         monteCarlo: MonteCarlo {
+            id: monteCarlo
             geometry: geometry
             filePath: simulator.filePath
             models: [
@@ -54,7 +75,8 @@ Window {
                 desorption
             ]
             datas: [
-
+                adsorptionData,
+                desorptionData
             ]
         }
     }

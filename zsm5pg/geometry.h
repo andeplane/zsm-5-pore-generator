@@ -25,7 +25,6 @@ private:
 public:
     Geometry();
     ~Geometry();
-    void loadIniFile(class IniFile *iniFile);
     void reset(float min, float max);
     void randomWalkStep(float standardDeviation);
     Q_INVOKABLE void save(QString filename);
@@ -52,6 +51,7 @@ public slots:
     void setMode(int mode);
     void setFilePath(QString filePath);
     void setIsValid(bool isValid);
+    void loadIniFile(class IniFile *iniFile);
 
 signals:
     void planesPerDimensionChanged(int planesPerDimension);

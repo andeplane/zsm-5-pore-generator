@@ -70,11 +70,11 @@ void Statistic::saveHistogramValues(QUrl filename)
     file.close();
 }
 
-void Statistic::load(QString filename)
+void Statistic::load(QString fileName)
 {
-    QFile file(filename);
+    QFile file(fileName);
     if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
-        qDebug() << "Could not open file " << filename;
+        qDebug() << "Could not open file " << fileName;
         exit(1);
     }
 
@@ -285,6 +285,11 @@ bool Statistic::isValid() const
     return m_isValid;
 }
 
+QString Statistic::sourceKey() const
+{
+    return m_sourceKey;
+}
+
 void Statistic::setName(QString name)
 {
     if (m_name == name)
@@ -321,7 +326,12 @@ void Statistic::setMode(int mode)
     emit modeChanged(mode);
 }
 
-void Statistic::loadIniFile(IniFile *iniFile) { Q_UNUSED(iniFile); }
+void Statistic::loadIniFile(IniFile *iniFile) {
+    if(m_sourceKey.isEmpty()) return;
+
+    QString fileName = iniFile->getString(m_sourceKey);
+    load(fileName);
+}
 
 void Statistic::setIsValid(bool isValid)
 {
@@ -330,4 +340,13 @@ void Statistic::setIsValid(bool isValid)
 
     m_isValid = isValid;
     emit isValidChanged(isValid);
+}
+
+void Statistic::setSourceKey(QString sourceKey)
+{
+    if (m_sourceKey == sourceKey)
+        return;
+
+    m_sourceKey = sourceKey;
+    emit sourceKeyChanged(sourceKey);
 }

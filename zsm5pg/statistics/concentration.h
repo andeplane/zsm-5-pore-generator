@@ -6,17 +6,14 @@
 class Concentration : public Statistic
 {
     Q_OBJECT
-    Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
+
 public:
     explicit Concentration(QObject *parent = nullptr);
     virtual void compute(Geometry *geometry) override;
-    QString fileName() const;
 
 public slots:
-    void setFileName(QString fileName);
 
 signals:
-    void fileNameChanged(QString fileName);
 
 private:
     bool isValid();
@@ -25,8 +22,10 @@ private:
     QVector<float> m_volumes;
     void computeMode0(Geometry *geometry);
     void computeMode1(Geometry *geometry);
-    QString m_fileName;
-    void readFile();
+    void readFile(QString fileName);
+    // Statistic interface
+public slots:
+    virtual void loadIniFile(IniFile *iniFile) override;
 };
 
 #endif // CONCENTRATION_H

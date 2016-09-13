@@ -83,7 +83,7 @@ void MonteCarlo::tick()
     points.clear();
 }
 
-void MonteCarlo::loadInifile(IniFile *iniFile)
+void MonteCarlo::loadIniFile(IniFile *iniFile)
 {
     setStandardDeviation(iniFile->getDouble("mcStandardDeviation"));
     setTemperature(iniFile->getDouble("mcTemperature"));
