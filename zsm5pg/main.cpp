@@ -3,7 +3,6 @@
 #include <QtQml>
 #include <QDebug>
 #include <QVector>
-#include "mysimulator.h"
 #include "statistics/statistics.h"
 #include "zsm5geometry.h"
 #include "montecarlo.h"

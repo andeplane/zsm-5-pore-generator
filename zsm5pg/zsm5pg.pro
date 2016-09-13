@@ -7,7 +7,6 @@ INCLUDEPATH += /usr/local/include
 LIBS += -L/usr/local/lib -lgsl
 # DEFINES += POREISCBRT
 SOURCES += main.cpp \
-    mysimulator.cpp \
     zsm5geometry.cpp \
     statistics/statistic.cpp \
     statistics/poresizestatistic.cpp \
@@ -28,10 +27,9 @@ QML_IMPORT_PATH =
 
 # Default rules for deployment.
 include(deployment.pri)
-include(../SimVis/library_deployment.pri)
+# include(../SimVis/library_deployment.pri)
 
 HEADERS += \
-    mysimulator.h \
     zsm5geometry.h \
     statistics/statistic.h \
     statistics/poresizestatistic.h \
