@@ -6,6 +6,7 @@
 #include <QVariantList>
 #include <QLineSeries>
 #include <QUrl>
+#include <QFile>
 using namespace QtCharts;
 
 class Statistic : public QObject
@@ -56,6 +57,8 @@ public:
     float max() const;
     void save(QString filename);
     void load(QString filename);
+    virtual void saveState(QFile &file) { Q_UNUSED(file) }
+    virtual void loadState(class IniFile *iniFile) { Q_UNUSED(iniFile) }
     double chiSquared(Statistic *statistic);
     virtual double eval(double x, bool &ok);
     void emitReady();

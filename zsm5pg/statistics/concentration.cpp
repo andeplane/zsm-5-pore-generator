@@ -301,3 +301,9 @@ void Concentration::setScalingFactor(double scalingFactor)
     m_scalingFactor = scalingFactor;
     emit scalingFactorChanged(scalingFactor);
 }
+
+
+void Concentration::saveState(QFile &file)
+{
+
+}

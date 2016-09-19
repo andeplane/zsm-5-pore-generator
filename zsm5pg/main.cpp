@@ -6,6 +6,7 @@
 #include "statistics/statistics.h"
 #include "geometry.h"
 #include "montecarlo.h"
+#include "mcobject.h"
 #include "inifile.h"
 #include "nogui.h"
 #include <QtCharts>
@@ -14,6 +15,7 @@
 int main(int argc, char *argv[])
 {
     qmlRegisterType<NoGUI>("Zeolite", 1, 0, "NoGUI");
+    qmlRegisterType<MCObject>("Zeolite", 1, 0, "MCObject");
     qmlRegisterType<Statistic>("Zeolite", 1, 0, "Statistic");
     qmlRegisterType<Concentration>("Zeolite", 1, 0, "Concentration");
     qmlRegisterType<PoreSizeStatistic>("Zeolite", 1, 0, "PoreSizeStatistic");

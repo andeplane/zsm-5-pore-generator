@@ -21,6 +21,7 @@ class NoGUI : public QObject
     Q_PROPERTY(int printEvery READ printEvery WRITE setPrintEvery NOTIFY printEveryChanged)
     Q_PROPERTY(bool finished READ finished WRITE setFinished NOTIFY finishedChanged)
     Q_PROPERTY(bool verbose READ verbose WRITE setVerbose NOTIFY verboseChanged)
+
 private:
     QElapsedTimer m_timer;
     Concentration* m_concentration = nullptr;
@@ -43,6 +44,8 @@ private:
 public:
     NoGUI();
     ~NoGUI();
+    Q_INVOKABLE void saveState();
+    Q_INVOKABLE void loadState();
     Q_INVOKABLE void loadIniFile(IniFile *iniFile);
     Q_INVOKABLE void tick();
     Q_INVOKABLE void run(int steps);

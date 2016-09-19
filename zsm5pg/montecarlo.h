@@ -64,7 +64,8 @@ public:
     QString filePath() const;
     bool verbose() const;
     QVariantList mcObjects() const;
-
+    void saveState(QFile &file);
+    void loadState(class IniFile *iniFile);
 public slots:
     void setGeometry(Geometry* geometry);
     void setStandardDeviation(float standardDeviation);

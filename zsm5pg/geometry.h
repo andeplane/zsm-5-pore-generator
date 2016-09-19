@@ -1,5 +1,6 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
+#include <QFile>
 #include <QObject>
 #include <QVector>
 class Geometry : public QObject
@@ -29,6 +30,8 @@ public:
     ~Geometry();
     void reset(float min, float max);
     bool randomWalkStep(float standardDeviation);
+    void saveState(QFile &file);
+    void loadState(class IniFile *iniFile);
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString filename);
     QVector<float> &deltaXVector();
@@ -47,7 +50,6 @@ public:
     QString filePath() const;
     bool isValid() const;
     bool verbose() const;
-
 public slots:
     void setLengthScale(float lengthScale);
     void setRandomWalkFraction(float randomWalkFraction);

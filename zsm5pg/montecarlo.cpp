@@ -52,7 +52,8 @@ void MonteCarlo::tick(int step)
     if(m_verbose) qDebug() << "Starting monte carlo step. Current chi squared: " << chiSquared1;
     if(m_verbose) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
 
-    m_geometry->randomWalkStep(m_standardDeviation);
+    bool anyChanges = m_geometry->randomWalkStep(m_standardDeviation);
+    if(!anyChanges) return;
     for(QVariant &variant : m_mcObjects) {
         MCObject *obj = variant.value<MCObject*>();
         obj->randomWalk();
@@ -230,6 +231,32 @@ bool MonteCarlo::verbose() const
 QVariantList MonteCarlo::mcObjects() const
 {
     return m_mcObjects;
+}
+
+void MonteCarlo::saveState(QFile &file)
+{
+    QTextStream stream(&file);
+    stream << "mc_accepted " << m_accepted << endl;
+    stream << "mc_steps " << m_steps << endl;
+    stream << "mc_chisquared " << m_chiSquared << endl;
+    stream << "mc_acceptanceRatio " << m_acceptanceRatio << endl;
+    for(QVariant &variant : m_mcObjects) {
+        MCObject *object = variant.value<MCObject*>();
+        object->saveState(file);
+    }
+
+}
+
+void MonteCarlo::loadState(IniFile *iniFile)
+{
+    setAccepted(iniFile->getInt("mc_accepted"));
+    setSteps(iniFile->getInt("mc_steps"));
+    setChiSquared(iniFile->getDouble("mc_chisquared"));
+    setAcceptanceRatio(iniFile->getDouble("mc_acceptanceRatio"));
+    for(QVariant &variant : m_mcObjects) {
+        MCObject *object = variant.value<MCObject*>();
+        object->loadState(iniFile);
+    }
 }
 
 float MonteCarlo::chiSquared() const

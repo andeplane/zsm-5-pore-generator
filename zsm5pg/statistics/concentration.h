@@ -34,6 +34,7 @@ private:
     // Statistic interface
 public slots:
     virtual void loadIniFile(class IniFile *iniFile) override;
+    virtual void saveState(QFile &file) override;
     void setZeoliteThickness(double zeoliteThickness);
     void setScalingFactor(double scalingFactor);
 };

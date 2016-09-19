@@ -13,7 +13,7 @@ void IniFile::loadFile() {
     QFile file(m_filename);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Could not open " << m_filename;
-        exit(1);
+        return;
     }
 
     QString content(file.readAll());

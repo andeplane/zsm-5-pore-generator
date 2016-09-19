@@ -35,6 +35,7 @@ Window {
             desorptionData.loadIniFile(iniFile)
             poreSizeStatistic.loadIniFile(iniFile)
             currentStatistic = poreSizeStatistic
+            simulator.loadState()
         }
     }
 
@@ -42,8 +43,8 @@ Window {
         id: adsorptionModel
         constant: false
         filePath: simulator.filePath
-        scalingFactor: scaleSlider.value
-        zeoliteThickness: thicknessSlider.value
+        scalingFactor: scaling.value
+        zeoliteThickness: thickness.value
         name: "adsorption"
         sourceKey: "adsorptionModel"
         Component.onCompleted: {
@@ -58,8 +59,8 @@ Window {
         id: desorptionModel
         constant: false
         filePath: simulator.filePath
-        scalingFactor: scaleSlider.value
-        zeoliteThickness: thicknessSlider.value
+        scalingFactor: scaling.value
+        zeoliteThickness: thickness.value
         name: "desorption"
         sourceKey: "desorptionModel"
         Component.onCompleted: {
@@ -112,10 +113,25 @@ Window {
         }
     }
 
+    MCObject {
+        id: thickness
+        name: "thickness"
+        standardDeviation: monteCarlo.standardDeviation * 0.001
+        value: 1.24
+    }
+
+    MCObject {
+        id: scaling
+        name: "scaling"
+        standardDeviation: monteCarlo.standardDeviation * 0.001
+        value: 1.5
+    }
+
     NoGUI {
         id: simulator
         onFinishedChanged: {
             console.log("Simulation finished")
+            saveState()
             Qt.quit()
         }
 
@@ -135,7 +151,6 @@ Window {
         monteCarlo: MonteCarlo {
             id: monteCarlo
             geometry: geometry
-            temperature: Math.pow(10,temperatureSlider.value)
             filePath: simulator.filePath
             models: [
                 adsorptionModel,
@@ -144,6 +159,10 @@ Window {
             datas: [
                 adsorptionData,
                 desorptionData
+            ]
+            mcObjects: [
+//                scaling,
+//                thickness
             ]
         }
     }
@@ -205,7 +224,7 @@ Window {
         ValueAxis {
             id: _axisY
             min: 0
-            max: 500.0
+            max: 1000.0
             tickCount: 5
             titleText: "c"
         }
@@ -229,7 +248,7 @@ Window {
             id: ___axisX
             min: 0
             max: currentStatistic ? currentStatistic.max : 1
-            tickCount: 5
+            tickCount: 10
             titleText: currentStatistic ? currentStatistic.xLabel : ""
         }
         ValueAxis {
@@ -241,88 +260,90 @@ Window {
         }
     }
 
-    Column {
-        Row {
-            Label {
-                text: "Scale: "
-            }
+//    Column {
+//        Row {
+//            Label {
+//                text: "Scale: "
+//            }
 
-            Slider {
-                id: scaleSlider
-                minimumValue: 0
-                maximumValue: 2.0
-                stepSize: 0.01
-                value: 1.5
-            }
+//            Slider {
+//                id: scaleSlider
+//                minimumValue: 0
+//                maximumValue: 2.0
+//                stepSize: 0.01
+//                value: 1.0
+//            }
 
-            Button {
-                text: "-"
-                onClicked: scaleSlider.value -= scaleSlider.stepSize
-            }
+//            Button {
+//                text: "-"
+//                onClicked: scaleSlider.value -= scaleSlider.stepSize
+//            }
 
-            Button {
-                text: "+"
-                onClicked: scaleSlider.value += scaleSlider.stepSize
-            }
+//            Button {
+//                text: "+"
+//                onClicked: scaleSlider.value += scaleSlider.stepSize
+//            }
 
-            Label {
-                text: scaleSlider.value.toFixed(2)
-            }
-        }
-        Row {
-            Label {
-                text: "Thickness: "
-            }
+//            Label {
+//                text: scaleSlider.value.toFixed(2)
+//            }
+//        }
+//        Row {
+//            Label {
+//                text: "Thickness: "
+//            }
 
-            Slider {
-                id: thicknessSlider
-                minimumValue: 0
-                maximumValue: 5.0
-                stepSize: 0.01
-                value: 1.24
-            }
+//            Slider {
+//                id: thicknessSlider
+//                minimumValue: 0
+//                maximumValue: 5.0
+//                stepSize: 0.01
+//                value: 1.0
+//            }
 
-            Button {
-                text: "-"
-                onClicked: thicknessSlider.value -= thicknessSlider.stepSize
-            }
+//            Button {
+//                text: "-"
+//                onClicked: thicknessSlider.value -= thicknessSlider.stepSize
+//            }
 
-            Button {
-                text: "+"
-                onClicked: thicknessSlider.value += thicknessSlider.stepSize
-            }
+//            Button {
+//                text: "+"
+//                onClicked: thicknessSlider.value += thicknessSlider.stepSize
+//            }
 
-            Label {
-                text: thicknessSlider.value.toFixed(2)
-            }
-        }
+//            Label {
+//                text: thicknessSlider.value.toFixed(2)
+//            }
+//        }
 
-        Row {
-            Label {
-                text: "Temperature: "
-            }
+//        Row {
+//            Label {
+//                text: "Temperature: "
+//            }
 
-            Slider {
-                id: temperatureSlider
-                minimumValue: -10
-                maximumValue: 0.0
-                stepSize: 1.0
-                value: -1.0
-            }
+//            Slider {
+//                id: temperatureSlider
+//                minimumValue: -10
+//                maximumValue: 0.0
+//                stepSize: 1.0
+//                value: -1.0
+//                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
+//            }
 
-            Button {
-                text: "-"
-                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
-            }
+//            Button {
+//                text: "-"
+//                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
+//            }
 
-            Button {
-                text: "+"
-                onClicked: temperatureSlider.value += temperatureSlider.stepSize
-            }
+//            Button {
+//                text: "+"
+//                onClicked: temperatureSlider.value += temperatureSlider.stepSize
+//            }
 
-            Label {
-                text: Math.pow(10,temperatureSlider.value).toFixed(2)
-            }
-        }
-    }
+//            Label {
+//                text: Math.pow(10,temperatureSlider.value).toFixed(2)
+//            }
+//        }
+//    }
+
 }
