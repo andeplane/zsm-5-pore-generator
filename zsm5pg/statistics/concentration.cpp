@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <cmath>
 #include <QTextStream>
+#include <random.h>
+#include "../montecarlo.h"
 #include "../inifile.h"
 #include "../geometry.h"
 Concentration::Concentration(QObject *parent) : Statistic(parent)
@@ -125,10 +127,9 @@ void Concentration::computeMode0(Geometry *geometry) {
     float xPlaneArea = ly*lz;
     float yPlaneArea = lx*lz;
     float zPlaneArea = lx*ly;
-    float thickness  = 1.5;
-    float xPlaneVolume = xPlaneArea*thickness;
-    float yPlaneVolume = yPlaneArea*thickness;
-    float zPlaneVolume = zPlaneArea*thickness;
+    float xPlaneVolume = xPlaneArea*m_zeoliteThickness;
+    float yPlaneVolume = yPlaneArea*m_zeoliteThickness;
+    float zPlaneVolume = zPlaneArea*m_zeoliteThickness;
 
     float totalZeoliteVolume = geometry->planesPerDimension()*(xPlaneVolume + yPlaneVolume + zPlaneVolume);
     float volumeOfZeoliteUnitCell = 5.21128;
@@ -146,7 +147,7 @@ void Concentration::computeMode0(Geometry *geometry) {
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
         N_adsorbed += bulkSystemFactor*m_values[1][i];
-        // N_adsorbed *= 1.41;
+        N_adsorbed *= m_scalingFactor;
         float N_molesAdsorbed = N_adsorbed/avogadro;
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
         float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;
@@ -205,24 +206,31 @@ void Concentration::computeMode1(Geometry *geometry) {
     float argonDensity = 1.784;
     float argonLiterPerMol = argonMass / argonDensity;
 
-    float thickness  = 1.5;
-    float totalZeoliteVolume = totalArea*thickness;
+    // float totalZeoliteVolume = totalArea*m_zeoliteThickness;
+    float totalZeoliteVolume = totalArea*m_zeoliteThickness;
+
+    for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+        float poreVolume = totalZeoliteVolume;
+        float N_ads = m_values[1][pIndex]/m_volumes[1]*poreVolume;
+        numberOfAdsorbedAtoms[pIndex] += N_ads;
+    }
+
     float volumeOfZeoliteUnitCell = 5.21128;
     float massOfZeoliteUnitCell = 192*15.9994 + 96*28.0855;
     float numberOfZeoliteUnitCells = totalZeoliteVolume / volumeOfZeoliteUnitCell;
     float totalZeoliteMass = numberOfZeoliteUnitCells*massOfZeoliteUnitCell;
     float totalZeoliteMassGrams = totalZeoliteMass/avogadro;
 
-    int numberOfUnitCellsBulkSystem = 200; // This is from MD.
+    // int numberOfUnitCellsBulkSystem = 200; // This is from MD.
     // float totalZeoliteMassBulkSystemGrams = numberOfUnitCellsBulkSystem*massOfZeoliteUnitCell/avogadro;
-    float totalZeoliteVolumeBulkSystem = volumeOfZeoliteUnitCell*numberOfUnitCellsBulkSystem;
-    float bulkSystemFactor = totalZeoliteVolume / totalZeoliteVolumeBulkSystem;
+    // float totalZeoliteVolumeBulkSystem = volumeOfZeoliteUnitCell*numberOfUnitCellsBulkSystem;
+    // float bulkSystemFactor = totalZeoliteVolume / totalZeoliteVolumeBulkSystem;
 
     m_points.clear();
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
-        N_adsorbed += bulkSystemFactor*m_values[1][i];
-        // N_adsorbed *= 1.41;
+        // N_adsorbed += bulkSystemFactor*m_values[1][i];
+        N_adsorbed *= m_scalingFactor;
         float N_molesAdsorbed = N_adsorbed/avogadro;
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
         float volumeAdsorbedCm3 = volumeAdsorbedLiter*cubicCentimetersPerLiter;
@@ -238,6 +246,16 @@ void Concentration::compute(Geometry *geometry, int timestep)
     if(m_mode==0) computeMode0(geometry);
     if(m_mode==1) computeMode1(geometry);
     m_lastComputed = timestep;
+}
+
+double Concentration::zeoliteThickness() const
+{
+    return m_zeoliteThickness;
+}
+
+double Concentration::scalingFactor() const
+{
+    return m_scalingFactor;
 }
 
 bool Concentration::isValid()
@@ -264,4 +282,22 @@ void Concentration::loadIniFile(IniFile *iniFile)
     qDebug() << "  Source key: " << m_sourceKey;
     qDebug() << "  Filename: " << fileName;
     setIsValid(true);
+}
+
+void Concentration::setZeoliteThickness(double zeoliteThickness)
+{
+    if (m_zeoliteThickness == zeoliteThickness)
+        return;
+
+    m_zeoliteThickness = zeoliteThickness;
+    emit zeoliteThicknessChanged(zeoliteThickness);
+}
+
+void Concentration::setScalingFactor(double scalingFactor)
+{
+    if (m_scalingFactor == scalingFactor)
+        return;
+
+    m_scalingFactor = scalingFactor;
+    emit scalingFactorChanged(scalingFactor);
 }

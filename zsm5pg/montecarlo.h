@@ -12,6 +12,7 @@ class MonteCarlo : public QObject
     Q_PROPERTY(Geometry* geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
     Q_PROPERTY(QVariantList models READ models WRITE setModels NOTIFY modelsChanged)
     Q_PROPERTY(QVariantList datas READ datas WRITE setDatas NOTIFY datasChanged)
+    Q_PROPERTY(QVariantList mcObjects READ mcObjects WRITE setMcObjects NOTIFY mcObjectsChanged)
     Q_PROPERTY(float standardDeviation READ standardDeviation WRITE setStandardDeviation NOTIFY standardDeviationChanged)
     Q_PROPERTY(float temperature READ temperature WRITE setTemperature NOTIFY temperatureChanged)
     Q_PROPERTY(int steps READ steps WRITE setSteps NOTIFY stepsChanged)
@@ -41,6 +42,7 @@ private:
     void updateRandomWalkFraction();
     void writeToFile();
     QString m_filePath;
+    QVariantList m_mcObjects;
 
 public:
     MonteCarlo();
@@ -61,6 +63,7 @@ public:
     QVariantList datas() const;
     QString filePath() const;
     bool verbose() const;
+    QVariantList mcObjects() const;
 
 public slots:
     void setGeometry(Geometry* geometry);
@@ -78,6 +81,7 @@ public slots:
     void setFilePath(QString filePath);
     void loadIniFile(class IniFile *iniFile);
     void setVerbose(bool verbose);
+    void setMcObjects(QVariantList mcObjects);
 
 signals:
     void geometryChanged(Geometry* geometry);
@@ -94,6 +98,7 @@ signals:
     void datasChanged(QVariantList datas);
     void filePathChanged(QString filePath);
     void verboseChanged(bool verbose);
+    void mcObjectsChanged(QVariantList mcObjects);
 };
 
 #endif // MONTECARLO_H

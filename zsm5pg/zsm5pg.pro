@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     statistics/cumulativevolume.cpp \
     statistics/lengthratio.cpp \
     statistics/dvdlogd.cpp \
-    geometry.cpp
+    geometry.cpp \
+    mcobject.cpp
 
 RESOURCES += qml.qrc
 
@@ -43,4 +44,5 @@ HEADERS += \
     statistics/cumulativevolume.h \
     statistics/lengthratio.h \
     statistics/dvdlogd.h \
-    geometry.h
+    geometry.h \
+    mcobject.h

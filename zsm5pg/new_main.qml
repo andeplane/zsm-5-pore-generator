@@ -42,6 +42,8 @@ Window {
         id: adsorptionModel
         constant: false
         filePath: simulator.filePath
+        scalingFactor: scaleSlider.value
+        zeoliteThickness: thicknessSlider.value
         name: "adsorption"
         sourceKey: "adsorptionModel"
         Component.onCompleted: {
@@ -56,6 +58,8 @@ Window {
         id: desorptionModel
         constant: false
         filePath: simulator.filePath
+        scalingFactor: scaleSlider.value
+        zeoliteThickness: thicknessSlider.value
         name: "desorption"
         sourceKey: "desorptionModel"
         Component.onCompleted: {
@@ -131,6 +135,7 @@ Window {
         monteCarlo: MonteCarlo {
             id: monteCarlo
             geometry: geometry
+            temperature: Math.pow(10,temperatureSlider.value)
             filePath: simulator.filePath
             models: [
                 adsorptionModel,
@@ -146,7 +151,7 @@ Window {
     ChartView {
         id: adsorptionChart
         width: parent.width*0.5
-        height: parent.height*0.5
+        height: parent.height
         antialiasing: true
         legend.visible: true
         title: "Adsorption"
@@ -166,7 +171,27 @@ Window {
             axisY: _axisY
             markerSize: 5
             color: Qt.rgba(1,1,1,0)
-            borderColor: "black"
+            borderColor: "red"
+            borderWidth: 1
+        }
+
+        LineSeries {
+            id: desorptionDataSeries
+            name: "Data"
+            color: "green"
+            axisX: _axisX
+            axisY: _axisY
+        }
+
+        ScatterSeries {
+            id: desorptionModelSeries
+            name: "Model"
+            axisX: _axisX
+            axisY: _axisY
+            markerSize: 5
+            markerShape: ScatterSeries.MarkerShapeRectangle
+            color: Qt.rgba(1,1,1,0)
+            borderColor: "green"
             borderWidth: 1
         }
 
@@ -179,50 +204,6 @@ Window {
         }
         ValueAxis {
             id: _axisY
-            min: 0
-            max: 500.0
-            tickCount: 5
-            titleText: "c"
-        }
-    }
-
-    ChartView {
-        id: desorptionChart
-        width: parent.width*0.5
-        height: parent.height*0.5
-        anchors.top: adsorptionChart.bottom
-        antialiasing: true
-        legend.visible: true
-        title: "Desorption"
-
-        LineSeries {
-            id: desorptionDataSeries
-            name: "Data"
-            color: "red"
-            axisX: __axisX
-            axisY: __axisY
-        }
-
-        ScatterSeries {
-            id: desorptionModelSeries
-            name: "Model"
-            axisX: __axisX
-            axisY: __axisY
-            markerSize: 5
-            color: Qt.rgba(1,1,1,0)
-            borderColor: "black"
-            borderWidth: 1
-        }
-
-        ValueAxis {
-            id: __axisX
-            min: 0
-            max: 1
-            tickCount: 5
-            titleText: "P [bar]"
-        }
-        ValueAxis {
-            id: __axisY
             min: 0
             max: 500.0
             tickCount: 5
@@ -254,9 +235,94 @@ Window {
         ValueAxis {
             id: ___axisY
             min: 0
-            max: 2.0
+            max: 0.5
             tickCount: 5
             titleText: currentStatistic ? currentStatistic.yLabel : ""
+        }
+    }
+
+    Column {
+        Row {
+            Label {
+                text: "Scale: "
+            }
+
+            Slider {
+                id: scaleSlider
+                minimumValue: 0
+                maximumValue: 2.0
+                stepSize: 0.01
+                value: 1.5
+            }
+
+            Button {
+                text: "-"
+                onClicked: scaleSlider.value -= scaleSlider.stepSize
+            }
+
+            Button {
+                text: "+"
+                onClicked: scaleSlider.value += scaleSlider.stepSize
+            }
+
+            Label {
+                text: scaleSlider.value.toFixed(2)
+            }
+        }
+        Row {
+            Label {
+                text: "Thickness: "
+            }
+
+            Slider {
+                id: thicknessSlider
+                minimumValue: 0
+                maximumValue: 5.0
+                stepSize: 0.01
+                value: 1.24
+            }
+
+            Button {
+                text: "-"
+                onClicked: thicknessSlider.value -= thicknessSlider.stepSize
+            }
+
+            Button {
+                text: "+"
+                onClicked: thicknessSlider.value += thicknessSlider.stepSize
+            }
+
+            Label {
+                text: thicknessSlider.value.toFixed(2)
+            }
+        }
+
+        Row {
+            Label {
+                text: "Temperature: "
+            }
+
+            Slider {
+                id: temperatureSlider
+                minimumValue: -10
+                maximumValue: 0.0
+                stepSize: 1.0
+                value: -1.0
+            }
+
+            Button {
+                text: "-"
+                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
+            }
+
+            Button {
+                text: "+"
+                onClicked: temperatureSlider.value += temperatureSlider.stepSize
+            }
+
+            Label {
+                text: Math.pow(10,temperatureSlider.value).toFixed(2)
+            }
         }
     }
 }

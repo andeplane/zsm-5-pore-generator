@@ -57,7 +57,7 @@ public:
     void save(QString filename);
     void load(QString filename);
     double chiSquared(Statistic *statistic);
-    virtual double eval(double x);
+    virtual double eval(double x, bool &ok);
     void emitReady();
     void updateQML();
     QString xLabel() const;
@@ -88,7 +88,6 @@ public slots:
     void setIsValid(bool isValid);
     void setSourceKey(QString sourceKey);
     void setFilePath(QString filePath);
-
     void setConstant(bool constant);
 
 signals:

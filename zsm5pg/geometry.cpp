@@ -89,6 +89,9 @@ void Geometry::reset(float min, float max) {
             m_deltaXVector[planeId] = Random::nextInt(int(min),int(max));
             m_deltaYVector[planeId] = Random::nextInt(int(min), int(max));
             m_deltaZVector[planeId] = Random::nextInt(int(min), int(max));
+//            m_deltaXVector[planeId] = Random::nextInt(int(18),int(19));
+//            m_deltaYVector[planeId] = Random::nextInt(int(18), int(19));
+//            m_deltaZVector[planeId] = Random::nextInt(int(18), int(19));
             if(m_verbose) qDebug() << "Plane " << (3*planeId+0) <<": " << m_deltaXVector[planeId];
             if(m_verbose) qDebug() << "Plane " << (3*planeId+1) <<": " << m_deltaYVector[planeId];
             if(m_verbose) qDebug() << "Plane " << (3*planeId+2) <<": " << m_deltaZVector[planeId];

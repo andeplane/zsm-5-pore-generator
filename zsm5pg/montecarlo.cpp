@@ -1,6 +1,7 @@
 #include "inifile.h"
 #include "montecarlo.h"
 #include "random.h"
+#include <mcobject.h>
 #include <QDebug>
 void MonteCarlo::setDebug(bool debug)
 {
@@ -43,16 +44,18 @@ void MonteCarlo::tick(int step)
         Statistic *model = m_models.at(i).value<Statistic*>();
         Statistic *data = m_datas.at(i).value<Statistic*>();
         model->compute(m_geometry, step);
-        chiSquared1 += model->chiSquared(data);
+        // chiSquared1 += model->chiSquared(data);
+        chiSquared1 += data->chiSquared(model);
         points.push_back(model->points());
     }
 
     if(m_verbose) qDebug() << "Starting monte carlo step. Current chi squared: " << chiSquared1;
     if(m_verbose) qDebug() << "Performing random walk step with std dev: " << m_standardDeviation << " and random walk fraction: " << m_geometry->randomWalkFraction();
 
-    bool anyChanges = m_geometry->randomWalkStep(m_standardDeviation);
-    if(!anyChanges) {
-        return;
+    m_geometry->randomWalkStep(m_standardDeviation);
+    for(QVariant &variant : m_mcObjects) {
+        MCObject *obj = variant.value<MCObject*>();
+        obj->randomWalk();
     }
 
     float chiSquared2 = 0;
@@ -61,7 +64,8 @@ void MonteCarlo::tick(int step)
         Statistic *data = m_datas.at(i).value<Statistic*>();
         model->setDirty();
         model->compute(m_geometry, step);
-        chiSquared2 += model->chiSquared(data);
+        // chiSquared2 += model->chiSquared(data);
+        chiSquared2 += data->chiSquared(model);
     }
 
     float deltaChiSquared = chiSquared2 - chiSquared1;
@@ -82,6 +86,10 @@ void MonteCarlo::tick(int step)
         for(int i=0; i<m_models.size(); i++) {
             Statistic *model = m_models.at(i).value<Statistic*>();
             model->setPoints(points.at(i));
+        }
+        for(QVariant &variant : m_mcObjects) {
+            MCObject *obj = variant.value<MCObject*>();
+            obj->rejectRW();
         }
         setChiSquared(chiSquared1);
         if(m_verbose) qDebug() << "     STEP REJECTED";
@@ -112,6 +120,15 @@ void MonteCarlo::setVerbose(bool verbose)
 
         m_verbose = verbose;
         emit verboseChanged(verbose);
+}
+
+void MonteCarlo::setMcObjects(QVariantList mcObjects)
+{
+    if (m_mcObjects == mcObjects)
+            return;
+
+        m_mcObjects = mcObjects;
+        emit mcObjectsChanged(mcObjects);
 }
 
 void MonteCarlo::writeToFile() {
@@ -208,6 +225,11 @@ QString MonteCarlo::filePath() const
 bool MonteCarlo::verbose() const
 {
     return m_verbose;
+}
+
+QVariantList MonteCarlo::mcObjects() const
+{
+    return m_mcObjects;
 }
 
 float MonteCarlo::chiSquared() const

@@ -118,7 +118,7 @@ void Statistic::emitReady()
     emit histogramReady();
 }
 
-double Statistic::eval(double x)
+double Statistic::eval(double x, bool &ok)
 {
     for(int i=0; i<m_points.size()-1; i++) {
         double x0 = m_points[i].x();
@@ -129,25 +129,30 @@ double Statistic::eval(double x)
             double delta = x1 - x0;
             double f = (x1 - x) / delta;
             double value = y0*f + (1.0 - f)*y1;
+            ok = true;
             return value;
         }
     }
-    qDebug() << m_name << " could not interpolate x=" << x;
-    qDebug() << "X values: " << m_points;
-    exit(1);
+    ok = false;
+    return 0;
+//    qDebug() << m_name << " could not interpolate x=" << x;
+//    qDebug() << "X values: " << m_points;
+//    exit(1);
 }
 
 double Statistic::chiSquared(Statistic *statistic)
 {
     double chiSquared = 0;
     for(int bin = 0; bin<m_points.size(); bin++) {
+        bool ok;
         double x = m_points[bin].x();
         double y_this = m_points[bin].y();
-        double y_other = statistic->eval(x);
-        double delta = (y_this - y_other) / (y_other + std::numeric_limits<double>::min());
-        // qDebug() << "x: " << x << ", bin: " << bin << ": " << y_this << " and " << y_other << " gives delta = " << delta;
-        // qDebug() << "delta[" << bin << "] = " << delta;
-        chiSquared += delta*delta;
+        double y_other = statistic->eval(x, ok);
+        if(ok) {
+            double delta = (y_this - y_other) / (y_other + std::numeric_limits<double>::min());
+            if(y_other==0 || y_this==0) continue; // Skip values being zero
+            chiSquared += delta*delta;
+        }
     }
     return chiSquared;
 }
