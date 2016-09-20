@@ -109,7 +109,6 @@ void NoGUI::saveState()
 
 void NoGUI::loadState()
 {
-    return;
     IniFile iniFile;
     iniFile.setFilename( QString("%1/state.ini").arg(m_filePath) );
     if(!iniFile.ready()) return;
@@ -153,8 +152,8 @@ void NoGUI::tick()
     if( (m_timestep % m_printEvery) == 0) {
         double timeLeft = m_timer.elapsed() / ( double(m_timestep+1)) * (m_timesteps-m_timestep) / 1000.; // seconds
         QTextStream logStream(&m_log);
-        qDebug() << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << m_monteCarlo->chiSquared() << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " (" << m_monteCarlo->accepted() << " / " << m_monteCarlo->steps() << ") and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";
-        logStream << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << m_monteCarlo->chiSquared() << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " (" << m_monteCarlo->accepted() << " / " << m_monteCarlo->steps() << ") and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.\n";
+        qDebug() << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << QString::number( m_monteCarlo->chiSquared(), 'f', 10 ) << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " (" << m_monteCarlo->accepted() << " / " << m_monteCarlo->steps() << ") and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";
+        logStream << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << QString::number( m_monteCarlo->chiSquared(), 'f', 10 ) << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " (" << m_monteCarlo->accepted() << " / " << m_monteCarlo->steps() << ") and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.\n";
         if(m_visualize) {
             for(QVariant &variant : m_statistics) {
                 Statistic *statistic = variant.value<Statistic*>();

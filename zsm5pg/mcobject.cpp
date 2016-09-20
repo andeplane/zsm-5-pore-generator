@@ -37,7 +37,7 @@ void MCObject::rejectRW()
 void MCObject::saveState(QFile &file)
 {
     QTextStream stream(&file);
-    stream << QString("%1_value %2").arg(m_name).arg(m_value) << endl;
+    stream << QString("%1_value = %2").arg(m_name).arg(m_value) << endl;
 }
 
 void MCObject::loadState(IniFile *iniFile)

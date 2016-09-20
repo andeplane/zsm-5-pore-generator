@@ -181,7 +181,7 @@ void Statistic::computeHistogram()
         float middle = 0.5*(upper+lower);
         float x = middle;
         float y = gsl_histogram_get(hist,i);
-        if(isnan(x) || isnan(y)) {
+        if(std::isnan(x) || std::isnan(y)) {
             qDebug() << "Statistic::computeHistogram() nan: " << x << ", " << y;
         }
         m_points.push_back(QPointF(x,y));

@@ -86,12 +86,9 @@ void Geometry::reset(float min, float max) {
         }
     } else {
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-//            m_deltaXVector[planeId] = Random::nextInt(int(min),int(max));
-//            m_deltaYVector[planeId] = Random::nextInt(int(min), int(max));
-//            m_deltaZVector[planeId] = Random::nextInt(int(min), int(max));
-            m_deltaXVector[planeId] = 19;
-            m_deltaYVector[planeId] = 19;
-            m_deltaZVector[planeId] = 19;
+            m_deltaXVector[planeId] = Random::nextInt(int(min),int(max));
+            m_deltaYVector[planeId] = Random::nextInt(int(min), int(max));
+            m_deltaZVector[planeId] = Random::nextInt(int(min), int(max));
 //            m_deltaXVector[planeId] = Random::nextInt(int(18),int(19));
 //            m_deltaYVector[planeId] = Random::nextInt(int(18), int(19));
 //            m_deltaZVector[planeId] = Random::nextInt(int(18), int(19));
@@ -128,11 +125,11 @@ bool Geometry::randomWalkStep(float standardDeviation)
         }
     } else {
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-            int dx = Random::nextInt(-1,1);
+            int dx = Random::nextInt(-3,3);
             if(Random::nextFloat() < 0.05) dx = Random::nextInt(-10, 10);
-            int dy = Random::nextInt(-1,1);
+            int dy = Random::nextInt(-3,3);
             if(Random::nextFloat() < 0.05) dy = Random::nextInt(-10, 10);
-            int dz = Random::nextInt(-1,1);
+            int dz = Random::nextInt(-3,3);
             if(Random::nextFloat() < 0.05) dz = Random::nextInt(-10, 10);
             if(m_deltaXVector[planeId] + dx >= 2 && m_deltaXVector[planeId] + dx < 20 && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;
@@ -162,7 +159,7 @@ bool Geometry::randomWalkStep(float standardDeviation)
 void Geometry::saveState(QFile &file)
 {
     QTextStream stream(&file);
-    stream << "rwFraction " << m_randomWalkFraction << endl;
+    stream << "rwFraction = " << m_randomWalkFraction << endl;
 }
 
 void Geometry::loadState(IniFile *iniFile) {
