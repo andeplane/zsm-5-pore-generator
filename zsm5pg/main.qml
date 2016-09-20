@@ -1,262 +1,356 @@
 import QtQuick 2.5
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
-import SimVis 1.0
-import MySimulator 1.0
-import QtCharts 2.0
+import QtQuick.Dialogs 1.2
+import Qt.labs.settings 1.0
+import QtCharts 2.1
 import Zeolite 1.0
 
 Window {
+    property string iniFilename
+    property var currentStatistic
     id: rootWindow
-    visible: true
+    visible: simulator.visualize
     width: 1500
     height: 900
 
+    onCurrentStatisticChanged: {
+        currentStatistic.histogramReady.connect(function() {
+            currentStatistic.updateSeries(statisticSeries)
+            ___axisX.applyNiceNumbers()
+        })
+        currentStatistic.updateSeries(statisticSeries)
+    }
+
+    IniFile {
+        id: iniFile
+        filename: iniFilename
+        onReadyChanged: {
+            simulator.loadIniFile(iniFile)
+            geometry.loadIniFile(iniFile)
+            monteCarlo.loadIniFile(iniFile)
+            adsorptionModel.loadIniFile(iniFile)
+            desorptionModel.loadIniFile(iniFile)
+            adsorptionData.loadIniFile(iniFile)
+            desorptionData.loadIniFile(iniFile)
+            poreSizeStatistic.loadIniFile(iniFile)
+            currentStatistic = poreSizeStatistic
+            simulator.loadState()
+        }
+    }
+
+    Concentration {
+        id: adsorptionModel
+        constant: false
+        filePath: simulator.filePath
+        scalingFactor: scaling.value
+        zeoliteThickness: thickness.value
+        name: "adsorption"
+        sourceKey: "adsorptionModel"
+        Component.onCompleted: {
+            histogramReady.connect(function() {
+                updateSeries(adsorptionModelSeries)
+            })
+            updateSeries(adsorptionModelSeries)
+        }
+    }
+
+    Concentration {
+        id: desorptionModel
+        constant: false
+        filePath: simulator.filePath
+        scalingFactor: scaling.value
+        zeoliteThickness: thickness.value
+        name: "desorption"
+        sourceKey: "desorptionModel"
+        Component.onCompleted: {
+            histogramReady.connect(function() {
+                updateSeries(desorptionModelSeries)
+            })
+            updateSeries(desorptionModelSeries)
+        }
+    }
+
+    Statistic {
+        id: adsorptionData
+        filePath: simulator.filePath
+        name: "adsorptionData"
+        sourceKey: "adsorptionData"
+        Component.onCompleted: {
+            histogramReady.connect(function() {
+                updateSeries(adsorptionDataSeries)
+            })
+            updateSeries(adsorptionDataSeries)
+        }
+    }
+
+    Statistic {
+        id: desorptionData
+        filePath: simulator.filePath
+        name: "desorptionData"
+        sourceKey: "desorptionData"
+        Component.onCompleted: {
+            histogramReady.connect(function() {
+                updateSeries(desorptionDataSeries)
+            })
+            updateSeries(desorptionDataSeries)
+        }
+    }
+
     PoreSizeStatistic {
         id: poreSizeStatistic
-        bins: 50
-        min: 0
-        max: 10
-        onHistogramReady: {
-            lineSeries.clear()
-            lineSeries2.clear()
-            var xMin = 1e10
-            var xMax = 0
-            var yMin = 1e10
-            var yMax = 0
-            var lambda = 0.76078
-            for(var i in xValues) {
-                var x = xValues[i]
-                var y = yValues[i]
-                var yTarget = lambda*Math.exp(-lambda*(x-2.0))
-                if(x < 2.0) yTarget = 0
-                lineSeries.append(x,y)
-                lineSeries2.append(x, yTarget)
-                xMin = Math.min(xMin, x)
-                xMax = Math.max(xMax, x)
-                yMin = Math.min(yMin, y)
-                yMax = Math.max(yMax, y)
-                yMin = Math.min(yMin, yTarget)
-                yMax = Math.max(yMax, yTarget)
-            }
-            // xAxis.min = xMin*0.9
-            // xAxis.max = xMax*1.1
-            xAxis.max = xMax
-            // yAxis.min = yMin*0.9
-            yAxis.max = yMax*1.1
+        constant: false
+        filePath: simulator.filePath
+        name: "poreSizeDistribution"
+    }
+
+    CumulativeVolume {
+        id: cumulativeVolume
+        constant: false
+        filePath: simulator.filePath
+        name: "cumulativeVolume"
+    }
+
+    Timer {
+        interval: 1
+        repeat: true
+        running: true
+        onTriggered: {
+            simulator.tick()
         }
     }
 
-    PoreVolumeStatistic {
-        id: poreVolumeStatistic
-        bins: 100
-        min: 10
-        max: 1000
-        onHistogramReady: {
-            lineSeries.clear()
-            lineSeries2.clear()
-            var xMin = 1e10
-            var xMax = 0
-            var yMin = 1e10
-            var yMax = 0
-            var lambda = 0.76078
-            for(var i in xValues) {
-                var x = xValues[i]
-                var y = yValues[i]
-                var yTarget = lambda*Math.exp(-lambda*(x-2.0))
-                if(x < 2.0) yTarget = 0
-                lineSeries.append(x,y)
-                lineSeries2.append(x, yTarget)
-                xMin = Math.min(xMin, x)
-                xMax = Math.max(xMax, x)
-                yMin = Math.min(yMin, y)
-                yMax = Math.max(yMax, y)
-                yMin = Math.min(yMin, yTarget)
-                yMax = Math.max(yMax, yTarget)
-            }
-            xAxis.min = xMin*0.9
-            xAxis.max = xMax*1.1
-            yAxis.min = yMin*0.9
-            yAxis.max = yMax*1.1
-        }
+    MCObject {
+        id: thickness
+        name: "thickness"
+        standardDeviation: monteCarlo.standardDeviation * 0.001
+        value: 1.24
     }
 
-    MySimulator {
+    MCObject {
+        id: scaling
+        name: "scaling"
+        standardDeviation: monteCarlo.standardDeviation * 0.001
+        value: 1.5
+    }
+
+    NoGUI {
         id: simulator
+        onFinishedChanged: {
+            console.log("Simulation finished")
+            saveState()
+            Qt.quit()
+        }
 
+        statistics: [
+            adsorptionModel,
+            desorptionModel,
+            adsorptionData,
+            desorptionData,
+            poreSizeStatistic
+        ]
+
+        geometry: Geometry {
+            id: geometry
+            filePath: simulator.filePath
+            mode: simulator.mode
+        }
         monteCarlo: MonteCarlo {
             id: monteCarlo
-            geometry: myGeometry
-            statistic: simulator.statistic
-            standardDeviation: stdDevSlider.value
-            temperature: tempSlider.value
-            running: true
-        }
-
-        geometry: Zsm5geometry {
-            id: myGeometry
-            planesPerDimension: 50
-            lengthScale: 2
-        }
-
-        statistic: poreSizeStatistic
-    }
-
-    Visualizer {
-        anchors.fill: parent
-        simulator: simulator
-        camera: camera
-        backgroundColor: "white"
-
-        TrackballNavigator {
-            id: navigator
-            anchors.fill: parent
-            camera: camera
-        }
-
-        TriangleCollection {
-            id: triangles
-
-            Light {
-                id: light
-                ambientColor: "blue"
-                specularColor: "white"
-                diffuseColor: "green"
-                ambientIntensity: 0.025
-                diffuseIntensity: 0.5
-                specularIntensity: 0.01
-                shininess: 100.0
-                attenuation: 0.0
-                position: camera.position
-            }
+            geometry: geometry
+            filePath: simulator.filePath
+            models: [
+                adsorptionModel,
+                desorptionModel
+            ]
+            datas: [
+                adsorptionData,
+                desorptionData
+            ]
+            mcObjects: [
+//                scaling,
+//                thickness
+            ]
         }
     }
 
     ChartView {
-        id: chart
-        width: 600
-        height: 400
+        id: adsorptionChart
+        width: parent.width*0.5
+        height: parent.height
         antialiasing: true
         legend.visible: true
-        title: "Pore size distribution"
+        title: "Adsorption"
 
-        ValueAxis {
-            id: xAxis
-            min: 0
-            max: 2
-            tickCount: 5
-            titleText: "d [nm]"
-        }
-        ValueAxis {
-            id: yAxis
-            min: 0
-            max: 0.2
-            tickCount: 5
-            titleText: "P(d)"
-        }
         LineSeries {
-            id: lineSeries
-            name: "3d model"
-            axisX: xAxis
-            axisY: yAxis
-            style: Qt.DotLine
-            width: 3
+            id: adsorptionDataSeries
+            name: "Data"
+            color: "red"
+            axisX: _axisX
+            axisY: _axisY
+        }
+
+        ScatterSeries {
+            id: adsorptionModelSeries
+            name: "Model"
+            axisX: _axisX
+            axisY: _axisY
+            markerSize: 5
+            color: Qt.rgba(1,1,1,0)
+            borderColor: "red"
+            borderWidth: 1
         }
 
         LineSeries {
-            id: lineSeries2
-            name: "Target"
-            axisX: xAxis
-            axisY: yAxis
+            id: desorptionDataSeries
+            name: "Data"
+            color: "green"
+            axisX: _axisX
+            axisY: _axisY
         }
 
-        MouseArea {
-            anchors.fill: parent
-            drag.target: parent
-        }
-    }
-
-    Rectangle {
-        radius: 10
-        width: 400
-        height: 200
-        anchors.top: parent.top
-        anchors.right: parent.right
-        color: "white"
-
-        MouseArea {
-            anchors.fill: parent
-            drag.target: parent
+        ScatterSeries {
+            id: desorptionModelSeries
+            name: "Model"
+            axisX: _axisX
+            axisY: _axisY
+            markerSize: 5
+            markerShape: ScatterSeries.MarkerShapeRectangle
+            color: Qt.rgba(1,1,1,0)
+            borderColor: "green"
+            borderWidth: 1
         }
 
-        Column {
-            spacing: 10
-
-            Row {
-                Text {
-                    text: "FPS: "+(1.0/simulator.tickTime).toFixed(2)
-                }
-            }
-
-            Row {
-                Text {
-                    text: "Monte carlo: "
-                }
-                Button {
-                    id: startButton
-                    text: monteCarlo.running ? "Stop" : "Start"
-                    onClicked: {
-                        monteCarlo.running = !monteCarlo.running
-                    }
-                }
-            }
-
-            Row {
-                Text {
-                    text: "MC stddev ("+monteCarlo.standardDeviation.toFixed(3)+"): "
-                }
-                Slider {
-                    id: stdDevSlider
-                    minimumValue: 0.01
-                    maximumValue: 0.1
-                    stepSize: 0.01
-                    value: 0.01
-                }
-            }
-
-            Row {
-                Text {
-                    text: "MC temp ("+monteCarlo.temperature.toFixed(5)+"): "
-                }
-                Slider {
-                    id: tempSlider
-                    minimumValue: 0.0
-                    maximumValue: 1.0
-                    stepSize: 0.001
-                    value: 0.0
-                }
-            }
-
-            Row {
-                Button {
-                    text: "Load"
-                    onClicked: {
-                        myGeometry.load("/projects/geometry.txt")
-                    }
-                }
-                Button {
-                    text: "Save"
-                    onClicked: {
-                        myGeometry.save("/projects/geometry.txt")
-                    }
-                }
-            }
+        ValueAxis {
+            id: _axisX
+            min: 0
+            max: 1
+            tickCount: 5
+            titleText: "P [bar]"
+        }
+        ValueAxis {
+            id: _axisY
+            min: 0
+            max: 1000.0
+            tickCount: 5
+            titleText: "c"
         }
     }
 
-    Camera {
-        id: camera
-        farPlane: 1000000
-        nearPlane: 0.01
+    ChartView {
+        id: statisticChart
+        anchors.left: adsorptionChart.right
+        width: parent.width*0.5
+        height: parent.height
+        antialiasing: true
+        title: currentStatistic ? currentStatistic.name : ""
+
+        LineSeries {
+            id: statisticSeries
+            axisX: ___axisX
+            axisY: ___axisY
+        }
+
+        ValueAxis {
+            id: ___axisX
+            min: 0
+            max: currentStatistic ? currentStatistic.max : 1
+            tickCount: 10
+            titleText: currentStatistic ? currentStatistic.xLabel : ""
+        }
+        ValueAxis {
+            id: ___axisY
+            min: 0
+            max: 0.5
+            tickCount: 5
+            titleText: currentStatistic ? currentStatistic.yLabel : ""
+        }
     }
+
+//    Column {
+//        Row {
+//            Label {
+//                text: "Scale: "
+//            }
+
+//            Slider {
+//                id: scaleSlider
+//                minimumValue: 0
+//                maximumValue: 2.0
+//                stepSize: 0.01
+//                value: 1.0
+//            }
+
+//            Button {
+//                text: "-"
+//                onClicked: scaleSlider.value -= scaleSlider.stepSize
+//            }
+
+//            Button {
+//                text: "+"
+//                onClicked: scaleSlider.value += scaleSlider.stepSize
+//            }
+
+//            Label {
+//                text: scaleSlider.value.toFixed(2)
+//            }
+//        }
+//        Row {
+//            Label {
+//                text: "Thickness: "
+//            }
+
+//            Slider {
+//                id: thicknessSlider
+//                minimumValue: 0
+//                maximumValue: 5.0
+//                stepSize: 0.01
+//                value: 1.0
+//            }
+
+//            Button {
+//                text: "-"
+//                onClicked: thicknessSlider.value -= thicknessSlider.stepSize
+//            }
+
+//            Button {
+//                text: "+"
+//                onClicked: thicknessSlider.value += thicknessSlider.stepSize
+//            }
+
+//            Label {
+//                text: thicknessSlider.value.toFixed(2)
+//            }
+//        }
+
+//        Row {
+//            Label {
+//                text: "Temperature: "
+//            }
+
+//            Slider {
+//                id: temperatureSlider
+//                minimumValue: -10
+//                maximumValue: 0.0
+//                stepSize: 1.0
+//                value: -1.0
+//                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
+//            }
+
+//            Button {
+//                text: "-"
+//                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
+//            }
+
+//            Button {
+//                text: "+"
+//                onClicked: temperatureSlider.value += temperatureSlider.stepSize
+//            }
+
+//            Label {
+//                text: Math.pow(10,temperatureSlider.value).toFixed(2)
+//            }
+//        }
+//    }
+
 }

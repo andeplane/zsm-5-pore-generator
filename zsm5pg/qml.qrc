@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>main_simple.qml</file>
-        <file>new_main.qml</file>
     </qresource>
 </RCC>

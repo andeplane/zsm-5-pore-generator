@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/new_main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     for(QObject *root : engine.rootObjects()) {
         root->setProperty("iniFilename", QVariant::fromValue(iniFilename));
     }
