@@ -159,11 +159,12 @@ void MonteCarlo::updateRandomWalkFraction() {
     setAcceptanceRatio(acceptanceRatioLowpass);
     float factor = sqrt(1.0 - m_acceptanceRatioAdjustmentTimeScale*(m_targetAcceptanceRatio/acceptanceRatioLowpass - 1.0));
     float newRandomWalkFraction = m_geometry->randomWalkFraction()*factor;
-    if(isnan(newRandomWalkFraction)) newRandomWalkFraction = m_geometry->randomWalkFraction();
+    if(std::isnan(newRandomWalkFraction)) newRandomWalkFraction = m_geometry->randomWalkFraction();
 
     if(newRandomWalkFraction>1) newRandomWalkFraction = 1.0;
-    // Minimum fraction is to move 1 plane
-    float minimumRandomWalkFraction = 1.0 / (3*m_geometry->planesPerDimension());
+    // Minimum fraction is to move 2 planes
+    float minimumRandomWalkFraction = 2.0 / (3*m_geometry->planesPerDimension());
+    // float minimumRandomWalkFraction = 0.1;
 
     if(newRandomWalkFraction<minimumRandomWalkFraction) newRandomWalkFraction = minimumRandomWalkFraction;
     if(m_verbose) {
@@ -236,10 +237,10 @@ QVariantList MonteCarlo::mcObjects() const
 void MonteCarlo::saveState(QFile &file)
 {
     QTextStream stream(&file);
-    stream << "mc_accepted " << m_accepted << endl;
-    stream << "mc_steps " << m_steps << endl;
-    stream << "mc_chisquared " << m_chiSquared << endl;
-    stream << "mc_acceptanceRatio " << m_acceptanceRatio << endl;
+    stream << "mc_accepted = " << m_accepted << endl;
+    stream << "mc_steps = " << m_steps << endl;
+    stream << "mc_chisquared = " << m_chiSquared << endl;
+    stream << "mc_acceptanceRatio = " << m_acceptanceRatio << endl;
     for(QVariant &variant : m_mcObjects) {
         MCObject *object = variant.value<MCObject*>();
         object->saveState(file);
