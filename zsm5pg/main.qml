@@ -168,8 +168,8 @@ Window {
                 desorptionData
             ]
             mcObjects: [
-//                scaling,
-//                thickness
+                scaling,
+                thickness
             ]
         }
     }
