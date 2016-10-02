@@ -131,7 +131,7 @@ void Concentration::computeMode0(Geometry *geometry) {
     float yPlaneVolume = yPlaneArea*m_zeoliteThickness;
     float zPlaneVolume = zPlaneArea*m_zeoliteThickness;
 
-    float totalZeoliteVolume = geometry->planesPerDimension()*(xPlaneVolume + yPlaneVolume + zPlaneVolume);
+    float totalZeoliteVolume = (geometry->planesPerDimension() + 1)*(xPlaneVolume + yPlaneVolume + zPlaneVolume);
     float volumeOfZeoliteUnitCell = 5.21128;
     float massOfZeoliteUnitCell = 192*15.9994 + 96*28.0855;
     float numberOfZeoliteUnitCells = totalZeoliteVolume / volumeOfZeoliteUnitCell;
