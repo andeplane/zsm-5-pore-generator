@@ -5,6 +5,7 @@
 #include <cmath>
 CumulativeVolume::CumulativeVolume(QObject *parent) : Statistic(parent)
 {
+    m_isValid = true;
     setXLabel("Pore size [nm]");
     setYLabel("Cumulative volume");
 }

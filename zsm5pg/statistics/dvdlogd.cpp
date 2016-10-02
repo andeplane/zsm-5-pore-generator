@@ -7,7 +7,7 @@
 
 DVDLogd::DVDLogd(QObject *parent) : Statistic(parent)
 {
-    m_name = "DVDLogD";
+    m_isValid = true;
     m_xLabel = "Pore size [nm]";
     m_yLabel = "dV/dlogd";
 }

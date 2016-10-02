@@ -111,6 +111,13 @@ Window {
         name: "cumulativeVolume"
     }
 
+    DVDLogd {
+        id: dvdlogd
+        constant: false
+        filePath: simulator.filePath
+        name: "dvdlogd"
+    }
+
     Timer {
         interval: 1
         repeat: true
@@ -147,7 +154,9 @@ Window {
             desorptionModel,
             adsorptionData,
             desorptionData,
-            poreSizeStatistic
+            poreSizeStatistic,
+            cumulativeVolume,
+            dvdlogd
         ]
 
         geometry: Geometry {
