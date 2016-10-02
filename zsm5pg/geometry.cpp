@@ -109,6 +109,7 @@ bool Geometry::randomWalkStep(float standardDeviation)
             float dz = Random::nextGaussianf(0, standardDeviation);
 
             if(Random::nextFloat() < 0.05) {
+                anyChanges = true;
                 m_deltaXVector[planeId] = Random::nextDouble(2, 19);
             } else if(m_deltaXVector[planeId] + dx > 2 && m_deltaXVector[planeId] + dx < 19 && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;
@@ -116,6 +117,7 @@ bool Geometry::randomWalkStep(float standardDeviation)
             }
 
             if(Random::nextFloat() < 0.05) {
+                anyChanges = true;
                 m_deltaYVector[planeId] = Random::nextDouble(2, 19);
             } else if(m_deltaYVector[planeId] + dy > 2 && m_deltaYVector[planeId] + dy < 19 && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;
@@ -123,6 +125,7 @@ bool Geometry::randomWalkStep(float standardDeviation)
             }
 
             if(Random::nextFloat() < 0.05) {
+                anyChanges = true;
                 m_deltaZVector[planeId] = Random::nextDouble(2, 19);
             } else if(m_deltaZVector[planeId] + dz > 2 && m_deltaZVector[planeId] + dz < 19 && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;

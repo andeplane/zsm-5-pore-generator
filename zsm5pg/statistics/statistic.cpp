@@ -143,7 +143,6 @@ double Statistic::eval(double x, bool &ok)
 double Statistic::chiSquared(Statistic *statistic)
 {
     double chiSquared = 0;
-    double max = 0;
     for(int bin = 0; bin<m_points.size(); bin++) {
         bool ok;
         double x = m_points[bin].x();
@@ -153,10 +152,6 @@ double Statistic::chiSquared(Statistic *statistic)
             double delta = (y_this - y_other) / (y_other + std::numeric_limits<double>::min());
             if(y_other==0 || y_this==0) continue; // Skip values being zero
             chiSquared += delta*delta;
-//            if(delta*delta > max) {
-//                max = delta*delta;
-//                qDebug() << "New max contribution: " << max << " with x=" << x << " y_this=" << y_this << " and y_other = " << y_other;
-//            }
         }
     }
     return chiSquared;
