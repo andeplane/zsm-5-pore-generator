@@ -14,6 +14,20 @@ Window {
     width: 1500
     height: 900
 
+    MCObject {
+        id: thickness
+        name: "thickness"
+        standardDeviation: monteCarlo.standardDeviation * 0.001
+        value: thicknessSlider.value
+    }
+
+    MCObject {
+        id: scaling
+        name: "scaling"
+        standardDeviation: monteCarlo.standardDeviation * 0.001
+        value: scaleSlider.value
+    }
+
     onCurrentStatisticChanged: {
         currentStatistic.histogramReady.connect(function() {
             currentStatistic.updateSeries(statisticSeries)
@@ -127,20 +141,6 @@ Window {
         }
     }
 
-    MCObject {
-        id: thickness
-        name: "thickness"
-        standardDeviation: monteCarlo.standardDeviation * 0.001
-        value: 1.24
-    }
-
-    MCObject {
-        id: scaling
-        name: "scaling"
-        standardDeviation: monteCarlo.standardDeviation * 0.001
-        value: 1.5
-    }
-
     NoGUI {
         id: simulator
         onFinishedChanged: {
@@ -177,8 +177,8 @@ Window {
                 desorptionData
             ]
             mcObjects: [
-                scaling,
-                thickness
+//                scaling,
+//                thickness
             ]
         }
     }
@@ -276,90 +276,90 @@ Window {
         }
     }
 
-//    Column {
-//        Row {
-//            Label {
-//                text: "Scale: "
-//            }
+    Column {
+        Row {
+            Label {
+                text: "Scale: "
+            }
 
-//            Slider {
-//                id: scaleSlider
-//                minimumValue: 0
-//                maximumValue: 2.0
-//                stepSize: 0.01
-//                value: 1.0
-//            }
+            Slider {
+                id: scaleSlider
+                minimumValue: 0
+                maximumValue: 2.0
+                stepSize: 0.01
+                value: 1.24
+            }
 
-//            Button {
-//                text: "-"
-//                onClicked: scaleSlider.value -= scaleSlider.stepSize
-//            }
+            Button {
+                text: "-"
+                onClicked: scaleSlider.value -= scaleSlider.stepSize
+            }
 
-//            Button {
-//                text: "+"
-//                onClicked: scaleSlider.value += scaleSlider.stepSize
-//            }
+            Button {
+                text: "+"
+                onClicked: scaleSlider.value += scaleSlider.stepSize
+            }
 
-//            Label {
-//                text: scaleSlider.value.toFixed(2)
-//            }
-//        }
-//        Row {
-//            Label {
-//                text: "Thickness: "
-//            }
+            Label {
+                text: scaleSlider.value.toFixed(2)
+            }
+        }
+        Row {
+            Label {
+                text: "Thickness: "
+            }
 
-//            Slider {
-//                id: thicknessSlider
-//                minimumValue: 0
-//                maximumValue: 5.0
-//                stepSize: 0.01
-//                value: 1.0
-//            }
+            Slider {
+                id: thicknessSlider
+                minimumValue: 0
+                maximumValue: 5.0
+                stepSize: 0.01
+                value: 3.44
+            }
 
-//            Button {
-//                text: "-"
-//                onClicked: thicknessSlider.value -= thicknessSlider.stepSize
-//            }
+            Button {
+                text: "-"
+                onClicked: thicknessSlider.value -= thicknessSlider.stepSize
+            }
 
-//            Button {
-//                text: "+"
-//                onClicked: thicknessSlider.value += thicknessSlider.stepSize
-//            }
+            Button {
+                text: "+"
+                onClicked: thicknessSlider.value += thicknessSlider.stepSize
+            }
 
-//            Label {
-//                text: thicknessSlider.value.toFixed(2)
-//            }
-//        }
+            Label {
+                text: thicknessSlider.value.toFixed(2)
+            }
+        }
 
-//        Row {
-//            Label {
-//                text: "Temperature: "
-//            }
+        Row {
+            Label {
+                text: "Temperature: "
+            }
 
-//            Slider {
-//                id: temperatureSlider
-//                minimumValue: -10
-//                maximumValue: 0.0
-//                stepSize: 1.0
-//                value: -1.0
-//                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
-//            }
+            Slider {
+                id: temperatureSlider
+                minimumValue: -10
+                maximumValue: 0.0
+                stepSize: 1.0
+                value: -1.0
+                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
+            }
 
-//            Button {
-//                text: "-"
-//                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
-//            }
+            Button {
+                text: "-"
+                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
+            }
 
-//            Button {
-//                text: "+"
-//                onClicked: temperatureSlider.value += temperatureSlider.stepSize
-//            }
+            Button {
+                text: "+"
+                onClicked: temperatureSlider.value += temperatureSlider.stepSize
+            }
 
-//            Label {
-//                text: Math.pow(10,temperatureSlider.value).toFixed(2)
-//            }
-//        }
-//    }
+            Label {
+                text: Math.pow(10,temperatureSlider.value).toFixed(2)
+            }
+        }
+    }
 
 }
