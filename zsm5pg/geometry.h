@@ -32,6 +32,7 @@ public:
     bool randomWalkStep(float standardDeviation);
     void saveState(QFile &file);
     void loadState(class IniFile *iniFile);
+    Q_INVOKABLE void generateFromPSD(QVector<qreal> probabilities);
     Q_INVOKABLE void save(QString fileName);
     Q_INVOKABLE void load(QString filename);
     QVector<float> &deltaXVector();

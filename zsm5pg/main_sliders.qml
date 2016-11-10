@@ -10,6 +10,7 @@ import Zeolite 1.0
 Window {
     property string iniFilename
     property var currentStatistic
+    property var probabilities: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     id: rootWindow
     visible: true
     width: 1500
@@ -220,6 +221,28 @@ Window {
                 Button {
                     text: "Compute"
                     onClicked: simulator.compute()
+                }
+            }
+        }
+        Row {
+            Repeater {
+                model: 19
+                Column {
+                    QQC1.Slider {
+                        height: 100
+                        orientation: Qt.Vertical
+                        minimumValue: 0
+                        maximumValue: 100
+                        stepSize: 1
+                        onValueChanged: {
+                            rootWindow.probabilities[index] = value
+                            geometry.generateFromPSD(rootWindow.probabilities)
+                            simulator.compute()
+                        }
+                    }
+                    Label {
+                        text: (index+1)
+                    }
                 }
             }
         }

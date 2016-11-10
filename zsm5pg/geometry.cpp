@@ -178,6 +178,59 @@ void Geometry::loadState(IniFile *iniFile) {
     setRandomWalkFraction(iniFile->getDouble("rwFraction"));
 }
 
+void Geometry::generateFromPSD(QVector<qreal> probabilities)
+{
+    QVector<qreal> cumulative = probabilities;
+
+    // First normalize
+    double sum = 0.0;
+    for(double p : probabilities) {
+        sum += p;
+    }
+    double normalizeFactor = 1.0 / sum;
+
+    sum = 0.0;
+    for(int i=0; i<probabilities.size(); i++) {
+        probabilities[i]*= normalizeFactor;
+        sum += probabilities[i];
+        cumulative[i] = sum;
+    }
+
+    // Now loop through each plane and draw random number
+
+    for(int i=0; i<m_planesPerDimension; i++) {
+        double rnd = Random::nextDouble();
+        for(int j=0; j<cumulative.size(); j++) {
+            if(rnd < cumulative[j]) {
+                double delta = j+1;
+                m_deltaXVector[i] = delta;
+                qDebug() << "dx[" << i << "] = " << delta;
+                break;
+            }
+        }
+
+        rnd = Random::nextDouble();
+        for(int j=0; j<cumulative.size(); j++) {
+            if(rnd < cumulative[j]) {
+                double delta = j+1;
+                m_deltaYVector[i] = delta;
+                qDebug() << "dy[" << i << "] = " << delta;
+                break;
+            }
+        }
+
+        rnd = Random::nextDouble();
+        for(int j=0; j<cumulative.size(); j++) {
+            if(rnd < cumulative[j]) {
+                double delta = j+1;
+                m_deltaZVector[i] = delta;
+                qDebug() << "dz[" << i << "] = " << delta;
+                break;
+            }
+        }
+    }
+}
+
 void Geometry::resize(int newNumberOfPlanes) {
     if(newNumberOfPlanes > m_planesPerDimension) {
         int delta = newNumberOfPlanes - m_planesPerDimension;
