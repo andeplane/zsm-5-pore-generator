@@ -35,9 +35,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    bool sliders = false;
+    if(argc>2) {
+        sliders = atoi(argv[2]);
+    }
+
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    if(sliders) {
+        engine.load(QUrl(QStringLiteral("qrc:/main_sliders.qml")));
+    } else {
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    }
     for(QObject *root : engine.rootObjects()) {
         root->setProperty("iniFilename", QVariant::fromValue(iniFilename));
     }

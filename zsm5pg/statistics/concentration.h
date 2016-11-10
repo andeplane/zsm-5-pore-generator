@@ -32,6 +32,7 @@ private:
     double m_zeoliteThickness = 1.24;
 
     // Statistic interface
+    double findNumAdsorbed(double P, double Lx, double Ly, double Lz);
 public slots:
     virtual void loadIniFile(class IniFile *iniFile) override;
     virtual void saveState(QFile &file) override;

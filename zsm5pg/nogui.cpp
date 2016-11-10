@@ -99,7 +99,7 @@ void NoGUI::saveState()
         qDebug() << "Error, could not not save file " << fileName;
         return;
     }
-    m_monteCarlo->saveState(file);
+    if(m_monteCarlo) m_monteCarlo->saveState(file);
     m_geometry->saveState(file);
     for(QVariant &variant : m_statistics) {
         Statistic *statistic = variant.value<Statistic*>();
@@ -112,7 +112,7 @@ void NoGUI::loadState()
     IniFile iniFile;
     iniFile.setFilename( QString("%1/state.ini").arg(m_filePath) );
     if(!iniFile.ready()) return;
-    m_monteCarlo->loadState(&iniFile);
+    if(m_monteCarlo) m_monteCarlo->loadState(&iniFile);
     m_geometry->loadState(&iniFile);
     for(QVariant &variant : m_statistics) {
         Statistic *statistic = variant.value<Statistic*>();
@@ -121,6 +121,32 @@ void NoGUI::loadState()
 }
 
 NoGUI::~NoGUI() {
+
+}
+
+void NoGUI::compute() {
+    for(QVariant &variant : m_statistics) {
+        Statistic *statistic = variant.value<Statistic*>();
+        statistic->compute(m_geometry, m_timestep);
+    }
+
+    for(QVariant &variant : m_models) {
+        Statistic *statistic = variant.value<Statistic*>();
+        statistic->compute(m_geometry, m_timestep);
+    }
+
+    for(QVariant &variant : m_datas) {
+        Statistic *statistic = variant.value<Statistic*>();
+        statistic->compute(m_geometry, m_timestep);
+    }
+
+    for(QVariant &variant : m_statistics) {
+        Statistic *statistic = variant.value<Statistic*>();
+        statistic->compute(m_geometry, m_timestep);
+        if(m_visualize) {
+            statistic->updateQML();
+        }
+    }
 
 }
 
@@ -147,9 +173,9 @@ void NoGUI::tick()
         }
     }
     if(!m_timer.isValid()) m_timer.start();
-    m_monteCarlo->tick(m_timestep);
+    if(m_monteCarlo) m_monteCarlo->tick(m_timestep);
 
-    if( (m_timestep % m_printEvery) == 0) {
+    if( m_monteCarlo && (m_timestep % m_printEvery) == 0) {
         double timeLeft = m_timer.elapsed() / ( double(m_timestep+1)) * (m_timesteps-m_timestep) / 1000.; // seconds
         QTextStream logStream(&m_log);
         qDebug() << "MC step " << m_timestep << "/" << m_timesteps << ". χ^2: " << QString::number( m_monteCarlo->chiSquared(), 'f', 10 ) << ", T=" << m_monteCarlo->temperature() << " with acceptance ratio " << m_monteCarlo->acceptanceRatio() << " (" << m_monteCarlo->accepted() << " / " << m_monteCarlo->steps() << ") and random walk fraction " << m_geometry->randomWalkFraction() << ". Estimated time left: " << timeLeft << " seconds.";

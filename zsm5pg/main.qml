@@ -177,8 +177,8 @@ Window {
                 desorptionData
             ]
             mcObjects: [
-//                scaling,
-//                thickness
+                scaling,
+                thickness
             ]
         }
     }
@@ -240,7 +240,7 @@ Window {
         ValueAxis {
             id: _axisY
             min: 0
-            max: 1000.0
+            max: 250.0
             tickCount: 5
             titleText: "c"
         }
@@ -287,7 +287,7 @@ Window {
                 minimumValue: 0
                 maximumValue: 2.0
                 stepSize: 0.01
-                value: 1.24
+                value: 1.0
             }
 
             Button {
@@ -312,9 +312,9 @@ Window {
             Slider {
                 id: thicknessSlider
                 minimumValue: 0
-                maximumValue: 5.0
+                maximumValue: 8.0
                 stepSize: 0.01
-                value: 3.44
+                value: 2.0
             }
 
             Button {
@@ -332,34 +332,34 @@ Window {
             }
         }
 
-        Row {
-            Label {
-                text: "Temperature: "
-            }
+//        Row {
+//            Label {
+//                text: "Temperature: "
+//            }
 
-            Slider {
-                id: temperatureSlider
-                minimumValue: -10
-                maximumValue: 0.0
-                stepSize: 1.0
-                value: -1.0
-                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
-            }
+//            Slider {
+//                id: temperatureSlider
+//                minimumValue: -10
+//                maximumValue: 0.0
+//                stepSize: 1.0
+//                value: -1.0
+//                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
+//            }
 
-            Button {
-                text: "-"
-                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
-            }
+//            Button {
+//                text: "-"
+//                onClicked: temperatureSlider.value -= temperatureSlider.stepSize
+//            }
 
-            Button {
-                text: "+"
-                onClicked: temperatureSlider.value += temperatureSlider.stepSize
-            }
+//            Button {
+//                text: "+"
+//                onClicked: temperatureSlider.value += temperatureSlider.stepSize
+//            }
 
-            Label {
-                text: Math.pow(10,temperatureSlider.value).toFixed(2)
-            }
-        }
+//            Label {
+//                text: Math.pow(10,temperatureSlider.value).toFixed(2)
+//            }
+//        }
     }
 
 }

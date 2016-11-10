@@ -44,6 +44,7 @@ void Concentration::readFile(QString fileName) {
 
             m_values[H].push_back(N);
             m_volumes[H] = V;
+            // qDebug() << "Read H = " << H << "  P = " << P << "  N = " << N << "  V = " << V;
         }
     }
 
@@ -73,31 +74,14 @@ void Concentration::computeMode0(Geometry *geometry) {
             const float dy = y[j];
             for(int k=0; k<z.size(); k++) {
                 const float dz = z[k];
-                float poreSize = std::min(std::min(dx, dy), dz);
+                // float poreSize = std::min(std::min(dx, dy), dz);
                 const float poreVolume = dx*dy*dz;
-#ifdef POREISCBRT
-                poreSize = cbrt(poreVolume);
-#endif
-                // int H = std::roundf(poreSize);
+                const float H = poreVolume;
 
-                float H = poreSize;  // 1
-
-                int H0 = poreSize; // 19
-                int H1 = int(poreSize)+1;  // 20
-                float dH = H1-H0;  // 1
-                float fraction = (H1-H) / dH;  // (20-19.5) / 1 = 0.5
-                if(H1>19) {
-                    fraction = 1.0; // 1.0
-                    H1 = 19; // force this
-                }
-
-                if(H>=2 && H<=19) {
+                if(H>=1 && H<=19) {
                     for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-                        float N_ads0 = m_values[H0][pIndex]/m_volumes[H0]*poreVolume;
-                        float N_ads1 = m_values[H1][pIndex]/m_volumes[H1]*poreVolume;
-                        float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
-                        // float N_ads = m_values[H][pIndex];
-                        numberOfAdsorbedAtoms[pIndex] += N_ads;
+                        double P = m_pressures[pIndex];
+                        numberOfAdsorbedAtoms[pIndex] += findNumAdsorbed(P, dx, dy, dz);
                     }
                     inside++;
                 } else outside++;
@@ -138,15 +122,17 @@ void Concentration::computeMode0(Geometry *geometry) {
     float totalZeoliteMass = numberOfZeoliteUnitCells*massOfZeoliteUnitCell;
     float totalZeoliteMassGrams = totalZeoliteMass/avogadro;
 
-    int numberOfUnitCellsBulkSystem = 200; // This is from MD.
+    // int numberOfUnitCellsBulkSystem = 200; // This is from MD.
     // float totalZeoliteMassBulkSystemGrams = numberOfUnitCellsBulkSystem*massOfZeoliteUnitCell/avogadro;
-    float totalZeoliteVolumeBulkSystem = volumeOfZeoliteUnitCell*numberOfUnitCellsBulkSystem;
-    float bulkSystemFactor = totalZeoliteVolume / totalZeoliteVolumeBulkSystem;
+    // float totalZeoliteVolumeBulkSystem = volumeOfZeoliteUnitCell*numberOfUnitCellsBulkSystem;
+    // float bulkSystemFactor = totalZeoliteVolume / totalZeoliteVolumeBulkSystem;
 
     m_points.clear();
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
-        N_adsorbed += bulkSystemFactor*m_values[1][i];
+        //N_adsorbed += bulkSystemFactor*m_values[1][i];
+        double adsorbedInZeolite = m_values[1][i]/m_volumes[1]*totalZeoliteVolume;
+        N_adsorbed += adsorbedInZeolite;
         N_adsorbed *= m_scalingFactor;
         float N_molesAdsorbed = N_adsorbed/avogadro;
         float volumeAdsorbedLiter = N_molesAdsorbed*argonLiterPerMol;
@@ -306,4 +292,195 @@ void Concentration::setScalingFactor(double scalingFactor)
 void Concentration::saveState(QFile &file)
 {
 
+}
+
+
+double Concentration::findNumAdsorbed(double P, double Lx, double Ly, double Lz) {
+    double eps = 1e-7;
+    if(fabs(P-0.0001) < eps) {
+        double a = 0.07239;
+        double b = -0.4811;
+        double c = 7.335e-10;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        return Nads*V;
+    } else if(fabs(P-0.0005) < eps) {
+        double a = 0.3398;
+        double b = -0.4942;
+        double c = 3.897e-12;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        return Nads*V;
+    } else if(fabs(P-0.001) < eps) {
+        double a = 0.6653;
+        double b = -0.5059;
+        double c = 2.221e-9;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        return Nads*V;
+    } else if(fabs(P-0.059765) < eps) {
+        double a = 19.64;
+        double b = -0.4823;
+        double c = 2.725e-8;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        return Nads*V;
+    } else if(fabs(P-0.118529) < eps) {
+        double a = 17.34;
+        double b = -0.432;
+        double c = 6.69e-9;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        if(V<7) {
+            Nads = 17;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.177294) < eps) {
+        double a = 49.54;
+        double b = -0.6381;
+        double c = 0.3861;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        if(V < 24) {
+            Nads = -0.4865*V + 18.21;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.236059) < eps) {
+        double a = 59.79;
+        double b = -0.5839;
+        double c = 0.4853;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        return Nads*V;
+    } else if(fabs(P-0.294824) < eps) {
+        double a = 44.05;
+        double b = -0.4952;
+        double c = 0.3104;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        if(V < 24) {
+            Nads = 18;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.353588) < eps) {
+        double a = 53.02;
+        double b = -0.4994;
+        double c = 0.4253;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        if(V < 64) {
+            Nads = -0.1892*V + 18.42;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.412353) < eps) {
+        double a = 105.5;
+        double b = -0.606;
+        double c = 0.8105;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        if(V < 100) {
+            Nads = -0.1219*V + 18.78;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.471118) < eps) {
+        double a = 38.19;
+        double b = -0.3737;
+        double c = 0.1e-8;
+        double V = Lx*Ly*Lz;
+        double Nads = (a*pow(V, b) + c);
+        if(V < 50) {
+            Nads = 19;
+        } else if(V<100) {
+            Nads = -0.02937*V + 11.55;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.529882) < eps) {
+        double a = 42.76;
+        double b = -0.3734;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b);
+        if(V < 50) {
+            Nads = 19;
+        } else if(V<200) {
+            a = 100.5;
+            b = -0.5052;
+            Nads = a*pow(V, b);
+        }
+        return Nads*V;
+    } else if(fabs(P-0.588647) < eps) {
+        double a = 88.64;
+        double b = -0.4856;
+        double c = 0.8597;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 64) {
+            Nads = 19;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.647412) < eps) {
+        double a = 86.01;
+        double b = -0.4571;
+        double c = 0.4921;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 100) {
+            Nads = 19;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.706176) < eps) {
+        double a = 88.31;
+        double b = -0.4229;
+        double c = 0.0;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 100) {
+            Nads = 19;
+        } else if(V < 200) {
+            Nads = -0.05365*V + 20.39;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.764941) < eps) {
+        double a = 97.8;
+        double b = -0.4221;
+        double c = 0.0;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 200) {
+            Nads = 19;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.823706) < eps) {
+        double a = 99.98;
+        double b = -0.4078;
+        double c = 0.0;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 200) {
+            Nads = 19.5;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.882471) < eps) {
+        double a = 186.4;
+        double b = -0.4609;
+        double c = 0.0;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 400) {
+            Nads = 20.0;
+        }
+        return Nads*V;
+    } else if(fabs(P-0.94123) < eps) {
+        double a = 595.3;
+        double b = -0.4609;
+        double c = 2.463e-6;
+        double V = Lx*Ly*Lz;
+        double Nads = a*pow(V, b) + c;
+        if(V < 400) {
+            Nads = 20.0;
+        }
+        return Nads*V;
+    } else {
+        qDebug() << "Error, pressure not found. Can't compute concentration";
+        exit(1);
+    }
 }

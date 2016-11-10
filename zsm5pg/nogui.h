@@ -48,6 +48,7 @@ public:
     Q_INVOKABLE void loadState();
     Q_INVOKABLE void loadIniFile(IniFile *iniFile);
     Q_INVOKABLE void tick();
+    Q_INVOKABLE void compute();
     Q_INVOKABLE void run(int steps);
     QVariantList statistics() const;
     MonteCarlo* monteCarlo() const;
