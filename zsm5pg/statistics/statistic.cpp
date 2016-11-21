@@ -162,6 +162,7 @@ void Statistic::computeHistogram()
     // Produce histogram
     gsl_histogram *hist = gsl_histogram_alloc (m_bins);
     gsl_histogram_set_ranges_uniform (hist, m_min, m_max);
+
     for(const float &value : m_histogramValues) {
         gsl_histogram_increment (hist, value);
     }

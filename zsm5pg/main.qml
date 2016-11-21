@@ -56,6 +56,7 @@ Window {
     Concentration {
         id: adsorptionModel
         constant: false
+        adsorption: true
         filePath: simulator.filePath
         scalingFactor: scaling.value
         zeoliteThickness: thickness.value
@@ -72,6 +73,7 @@ Window {
     Concentration {
         id: desorptionModel
         constant: false
+        adsorption: false
         filePath: simulator.filePath
         scalingFactor: scaling.value
         zeoliteThickness: thickness.value

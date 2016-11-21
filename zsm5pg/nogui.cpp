@@ -125,11 +125,8 @@ NoGUI::~NoGUI() {
 }
 
 void NoGUI::compute() {
-    for(QVariant &variant : m_statistics) {
-        Statistic *statistic = variant.value<Statistic*>();
-        statistic->compute(m_geometry, m_timestep);
-    }
-
+    qDebug() << "Doing compute";
+    m_timestep++;
     for(QVariant &variant : m_models) {
         Statistic *statistic = variant.value<Statistic*>();
         statistic->compute(m_geometry, m_timestep);
@@ -147,7 +144,6 @@ void NoGUI::compute() {
             statistic->updateQML();
         }
     }
-
 }
 
 void NoGUI::tick()

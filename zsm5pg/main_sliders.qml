@@ -44,6 +44,7 @@ Window {
     Concentration {
         id: adsorptionModel
         constant: false
+        adsorption: true
         filePath: simulator.filePath
         scalingFactor: scaleSlider.value
         zeoliteThickness: thicknessSlider.value
@@ -60,6 +61,7 @@ Window {
     Concentration {
         id: desorptionModel
         constant: false
+        adsorption: false
         filePath: simulator.filePath
         scalingFactor: scaleSlider.value
         zeoliteThickness: thicknessSlider.value
@@ -162,6 +164,9 @@ Window {
                     maximumValue: 2.0
                     stepSize: 0.01
                     value: 1.0
+                    onValueChanged: {
+                        simulator.compute()
+                    }
                 }
 
                 Button {
@@ -197,6 +202,9 @@ Window {
                     maximumValue: 8.0
                     stepSize: 0.01
                     value: 2.0
+                    onValueChanged: {
+                        simulator.compute()
+                    }
                 }
 
                 Button {
@@ -221,6 +229,13 @@ Window {
                 Button {
                     text: "Compute"
                     onClicked: simulator.compute()
+                }
+                Button {
+                    text: "New geometry"
+                    onClicked: {
+                        geometry.generateFromPSD(rootWindow.probabilities)
+                        simulator.compute()
+                    }
                 }
             }
         }
