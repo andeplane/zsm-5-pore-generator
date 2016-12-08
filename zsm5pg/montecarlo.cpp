@@ -54,6 +54,15 @@ void MonteCarlo::tick(int step)
 
     bool anyChanges = m_geometry->randomWalkStep(m_standardDeviation);
     if(!anyChanges) return;
+
+    if(m_geometry->shouldBeRejected()) {
+        m_geometry->setDeltaXVector(x);
+        m_geometry->setDeltaYVector(y);
+        m_geometry->setDeltaZVector(z);
+        setSteps(m_steps+1);
+        return;
+    }
+
     for(QVariant &variant : m_mcObjects) {
         MCObject *obj = variant.value<MCObject*>();
         obj->randomWalk();
@@ -66,7 +75,9 @@ void MonteCarlo::tick(int step)
         model->setDirty();
         model->compute(m_geometry, step);
         // chiSquared2 += model->chiSquared(data);
-        chiSquared2 += data->chiSquared(model);
+        double chiSquaredModel = data->chiSquared(model);
+        chiSquared2 += chiSquaredModel;
+        // qDebug() << "Chi squared model: " << chiSquaredModel;
     }
 
     float deltaChiSquared = chiSquared2 - chiSquared1;

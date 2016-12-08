@@ -13,7 +13,6 @@ PoreSizeStatistic::PoreSizeStatistic(QObject *parent) : Statistic(parent)
 
 void PoreSizeStatistic::computeMode0(Geometry *geometry)
 {
-    qDebug() << "Computing mode 0";
     QVector<float> &x = geometry->deltaXVector();
     QVector<float> &y = geometry->deltaYVector();
     QVector<float> &z = geometry->deltaZVector();
@@ -27,7 +26,8 @@ void PoreSizeStatistic::computeMode0(Geometry *geometry)
             for(int k=0; k<z.size(); k++) {
                 const float dz = z[k];
 
-                float poreSize = std::min(std::min(dx,dy), dz);
+                // float poreSize = std::min(std::min(dx,dy), dz);
+                float poreSize = cbrt(dx*dy*dz);
                 m_poreVolumes[poreIndex++] = poreSize;
             }
         }

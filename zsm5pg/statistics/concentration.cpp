@@ -7,6 +7,9 @@
 #include "../montecarlo.h"
 #include "../inifile.h"
 #include "../geometry.h"
+#include <vector>
+using namespace std;
+
 Concentration::Concentration(QObject *parent) : Statistic(parent)
 {
     setConstant(false);
@@ -339,218 +342,357 @@ double Concentration::findNumAdsorbed(double P, double Lx, double Ly, double Lz)
     if(H1<H0) std::swap(H1, H0);
     if(H2<H0) std::swap(H2, H0);
     if(H2<H1) std::swap(H2, H1);
+    H0 = round(H0);
+    H1 = round(H1);
+    H2 = round(H2);
 
     if(fabs(P-0.0001) < eps) {
-        double a = 0.04307;
-        double b = -0.5746;
-        double c = 0;
+        double a = 0.06441;
+        double b = -0.8238;
+        double c = 0.0003653;
         double Nads = (a*pow(V, b) + c);
         return Nads*V;
     } else if(fabs(P-0.0005) < eps) {
-        double H_table[] = {1.0, 1.03, 1.03};
-        double V_table = 1.07;
-        double Nads = 0.25;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 0.255;
-            double b = -0.556;
-            double c = 0.0;
-            Nads = (a*pow(V, b) + c);
-        }
+        double a = 0.5005;
+        double b = -0.9803;
+        double c = 0.004008;
+        double Nads = (a*pow(V, b) + c);
         return Nads*V;
     } else if(fabs(P-0.001) < eps) {
-        double H_table[] = {1.0, 2, 2};
-        double V_table = 4;
-        double Nads = 0.41;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 2.59;
-            double b = -1.36;
-            double c = 0.01386;
-            Nads = (a*pow(V, b) + c);
-        }
+        double a = 1.744;
+        double b = -1.197;
+        double c = 0.01088;
+        double Nads = (a*pow(V, b) + c);
         return Nads*V;
     } else if(fabs(P-0.059765) < eps) {
-        double H_table[] = {1.0, 1.5, 1.5};
-        double V_table = 2.25;
-        double Nads = 16.36;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 28.52;
-            double b = -0.6881;
-            double c = 0.04328;
-            Nads = (a*pow(V, b) + c);
-        }
+        double a = 12.22;
+        double b = -0.4923;
+        double c = 0.07557;
+        double Nads = (a*pow(V, b) + c);
         return Nads*V;
     } else if(fabs(P-0.118529) < eps) {
-        double H_table[] = {1.0, 3, 3};
-        double V_table = 9;
-        double Nads = 17.54;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 169.9;
-            double b = -1.046;
-            double c = 0.4814;
-            Nads = (a*pow(V, b) + c);
-        }
+        double a = 22.18;
+        double b = -0.4987;
+        double c = 0.3375;
+        double Nads = (a*pow(V, b) + c);
         return Nads*V;
     } else if(fabs(P-0.177294) < eps) {
-        double H_table[] = {1.85, 1.85, 1.85};
-        double V_table = 6.3;
-        double Nads = 18.15;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 66.9;
-            double b = -0.7244;
-            double c = 0.5385;
-            Nads = (a*pow(V, b) + c);
-        }
+            double a = 62.76;
+            double b = -0.7297;
+            double c = 1.379;
+            double Nads = (a*pow(V, b) + c);
         return Nads*V;
     } else if(fabs(P-0.236059) < eps) {
-        double H_table[] = {2, 2, 2};
-        double V_table = 8;
-        double Nads = 18.48;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 61.56;
-            double b = -0.5896;
-            double c = 0.4853;
+        if(m_adsorption) {
+            double a = 56.87;
+            double b = -0.5598;
+            double c = 0.7598;
+            double Nads = (a*pow(V, b) + c);
+            return Nads*V;
+        }
+        // Desorption
+        vector<double> H_table = {2, 3, 3};
+        double Nads = 17.7;
+        double V_table = 18;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 1121;
+            double b = -1.494;
+            double c = 2.771;
             Nads = (a*pow(V, b) + c);
         }
         return Nads*V;
     } else if(fabs(P-0.294824) < eps) {
-        double H_table[] = {2, 2.45, 2.45};
-        double V_table = 12;
-        double Nads = 17.7;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 99.31;
-            double b = -0.71663;
-            double c = 0.9433;
+        if(m_adsorption) {
+            double H_table[] = {2, 2.6, 2.6};
+            double V_table = 13.2;
+            double Nads = 18.2;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 99.31;
+                double b = -0.7;
+                double c = 1.918;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
+        }
+
+        vector<double> H_table = {2, 5, 5};
+        if(H0==2) H_table = {2, 5, 5};
+        else if(H0==3) H_table = {3,3.9,3.9};
+
+        double V_table = 45;
+        double Nads = 18;
+
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 601.4;
+            double b = -0.9431;
+            double c = 1.474;
             Nads = (a*pow(V, b) + c);
         }
         return Nads*V;
     } else if(fabs(P-0.353588) < eps) {
-        double H_table[] = {2, 3, 3};
-        double V_table = 18;
-        double Nads = 17.53;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 125.8;
-            double b = -0.703;
-            double c = 1.044;
+        if(m_adsorption) {
+            double H_table[] = {2, 3, 3};
+            double V_table = 15;
+            double Nads = 18.5;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 140;
+                double b = -0.8147;
+                double c = 3.067;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
+        }
+        // Desorption
+        vector<double> H_table = {3, 5, 5};
+        if(H0==3) H_table = {3, 5, 5};
+        else if(H0==4) H_table = {4, 4.3, 4.3};
+
+        double V_table = 80;
+        double Nads = 18.2;
+
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 13060;
+            double b = -1.5434;
+            double c = 2.483;
             Nads = (a*pow(V, b) + c);
         }
         return Nads*V;
     } else if(fabs(P-0.412353) < eps) {
-        double H_table[] = {2, 3.1, 3.1};
-        double V_table = 18.8;
-        double Nads = 18.8; //TODO: equal vtable and nads coincindence?
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 115;
-            double b = -0.6356;
-            double c = 0.9894;
-            Nads = (a*pow(V, b) + c);
+        if(m_adsorption) {
+            double H_table[] = {2, 3.1, 3.1};
+            double V_table = 19.0;
+            double Nads = 18.8;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 157;
+                double b = -0.7851;
+                double c = 3.257;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
         }
 
+        // Desorption
+        vector<double> H_table = {3, 5.5, 5.5};
+        if(H0==3) H_table = {3, 5.5, 5.5};
+        else if(H0==4) H_table = {4, 5, 5};
+        double V_table = 90;
+        double Nads = 18.8;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 5.411e5;
+            double b = -2.31;
+            double c = 3.443;
+            Nads = (a*pow(V, b) + c);
+        }
         return Nads*V;
     } else if(fabs(P-0.471118) < eps) {
-        double H_table[] = {3,3,4};
-        double V_table = 36;
-        double Nads = 17.8;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 450.1;
-            double b = -0.9366;
-            double c = 2.089;
-            Nads = (a*pow(V, b) + c);
+        if(m_adsorption) {
+            vector<double> H_table = {3,3,3.5};
+            if(H0==2) H_table = {2,6,6};
+            double Nads = 19.0;
+            double V_table = 31.5;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 1025;
+                double b = -1.238;
+                double c = 4.678;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
         }
 
+        // Desorption
+        vector<double> H_table = {3, 5.5, 5.5};
+        if(H0==3) H_table = {3, 5.5, 5.5};
+        else if(H0==4 && H1>=5) H_table = {4, 5, 5};
+        else if(H0==4) H_table = {4, 4, 8};
+        double Nads = 18.8;
+        double V_table = 90;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 3.142e5;
+            double b = -2.198;
+            double c = 3.94;
+            Nads = (a*pow(V, b) + c);
+        }
         return Nads*V;
+
     } else if(fabs(P-0.529882) < eps) {
-        double H_table[] = {3, 3.8, 3.8};
-        double V_table = 44;
-        double Nads = 18.72;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 948.4;
-            double b = -1.079;
-            double c = 2.738; // Missing in the formula?
-            double V = Lx*Ly*Lz;
-            Nads = a*pow(V, b) + c;
+        if(m_adsorption) {
+            vector<double> H_table = {3,3.8,3.8};
+            if(H0==2) H_table = {2,7,7};
+            double Nads = 18.4;
+            double V_table = 44;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 1421;
+                double b = -1.239;
+                double c = 5.318;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
+        }
+
+        // Desorption
+        vector<double> H_table = {4,5,6};
+        if(H1<5) H_table = {4,4,8};
+        double Nads = 20.8;
+        double V_table = 90;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 1.572e5;
+            double b = -2.037;
+            double c = 4.403;
+            Nads = (a*pow(V, b) + c);
         }
         return Nads*V;
     } else if(fabs(P-0.588647) < eps) {
-        double H_table[] = {3, 4, 4};
-        double V_table = 48;
-        double Nads = 18.7;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 270.3;
-            double b = -0.7111;
-            double c = 1.485;
-            Nads = a*pow(V, b) + c;
+        if(m_adsorption) {
+            vector<double> H_table = {3,4,4};
+            double Nads = 18.4;
+            double V_table = 48;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 1600;
+                double b = -1.271;
+                double c = 6.695;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
         }
 
+        // Desorption
+        vector<double> H_table = {4,5,6};
+        if(H1<5) H_table = {4,4,8};
+        double Nads = 20.8;
+        double V_table = 120;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 4.624e15;
+            double b = -6.994;
+            double c = 6.735;
+            Nads = (a*pow(V, b) + c);
+        }
         return Nads*V;
     } else if(fabs(P-0.647412) < eps) {
-        double H_table[] = {3, 5, 5};
+        if(m_adsorption) {
+            vector<double> H_table = {4,4,4};
+            if(H0<4) H_table = {3,5,5};
+            double Nads = 19.1;
+            double V_table = 75;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 1924;
+                double b = -1.137;
+                double c = 4.923;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
+        }
+
+        // Desorption
+        vector<double> H_table = {4,6,6};
+        double Nads = 20.0;
         double V_table = 75;
-        double Nads = 18.9;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 1244;
-            double b = -1.008;
-            double c = 2.884;
-            Nads = a*pow(V, b) + c;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 1924;
+            double b = -1.137;
+            double c = 4.923;
+            Nads = (a*pow(V, b) + c);
         }
-
         return Nads*V;
+
     } else if(fabs(P-0.706176) < eps) {
-        double H_table[] = {4, 5, 5};
-        double V_table = 100;
-        double Nads = 18.8;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 4758;
-            double b = -1.256;
-            double c = 4.051;
-            Nads = a*pow(V, b) + c;
+        if(m_adsorption) {
+            vector<double> H_table = {4,5,5};
+            if(H1<5) H_table = {4,4,10};
+            double Nads = 18.8;
+            double V_table = 100;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 10220;
+                double b = -1.454;
+                double c = 5.795;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
         }
 
+        // Desorption
+        vector<double> H_table = {4,6,6};
+        double Nads = 20.0;
+        double V_table = 100;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 10220;
+            double b = -1.454;
+            double c = 5.795;
+            Nads = (a*pow(V, b) + c);
+        }
         return Nads*V;
     } else if(fabs(P-0.764941) < eps) {
-        double H_table[] = {4, 5.7, 5.7};
+        if(m_adsorption) {
+            vector<double> H_table = {4,5.7,5.7};
+            if(H0<4) H_table = {3, 10, 10};
+            double Nads = 20.3;
+            double V_table = 130;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 20650;
+                double b = -1.49;
+                double c = 5.721;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
+        }
+
+        // Desorption
+        vector<double> H_table = {4,7,7};
+        double Nads = 20.3;
         double V_table = 130;
-        double Nads = 19.8;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 5918;
-            double b = -1.212;
-            double c = 3.577;
-            Nads = a*pow(V, b) + c;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 20650;
+            double b = -1.49;
+            double c = 5.721;
+            Nads = (a*pow(V, b) + c);
         }
         return Nads*V;
     } else if(fabs(P-0.823706) < eps) {
-        double V_table = 230;
-        double Nads = 20.3;
-        if(V>V_table) {
-            double a = 180200;
-            double b = -1.715;
-            double c = 4.23;
-            Nads = a*pow(V, b) + c;
+        if(m_adsorption) {
+            vector<double> H_table = {4,12,12};
+            if(H0<4) H_table = {3,15,15};
+            double Nads = 20.3;
+            double V_table = 230;
+            if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+                double a = 24450;
+                double b = -1.364;
+                double c = 5.27;
+                Nads = (a*pow(V, b) + c);
+            }
+            return Nads*V;
         }
 
+        // Desorption
+        vector<double> H_table = {4,12,12};
+        double Nads = 20.3;
+        double V_table = 230;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 24450;
+            double b = -1.364;
+            double c = 5.27;
+            Nads = (a*pow(V, b) + c);
+        }
         return Nads*V;
     } else if(fabs(P-0.882471) < eps) {
-        double H_table[] = {6, 7.75, 7.75};
-        double V_table = 360;
+        vector<double> H_table = {4,12,15};
         double Nads = 20.3;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 1.58e8;
-            double b = -2.748;
-            double c = 5.328;
-            Nads = a*pow(V, b) + c;
+        double V_table = 720;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 7.346e15;
+            double b = -5.176;
+            double c = 8.014;
+            Nads = (a*pow(V, b) + c);
         }
-
         return Nads*V;
     } else if(fabs(P-0.941235) < eps) {
-        double H_table[] = {6, 9, 9};
-        double V_table = 486;
+        vector<double> H_table = {4,12,15};
         double Nads = 20.0;
-        if( (H0>H_table[0] || H1>H_table[1] || H2>H_table[2]) && V>V_table) {
-            double a = 172600;
-            double b = -1.494;
-            double c = 3.352;
-            Nads = a*pow(V, b) + c;
+        double V_table = 720;
+        if( !(H0<H_table[0] || H1<H_table[1] || H2<H_table[2] || V<V_table)) {
+            double a = 1.414e7;
+            double b = -2.116;
+            double c = 7.297;
+            Nads = (a*pow(V, b) + c);
         }
-
         return Nads*V;
     } else {
         qDebug() << "Error, pressure " << P << " not found. Can't compute concentration";

@@ -20,6 +20,34 @@ Geometry::~Geometry()
     save(fileName);
 }
 
+bool Geometry::shouldBeRejected() {
+    QVector<float> &x = deltaXVector();
+    QVector<float> &y = deltaYVector();
+    QVector<float> &z = deltaZVector();
+
+    for(int i=0; i<x.size(); i++) {
+        const float dx = x[i];
+        for(int j=0; j<y.size(); j++) {
+            const float dy = y[j];
+            for(int k=0; k<z.size(); k++) {
+                const float dz = z[k];
+                float H1 = dx;
+                float H2 = dy;
+                float H3 = dz;
+
+                if(H2 < H1) std::swap(H2, H1);
+                if(H3 < H1) std::swap(H3, H1);
+                if(H3 < H2) std::swap(H3, H2);
+
+                if(H1< 2 || H1> 4.5) return true;
+                if(H2 > 19) return true;
+                if(H3 > 19) return true;
+            }
+        }
+    }
+    return false;
+}
+
 void Geometry::loadIniFile(IniFile *iniFile)
 {
     QFileInfo fileInfo(QString("%1/geometry.txt").arg(m_filePath));
@@ -77,9 +105,12 @@ void Geometry::reset(float min, float max) {
     if(m_mode == 0) {
         float delta = max - min;
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
-            m_deltaXVector[planeId] = 2.0*min + Random::nextFloat()*delta;
-            m_deltaYVector[planeId] = 2.0*min + Random::nextFloat()*delta;
-            m_deltaZVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+//            m_deltaXVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+//            m_deltaYVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+//            m_deltaZVector[planeId] = 2.0*min + Random::nextFloat()*delta;
+            m_deltaXVector[planeId] = 3.0;
+            m_deltaYVector[planeId] = 3.0;
+            m_deltaZVector[planeId] = 3.0;
             if(m_verbose) qDebug() << "Plane (" << planeId << ", X): " << m_deltaXVector[planeId];
             if(m_verbose) qDebug() << "Plane (" << planeId << ", Y): " << m_deltaYVector[planeId];
             if(m_verbose) qDebug() << "Plane (" << planeId << ", Z): " << m_deltaZVector[planeId];
@@ -103,6 +134,8 @@ bool Geometry::randomWalkStep(float standardDeviation)
 {
     bool anyChanges = false;
     if(m_mode == 0) {
+        double Hmin = 2;
+        double Hmax = 19;
         for(int planeId=0; planeId<m_planesPerDimension; planeId++) {
             float dx = Random::nextGaussianf(0, standardDeviation);
             float dy = Random::nextGaussianf(0, standardDeviation);
@@ -110,24 +143,24 @@ bool Geometry::randomWalkStep(float standardDeviation)
 
             if(Random::nextFloat() < 0.05) {
                 anyChanges = true;
-                m_deltaXVector[planeId] = Random::nextDouble(2, 19);
-            } else if(m_deltaXVector[planeId] + dx > 2 && m_deltaXVector[planeId] + dx < 19 && Random::nextFloat() < m_randomWalkFraction) {
+                m_deltaXVector[planeId] = Random::nextDouble(Hmin, Hmax);
+            } else if(m_deltaXVector[planeId] + dx > Hmin && m_deltaXVector[planeId] + dx < Hmax && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;
                 m_deltaXVector[planeId] += dx;
             }
 
             if(Random::nextFloat() < 0.05) {
                 anyChanges = true;
-                m_deltaYVector[planeId] = Random::nextDouble(2, 19);
-            } else if(m_deltaYVector[planeId] + dy > 2 && m_deltaYVector[planeId] + dy < 19 && Random::nextFloat() < m_randomWalkFraction) {
+                m_deltaYVector[planeId] = Random::nextDouble(Hmin, Hmax);
+            } else if(m_deltaYVector[planeId] + dy > Hmin && m_deltaYVector[planeId] + dy < Hmax && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;
                 m_deltaYVector[planeId] += dy;
             }
 
             if(Random::nextFloat() < 0.05) {
                 anyChanges = true;
-                m_deltaZVector[planeId] = Random::nextDouble(2, 19);
-            } else if(m_deltaZVector[planeId] + dz > 2 && m_deltaZVector[planeId] + dz < 19 && Random::nextFloat() < m_randomWalkFraction) {
+                m_deltaZVector[planeId] = Random::nextDouble(Hmin, Hmax);
+            } else if(m_deltaZVector[planeId] + dz > Hmin && m_deltaZVector[planeId] + dz < Hmax && Random::nextFloat() < m_randomWalkFraction) {
                 anyChanges = true;
                 m_deltaZVector[planeId] += dz;
             }

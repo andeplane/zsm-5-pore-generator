@@ -153,9 +153,9 @@ Window {
 
         statistics: [
             adsorptionModel,
-            desorptionModel,
+            // desorptionModel,
             adsorptionData,
-            desorptionData,
+            // desorptionData,
             poreSizeStatistic,
             cumulativeVolume,
             dvdlogd
@@ -171,16 +171,16 @@ Window {
             geometry: geometry
             filePath: simulator.filePath
             models: [
-                adsorptionModel,
-                desorptionModel
+                adsorptionModel
+                // desorptionModel
             ]
             datas: [
-                adsorptionData,
-                desorptionData
+                adsorptionData
+                // desorptionData
             ]
             mcObjects: [
-                scaling,
-                thickness
+//                scaling,
+//                thickness
             ]
         }
     }
@@ -289,7 +289,7 @@ Window {
                 minimumValue: 0
                 maximumValue: 2.0
                 stepSize: 0.01
-                value: 1.0
+                value: 1.05
             }
 
             Button {
@@ -313,10 +313,10 @@ Window {
 
             Slider {
                 id: thicknessSlider
-                minimumValue: 0
-                maximumValue: 8.0
+                minimumValue: 2
+                maximumValue: 12.0
                 stepSize: 0.01
-                value: 2.0
+                value: 8.67
             }
 
             Button {
@@ -346,6 +346,10 @@ Window {
 //                stepSize: 1.0
 //                value: -1.0
 //                // value: Math.log(monteCarlo.temperature) * Math.LOG10E
+//                onValueChanged: {
+//                    monteCarlo.temperature = Math.pow(10, value)
+//                    console.log("Changing value to ", monteCarlo.temperature)
+//                }
 //            }
 
 //            Button {
@@ -362,6 +366,7 @@ Window {
 //                text: Math.pow(10,temperatureSlider.value).toFixed(2)
 //            }
 //        }
+
     }
 
 }

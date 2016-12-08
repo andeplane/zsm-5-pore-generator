@@ -51,6 +51,7 @@ public:
     QString filePath() const;
     bool isValid() const;
     bool verbose() const;
+    bool shouldBeRejected();
 public slots:
     void setLengthScale(float lengthScale);
     void setRandomWalkFraction(float randomWalkFraction);
