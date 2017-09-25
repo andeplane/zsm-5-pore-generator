@@ -15,7 +15,9 @@ Concentration::Concentration(QObject *parent) : Statistic(parent)
     setConstant(false);
 }
 
-void Concentration::readFile(QString fileName) {
+void Concentration::readFileOct16(QString fileName) {
+    qDebug() << "Concentration loading file " << fileName;
+
     QFile file(fileName);
     if(!file.open(QFileDevice::ReadOnly | QFileDevice::Text)) {
         qDebug() << "Could not find adsorption matrix file " << fileName;
@@ -56,6 +58,22 @@ void Concentration::readFile(QString fileName) {
     setIsValid(true);
 }
 
+void Concentration::readJan17Files() {
+    for(QString P : m_pressureStrings) {
+        float PValue = P.toFloat();
+        m_pressures.push_back(PValue);
+    }
+    reader.debug = false;
+    reader.folder = "/Users/anderhaf/Dropbox/uio/phd/2017/zeolite/3dmodel/interpolatedData/data";
+    reader.largestPoreSize = 18;
+    qDebug() << "Reading GCMC data...";
+    reader.readData();
+    qDebug() << "Done.";
+    m_xLabel = "Pressure [p/p0]";
+    m_yLabel = "V_ads/cm^3";
+    setIsValid(true);
+}
+
 void Concentration::computeMode0(Geometry *geometry) {
     if(!geometry) return;
 
@@ -71,43 +89,50 @@ void Concentration::computeMode0(Geometry *geometry) {
 
     int outside = 0;
     int inside = 0;
+    QString dataMode = m_adsorption ? "adsorption" : "desorption";
+
     for(int i=0; i<x.size(); i++) {
         const float dx = x[i];
         for(int j=0; j<y.size(); j++) {
             const float dy = y[j];
             for(int k=0; k<z.size(); k++) {
                 const float dz = z[k];
-                if(m_adsorption) {
-                    // Use fitted model accounting for asymmetric pore volumes
-                    for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-                        double P = m_pressures[pIndex];
-                        numberOfAdsorbedAtoms[pIndex] += findNumAdsorbed(P, dx, dy, dz);
-                    }
-                } else {
-                    float poreSize = std::min(std::min(dx, dy), dz);
-                    const float poreVolume = dx*dy*dz;
-                    float H = poreSize;  // 1
-
-                    int H0 = poreSize; // 19
-                    int H1 = int(poreSize)+1;  // 20
-                    float dH = H1-H0;  // 1
-                    float fraction = (H1-H) / dH;  // (20-19.5) / 1 = 0.5
-                    if(H1>19) {
-                        fraction = 1.0; // 1.0
-                        H1 = 19; // force this
-                    }
-
-                    if(H>=2 && H<=19) {
-                        for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-                            float N_ads0 = m_values[H0][pIndex]/m_volumes[H0]*poreVolume;
-                            float N_ads1 = m_values[H1][pIndex]/m_volumes[H1]*poreVolume;
-                            float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
-                            // float N_ads = m_values[H][pIndex];
-                            numberOfAdsorbedAtoms[pIndex] += N_ads;
-                        }
-                        inside++;
-                    } else outside++;
+                for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+                    QString P = m_pressureStrings[pIndex];
+                    numberOfAdsorbedAtoms[pIndex] +=  findNumAdsorbedJan17(dataMode, P, dx, dy, dz);
                 }
+
+//                if(m_adsorption) {
+//                    // Use fitted model accounting for asymmetric pore volumes
+//                    for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+//                        double P = m_pressures[pIndex];
+//                        numberOfAdsorbedAtoms[pIndex] += findNumAdsorbedJan17(P, dx, dy, dz);
+//                    }
+//                } else {
+//                    float poreSize = std::min(std::min(dx, dy), dz);
+//                    const float poreVolume = dx*dy*dz;
+//                    float H = poreSize;  // 1
+
+//                    int H0 = poreSize; // 19
+//                    int H1 = int(poreSize)+1;  // 20
+//                    float dH = H1-H0;  // 1
+//                    float fraction = (H1-H) / dH;  // (20-19.5) / 1 = 0.5
+//                    if(H1>19) {
+//                        fraction = 1.0; // 1.0
+//                        H1 = 19; // force this
+//                    }
+
+//                    if(H>=2 && H<=19) {
+//                        for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+//                            float N_ads0 = m_values[H0][pIndex]/m_volumes[H0]*poreVolume;
+//                            float N_ads1 = m_values[H1][pIndex]/m_volumes[H1]*poreVolume;
+//                            float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
+//                            // float N_ads = m_values[H][pIndex];
+//                            numberOfAdsorbedAtoms[pIndex] += N_ads;
+//                        }
+//                        inside++;
+//                    } else outside++;
+//                }
             }
         }
     }
@@ -154,7 +179,14 @@ void Concentration::computeMode0(Geometry *geometry) {
     for(int i=0; i<m_pressures.size(); i++) {
         float N_adsorbed = numberOfAdsorbedAtoms[i];
         //N_adsorbed += bulkSystemFactor*m_values[1][i];
-        double adsorbedInZeolite = m_values[1][i]/m_volumes[1]*totalZeoliteVolume;
+        // double adsorbedInZeolite = m_values[1][i]/m_volumes[1]*totalZeoliteVolume; // 16 data
+        double adsorbedInZeolite = 0;
+        if(m_adsorption) {
+            adsorbedInZeolite = reader.CAdsWall[m_pressureStrings[i]] * totalZeoliteVolume;
+        } else {
+            adsorbedInZeolite = reader.CDesWall[m_pressureStrings[i]] * totalZeoliteVolume;
+        }
+
         N_adsorbed += adsorbedInZeolite;
         N_adsorbed *= m_scalingFactor;
         float N_molesAdsorbed = N_adsorbed/avogadro;
@@ -274,6 +306,7 @@ bool Concentration::adsorption() const
 
 bool Concentration::isValid()
 {
+    qDebug() << "Will return " << (m_pressures.size()>0);
     return m_pressures.size() > 0; // hack, but works.
 }
 
@@ -289,7 +322,10 @@ void Concentration::loadIniFile(IniFile *iniFile)
 
     if(m_sourceKey.isEmpty()) return;
     QString fileName = iniFile->getString(m_sourceKey);
-    readFile(fileName);
+    // readFile(fileName);
+    // readFileJan17(fileName);
+    readJan17Files();
+
     m_points.clear(); // Clear what we read in base class
 
     qDebug() << "Concentration loaded ini file with ";
@@ -331,8 +367,7 @@ void Concentration::saveState(QFile &file)
 
 }
 
-
-double Concentration::findNumAdsorbed(double P, double Lx, double Ly, double Lz) {
+double Concentration::findNumAdsorbedOct16(double P, double Lx, double Ly, double Lz) {
     double V = Lx*Ly*Lz;
     double eps = 1e-7;
     // Sort the three values
@@ -698,4 +733,18 @@ double Concentration::findNumAdsorbed(double P, double Lx, double Ly, double Lz)
         qDebug() << "Error, pressure " << P << " not found. Can't compute concentration";
         exit(1);
     }
+}
+
+
+double Concentration::findNumAdsorbedJan17(QString mode, QString P, double Lx, double Ly, double Lz) {
+    // Sort the three values
+    int H0 = round(Lx);
+    int H1 = round(Ly);
+    int H2 = round(Lz);
+
+    if(H1<H0) std::swap(H1, H0);
+    if(H2<H0) std::swap(H2, H0);
+    if(H2<H1) std::swap(H2, H1);
+
+    return reader.getNum(mode, P, Lx, Ly, Lz);
 }

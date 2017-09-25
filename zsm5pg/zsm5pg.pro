@@ -2,7 +2,6 @@ TEMPLATE = app
 CONFIG += c++11
 
 QT += qml quick widgets opengl openglextensions charts
-QMAKE_CXXFLAGS += -g
 INCLUDEPATH += /usr/local/include
 LIBS += -L/usr/local/lib -lgsl -lblas
 # DEFINES += POREISCBRT
@@ -19,7 +18,8 @@ SOURCES += main.cpp \
     statistics/lengthratio.cpp \
     statistics/dvdlogd.cpp \
     geometry.cpp \
-    mcobject.cpp
+    mcobject.cpp \
+    adsdesreader.cpp
 
 RESOURCES += qml.qrc
 
@@ -45,4 +45,5 @@ HEADERS += \
     statistics/lengthratio.h \
     statistics/dvdlogd.h \
     geometry.h \
-    mcobject.h
+    mcobject.h \
+    adsdesreader.h

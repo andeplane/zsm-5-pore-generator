@@ -52,21 +52,36 @@ bool NoGUI::isValid()
 {
     for(QVariant &variant : m_statistics) {
         Statistic *statistic = variant.value<Statistic*>();
-        if(!statistic->isValid()) return false;
+        if(!statistic->isValid()) {
+            qDebug() << "Not ready: " << statistic << ": " << statistic->name();
+            return false;
+        }
     }
 
     for(QVariant &variant : m_models) {
         Statistic *statistic = variant.value<Statistic*>();
-        if(!statistic->isValid()) return false;
+        if(!statistic->isValid()) {
+            qDebug() << "Not ready: " << statistic << ": " << statistic->name();
+            return false;
+        }
     }
 
     for(QVariant &variant : m_datas) {
         Statistic *statistic = variant.value<Statistic*>();
-        if(!statistic->isValid()) return false;
+        if(!statistic->isValid()) {
+            qDebug() << "Not ready: " << statistic << ": " << statistic->name();
+            return false;
+        }
     }
 
-    if(!m_geometry->isValid()) return false;
-    if(!m_monteCarlo->isValid()) return false;
+    if(!m_geometry->isValid()) {
+        qDebug() << "Geometry not ready";
+        return false;
+    }
+    if(!m_monteCarlo->isValid()) {
+        qDebug() << "MC not ready";
+        return false;
+    }
 
     return true;
 }

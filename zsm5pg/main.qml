@@ -153,9 +153,9 @@ Window {
 
         statistics: [
             adsorptionModel,
-            // desorptionModel,
+            desorptionModel,
             adsorptionData,
-            // desorptionData,
+            desorptionData,
             poreSizeStatistic,
             cumulativeVolume,
             dvdlogd
@@ -171,12 +171,12 @@ Window {
             geometry: geometry
             filePath: simulator.filePath
             models: [
-                adsorptionModel
-                // desorptionModel
+                adsorptionModel,
+                desorptionModel
             ]
             datas: [
-                adsorptionData
-                // desorptionData
+                adsorptionData,
+                desorptionData
             ]
             mcObjects: [
 //                scaling,
@@ -287,7 +287,7 @@ Window {
             Slider {
                 id: scaleSlider
                 minimumValue: 0
-                maximumValue: 2.0
+                maximumValue: 5.0
                 stepSize: 0.01
                 value: 1.05
             }
@@ -313,10 +313,10 @@ Window {
 
             Slider {
                 id: thicknessSlider
-                minimumValue: 2
-                maximumValue: 12.0
-                stepSize: 0.01
-                value: 8.67
+                minimumValue: 1
+                maximumValue: 10.0
+                stepSize: 0.25
+                value: 2
             }
 
             Button {

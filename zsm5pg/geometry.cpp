@@ -39,7 +39,8 @@ bool Geometry::shouldBeRejected() {
                 if(H3 < H1) std::swap(H3, H1);
                 if(H3 < H2) std::swap(H3, H2);
 
-                if(H1< 2 || H1> 4.5) return true;
+                // if(H1< 2 || H1> 4.5) return true;
+                if(H1 < 2) return true;
                 if(H2 > 19) return true;
                 if(H3 > 19) return true;
             }

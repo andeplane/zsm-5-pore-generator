@@ -161,7 +161,7 @@ Window {
                     id: scaleSlider
                     width: 200
                     minimumValue: 0
-                    maximumValue: 2.0
+                    maximumValue: 10.0
                     stepSize: 0.01
                     value: 1.0
                     onValueChanged: {
@@ -250,6 +250,7 @@ Window {
                         maximumValue: 100
                         stepSize: 1
                         onValueChanged: {
+                            if(index==0) return;
                             rootWindow.probabilities[index] = value
                             geometry.generateFromPSD(rootWindow.probabilities)
                             simulator.compute()

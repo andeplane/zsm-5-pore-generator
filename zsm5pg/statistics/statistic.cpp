@@ -382,6 +382,7 @@ void Statistic::loadIniFile(IniFile *iniFile) {
 
 void Statistic::setIsValid(bool isValid)
 {
+    qDebug() << "Setting " << this << ", " << name() << " to valid: " << isValid;
     if (m_isValid == isValid)
         return;
 

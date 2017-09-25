@@ -24,6 +24,7 @@ void IniFile::loadFile() {
         if(!line.contains("=")) continue; // We need something = yeahbuddy
         QStringList splittedLine = line.split("=");
         QString key = splittedLine[0].trimmed();
+        qDebug() << "Found key " << key;
         QString value = splittedLine[1].trimmed();
         if(key.split(" ").count() > 1) {
             qDebug() << "Error, key " << key << " contains whitespaces.";
@@ -55,7 +56,7 @@ double IniFile::getDouble(QString key)
             exit(1);
         }
     }
-    qDebug() << "Error, could not find key " << key;
+    qDebug() << "Error, could not find key " << key << " in " << m_filename;
     exit(1);
 }
 
