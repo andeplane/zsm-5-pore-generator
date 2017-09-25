@@ -147,21 +147,8 @@ void AdsDesReader::appendDummyData()
     if(debug) qDebug() << "Delta value: " << deltaPoreSize;
 }
 
-float AdsDesReader::getNum(QString mode, QString P, float H1, float H2, float H3) {
+float AdsDesReader::getNum(const QVector<QVector<QVector<float>>> &data, const QVector<QVector<QVector<float>>> &dataReal, float H1, float H2, float H3) const {
     float poreVolume = H1*H2*H3;
-
-    auto &data = CAds[P];
-    if(mode == QString("desorption")) {
-        // qDebug() << "Choosing desorption";
-        data = CDes[P];
-    } else {
-        // qDebug() << "Choosing adsorption";
-    }
-
-    auto &dataReal = NAds[P];
-    if(mode == QString("desorption")) {
-        dataReal = NDes[P];
-    }
     int idx1 = int(H1);
     if(idx1>17) idx1 = 17;
     int idx2 = idx1+1;
@@ -188,60 +175,60 @@ float AdsDesReader::getNum(QString mode, QString P, float H1, float H2, float H3
             + (1.0-mf)*nf*data2.at(m+1).at(n) + (1.0-mf)*(1.0-nf)*data2.at(m+1).at(n+1)) * poreVolume;
 
     float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
-    if(debug) {
-        float H2Interpolated = mf*this->H2.at(m) + (1.0 - mf)*this->H2.at(m+1);
-        float H3Interpolated = nf*this->H3.at(n) + (1.0 - nf)*this->H3.at(n+1);
-        qDebug() << "Getting num for " << mode << " with P=" << P << ", H1=" << H1 << ", H2=" << H2 << ", H3=" << H3;
-        qDebug() << "To debug, run";
-        qDebug() << "reader.printData(" << mode << ", " << P << ", " << H1 << ", " << H2 << ", " << H3 << ");";
-        qDebug() << "Pore volume: " << poreVolume;
-        qDebug() << "Delta = : " << deltaPoreSize;
-        qDebug() << "idx1=" << idx1;
-        qDebug() << "idx2=" << idx2;
-        qDebug() << "fraction=" << fraction;
-        qDebug() << "m (H2Index)=" << m << " which corresponds to H2=" << this->H2[m];
-        qDebug() << "mf = ( " << this->H2[m+1] << " - " << H2 << ")/" << deltaPoreSize << " = ( " << this->H2[m+1] - H2 << ")/" << deltaPoreSize << " = " << mf;
-        qDebug() << "n (H3Index)=" << n << " which corresponds to H3=" << this->H3[n];
-        qDebug() << "nf = ( " << this->H3[n+1] << " - " << H3 << ")/" << deltaPoreSize << " = ( " << this->H3[n+1]-H3 << ")/" << deltaPoreSize << " = " << nf;
-        qDebug() << "data1[m][n]=" << data1[m][n];
-        qDebug() << "data1[m][n+1]=" << data1[m][n+1];
-        qDebug() << "data1[m+1][n]=" << data1[m+1][n];
-        qDebug() << "data1[m+1][n+1]=" << data1[m+1][n+1];
-        qDebug() << "data2[m][n]=" << data2[m][n];
-        qDebug() << "data2[m][n+1]=" << data2[m][n+1];
-        qDebug() << "data2[m+1][n]=" << data2[m+1][n];
-        qDebug() << "data2[m+1][n+1]=" << data2[m+1][n+1];
+//    if(debug) {
+//        float H2Interpolated = mf*this->H2.at(m) + (1.0 - mf)*this->H2.at(m+1);
+//        float H3Interpolated = nf*this->H3.at(n) + (1.0 - nf)*this->H3.at(n+1);
+//        qDebug() << "Getting num for " << mode << " with P=" << P << ", H1=" << H1 << ", H2=" << H2 << ", H3=" << H3;
+//        qDebug() << "To debug, run";
+//        qDebug() << "reader.printData(" << mode << ", " << P << ", " << H1 << ", " << H2 << ", " << H3 << ");";
+//        qDebug() << "Pore volume: " << poreVolume;
+//        qDebug() << "Delta = : " << deltaPoreSize;
+//        qDebug() << "idx1=" << idx1;
+//        qDebug() << "idx2=" << idx2;
+//        qDebug() << "fraction=" << fraction;
+//        qDebug() << "m (H2Index)=" << m << " which corresponds to H2=" << this->H2[m];
+//        qDebug() << "mf = ( " << this->H2[m+1] << " - " << H2 << ")/" << deltaPoreSize << " = ( " << this->H2[m+1] - H2 << ")/" << deltaPoreSize << " = " << mf;
+//        qDebug() << "n (H3Index)=" << n << " which corresponds to H3=" << this->H3[n];
+//        qDebug() << "nf = ( " << this->H3[n+1] << " - " << H3 << ")/" << deltaPoreSize << " = ( " << this->H3[n+1]-H3 << ")/" << deltaPoreSize << " = " << nf;
+//        qDebug() << "data1[m][n]=" << data1[m][n];
+//        qDebug() << "data1[m][n+1]=" << data1[m][n+1];
+//        qDebug() << "data1[m+1][n]=" << data1[m+1][n];
+//        qDebug() << "data1[m+1][n+1]=" << data1[m+1][n+1];
+//        qDebug() << "data2[m][n]=" << data2[m][n];
+//        qDebug() << "data2[m][n+1]=" << data2[m][n+1];
+//        qDebug() << "data2[m+1][n]=" << data2[m+1][n];
+//        qDebug() << "data2[m+1][n+1]=" << data2[m+1][n+1];
 
-        qDebug() << "dataReal1[m][n]=" << dataReal1[m][n];
-        qDebug() << "dataReal1[m][n+1]=" << dataReal1[m][n+1];
-        qDebug() << "dataReal1[m+1][n]=" << dataReal1[m+1][n];
-        qDebug() << "dataReal1[m+1][n+1]=" << dataReal1[m+1][n+1];
-        qDebug() << "dataReal2[m][n]=" << dataReal2[m][n];
-        qDebug() << "dataReal2[m][n+1]=" << dataReal2[m][n+1];
-        qDebug() << "dataReal2[m+1][n]=" << dataReal2[m+1][n];
-        qDebug() << "dataReal2[m+1][n+1]=" << dataReal2[m+1][n+1];
+//        qDebug() << "dataReal1[m][n]=" << dataReal1[m][n];
+//        qDebug() << "dataReal1[m][n+1]=" << dataReal1[m][n+1];
+//        qDebug() << "dataReal1[m+1][n]=" << dataReal1[m+1][n];
+//        qDebug() << "dataReal1[m+1][n+1]=" << dataReal1[m+1][n+1];
+//        qDebug() << "dataReal2[m][n]=" << dataReal2[m][n];
+//        qDebug() << "dataReal2[m][n+1]=" << dataReal2[m][n+1];
+//        qDebug() << "dataReal2[m+1][n]=" << dataReal2[m+1][n];
+//        qDebug() << "dataReal2[m+1][n+1]=" << dataReal2[m+1][n+1];
 
-        qDebug() << "float N_ads0 = ((" << 1-nf << ")*(" << 1-mf << ")*" << data1[m][n]<< " + " << nf << "*(" << 1-mf << ")*" << data1[m][n+1] << " + (" << 1-nf << ")*" << mf << "*" << data1[m+1][n] << " + " << nf << "*" << mf << "*" << data1[m+1][n+1] << ") * " << poreVolume << " = " << N_ads0;
-        qDebug() << "float N_ads1 = ((" << 1-nf << ")*(" << 1-mf << ")*" << data2[m][n]<< " + " << nf << "*(" << 1-mf << ")*" << data2[m][n+1] << " + (" << 1-nf << ")*" << mf << "*" << data2[m+1][n] << " + " << nf << "*" << mf << "*" << data2[m+1][n+1] << ") * " << poreVolume << " = " << N_ads1;
-        qDebug() << "N_ads0=" << N_ads0;
-        qDebug() << "N_ads1=" << N_ads1;
-        qDebug() << "N_ads=" << N_ads;
-        if(fabs(mf) > 1.001 || fabs(nf) > 1.001) {
-            qDebug() << "We have problems with fractions being larger than 1...";
-            exit(0);
-        }
-    }
+//        qDebug() << "float N_ads0 = ((" << 1-nf << ")*(" << 1-mf << ")*" << data1[m][n]<< " + " << nf << "*(" << 1-mf << ")*" << data1[m][n+1] << " + (" << 1-nf << ")*" << mf << "*" << data1[m+1][n] << " + " << nf << "*" << mf << "*" << data1[m+1][n+1] << ") * " << poreVolume << " = " << N_ads0;
+//        qDebug() << "float N_ads1 = ((" << 1-nf << ")*(" << 1-mf << ")*" << data2[m][n]<< " + " << nf << "*(" << 1-mf << ")*" << data2[m][n+1] << " + (" << 1-nf << ")*" << mf << "*" << data2[m+1][n] << " + " << nf << "*" << mf << "*" << data2[m+1][n+1] << ") * " << poreVolume << " = " << N_ads1;
+//        qDebug() << "N_ads0=" << N_ads0;
+//        qDebug() << "N_ads1=" << N_ads1;
+//        qDebug() << "N_ads=" << N_ads;
+//        if(fabs(mf) > 1.001 || fabs(nf) > 1.001) {
+//            qDebug() << "We have problems with fractions being larger than 1...";
+//            exit(0);
+//        }
+//    }
     return N_ads;
 }
 
 float AdsDesReader::getNumAdsorbed(QString P, float H1, float H2, float H3)
 {
-    return getNum("adsorption", P, H1, H2, H3);
+    return getNum(CAds[P], NAds[P], H1, H2, H3);
 }
 
 float AdsDesReader::getNumDesorbed(QString P, float H1, float H2, float H3)
 {
-    return getNum("desorption", P, H1, H2, H3);
+    return getNum(CDes[P], NDes[P], H1, H2, H3);
 }
 
 void AdsDesReader::printData(QString mode, QString P, int H1, float H2, float H3)

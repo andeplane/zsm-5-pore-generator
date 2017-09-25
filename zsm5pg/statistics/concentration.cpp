@@ -1,5 +1,6 @@
 #include "concentration.h"
 #include <QFile>
+#include <omp.h>
 #include <QDebug>
 #include <cmath>
 #include <QTextStream>
@@ -64,7 +65,7 @@ void Concentration::readJan17Files() {
         m_pressures.push_back(PValue);
     }
     reader.debug = false;
-    reader.folder = "/Users/anderhaf/Dropbox/uio/phd/2017/zeolite/3dmodel/interpolatedData/data";
+    reader.folder = "/projects/zeolite/3dmodel/interpolatedData/data";
     reader.largestPoreSize = 18;
     qDebug() << "Reading GCMC data...";
     reader.readData();
@@ -77,10 +78,6 @@ void Concentration::readJan17Files() {
 void Concentration::computeMode0(Geometry *geometry) {
     if(!geometry) return;
 
-    QVector<float> &x = geometry->deltaXVector();
-    QVector<float> &y = geometry->deltaYVector();
-    QVector<float> &z = geometry->deltaZVector();
-
     QVector<float> numberOfAdsorbedAtoms;
     numberOfAdsorbedAtoms.resize(m_pressures.size());
     for(float &v : numberOfAdsorbedAtoms) {
@@ -90,53 +87,52 @@ void Concentration::computeMode0(Geometry *geometry) {
     int outside = 0;
     int inside = 0;
     QString dataMode = m_adsorption ? "adsorption" : "desorption";
+#define DOOMP
+#ifdef DOOMP
+#pragma omp parallel num_threads(10)
+{
+#endif
+    const QVector<float> xx = geometry->deltaXVector();
+    const QVector<float> yy = geometry->deltaYVector();
+    const QVector<float> zz = geometry->deltaZVector();
+    const QVector<float> pressures = m_pressures;
+#ifdef DOOMP
+#pragma omp for
+#endif
+    for(int pIndex=0; pIndex<pressures.size(); pIndex++) {
+        double sum = 0;
+        for(int i=0; i<xx.size(); i++) {
+            const float dx = xx[i];
+            for(int j=0; j<yy.size(); j++) {
+                const float dy = yy[j];
+                for(int k=0; k<zz.size(); k++) {
+                    const float dz = zz[k];
+                    double H0 = dx;
+                    double H1 = dy;
+                    double H2 = dz;
 
-    for(int i=0; i<x.size(); i++) {
-        const float dx = x[i];
-        for(int j=0; j<y.size(); j++) {
-            const float dy = y[j];
-            for(int k=0; k<z.size(); k++) {
-                const float dz = z[k];
-                for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
+                    if(H1<H0) std::swap(H1, H0);
+                    if(H2<H0) std::swap(H2, H0);
+                    if(H2<H1) std::swap(H2, H1);
+
                     QString P = m_pressureStrings[pIndex];
-                    numberOfAdsorbedAtoms[pIndex] +=  findNumAdsorbedJan17(dataMode, P, dx, dy, dz);
+
+                    if(m_adsorption)
+                        sum += reader.getNum(reader.CAds[P], reader.NAds[P], H0, H1, H2);
+                    else
+                        sum += reader.getNum(reader.CDes[P], reader.NDes[P], H0, H1, H2);
+                    //sum += findNumAdsorbedJan17(dataMode, P, dx, dy, dz);
                 }
-
-//                if(m_adsorption) {
-//                    // Use fitted model accounting for asymmetric pore volumes
-//                    for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-//                        double P = m_pressures[pIndex];
-//                        numberOfAdsorbedAtoms[pIndex] += findNumAdsorbedJan17(P, dx, dy, dz);
-//                    }
-//                } else {
-//                    float poreSize = std::min(std::min(dx, dy), dz);
-//                    const float poreVolume = dx*dy*dz;
-//                    float H = poreSize;  // 1
-
-//                    int H0 = poreSize; // 19
-//                    int H1 = int(poreSize)+1;  // 20
-//                    float dH = H1-H0;  // 1
-//                    float fraction = (H1-H) / dH;  // (20-19.5) / 1 = 0.5
-//                    if(H1>19) {
-//                        fraction = 1.0; // 1.0
-//                        H1 = 19; // force this
-//                    }
-
-//                    if(H>=2 && H<=19) {
-//                        for(int pIndex=0; pIndex<m_pressures.size(); pIndex++) {
-//                            float N_ads0 = m_values[H0][pIndex]/m_volumes[H0]*poreVolume;
-//                            float N_ads1 = m_values[H1][pIndex]/m_volumes[H1]*poreVolume;
-//                            float N_ads = N_ads0*fraction + (1.0 - fraction)*N_ads1;
-//                            // float N_ads = m_values[H][pIndex];
-//                            numberOfAdsorbedAtoms[pIndex] += N_ads;
-//                        }
-//                        inside++;
-//                    } else outside++;
-//                }
             }
         }
+        numberOfAdsorbedAtoms[pIndex] += sum;
     }
-
+#ifdef DOOMP
+}
+#endif
+    const QVector<float> &x = geometry->deltaXVector();
+    const QVector<float> &y = geometry->deltaYVector();
+    const QVector<float> &z = geometry->deltaZVector();
     float lx = 0;
     float ly = 0;
     float lz = 0;
@@ -746,5 +742,9 @@ double Concentration::findNumAdsorbedJan17(QString mode, QString P, double Lx, d
     if(H2<H0) std::swap(H2, H0);
     if(H2<H1) std::swap(H2, H1);
 
-    return reader.getNum(mode, P, Lx, Ly, Lz);
+    if(mode=="adsorption") {
+        return reader.getNum(reader.CAds[P], reader.NAds[P], Lx, Ly, Lz);
+    } else {
+        return reader.getNum(reader.CDes[P], reader.NDes[P], Lx, Ly, Lz);
+    }
 }

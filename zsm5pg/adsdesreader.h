@@ -31,8 +31,8 @@ public:
     void readFile(int H1, QString P, QString mode);
     void readH2H3Matrices();
     void readData();
-    void appendDummyData();
-    float getNum(QString mode, QString P, float H1, float H2, float H3);
+    void appendDummyData();;
+    float getNum(const QVector<QVector<QVector<float>>> &data, const QVector<QVector<QVector<float>>> &dataReal, float H1, float H2, float H3) const;
     float getNumAdsorbed(QString P, float H1, float H2, float H3);
     float getNumDesorbed(QString P, float H1, float H2, float H3);
     void printData(QString mode, QString P, int H1, float H2, float H3);

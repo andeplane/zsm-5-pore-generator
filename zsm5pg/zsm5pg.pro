@@ -3,7 +3,8 @@ CONFIG += c++11
 
 QT += qml quick widgets opengl openglextensions charts
 INCLUDEPATH += /usr/local/include
-LIBS += -L/usr/local/lib -lgsl -lblas
+QMAKE_CXXFLAGS += -fopenmp
+LIBS += -L/usr/local/lib -lgsl -lblas -fopenmp
 # DEFINES += POREISCBRT
 SOURCES += main.cpp \
     statistics/statistic.cpp \
